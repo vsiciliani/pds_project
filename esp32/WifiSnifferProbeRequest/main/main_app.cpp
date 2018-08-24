@@ -10,6 +10,10 @@
 #include <esp_log.h>
 #include <string>
 #include <list>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <time.h>
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "sdkconfig.h"
@@ -17,19 +21,28 @@
 
 
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
+void threadGestioneConnessionePc();
+bool checkTimeoutThreadConnessionePc();
 static char tag[]="Sniffer-ProbeRequest";
 
 std::list<std::string> listaRecord;
+std::mutex m;
+std::condition_variable cvMinuto;
+time_t startWaitTime;
 
 extern "C" {
    void app_main();
 }
+
+
 
 void app_main() {
 
 	nvs_flash_init();
 	wifi_init_config_t config = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&config));
+
+
 
 	//setto l'ESP32 per funzionare in modalita station
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
@@ -45,6 +58,12 @@ void app_main() {
 	//setto l'handler che gestisce la ricezione del pacchetto
 	ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
+	//spostare nella zona SETUP quando sarà pronta
+	time(&startWaitTime);
+
+	std::thread threadConnessionePc (threadGestioneConnessionePc);
+
+	threadConnessionePc.join();
 	fflush(stdout);
 
 }
@@ -64,9 +83,33 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 
 		PacketInfo record = PacketInfo(pacchetto.getSourceMacAddress(), pacchetto.getSSID(), pacchetto.getSignalStrength());
 		ESP_LOGD(tag, "JSON: %s", record.JSONSerializer().c_str());
+		std::lock_guard<std::mutex> l(m);
 		listaRecord.push_back(record.JSONSerializer());
-
+		cvMinuto.notify_one();
 		printf("\n");
 	}
 
+}
+
+bool checkTimeoutThreadConnessionePc() {
+	time_t now;
+	time(&now);
+	if (difftime(now,startWaitTime)>60) return true;
+	else return false;
+}
+
+void threadGestioneConnessionePc(){
+	ESP_LOGD(tag, "ThreadConnessionePc -- START THREAD");
+	while (true) {
+		std::unique_lock<std::mutex> ul(m);
+		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+		std::list<std::string>::iterator it;
+		ESP_LOGD(tag, "ThreadConnessionePc -- SONO PASSATI ALMENO 20 SECONDI");
+		for (it= listaRecord.begin(); it != listaRecord.end(); it++){
+			ESP_LOGD(tag, "ThreadConnessionePc -- %s", it->c_str());
+		}
+		listaRecord.clear();
+		time(&startWaitTime);
+	}
+	ESP_LOGD(tag, "ThreadConnessionePc -- END THREAD");
 }
