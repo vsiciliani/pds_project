@@ -1,7 +1,7 @@
 bootloader_start.o: \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader/subproject/main/bootloader_start.c \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/log/include/esp_log.h \
- c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h \
+ c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_assert.h \
@@ -24,7 +24,7 @@ bootloader_start.o: \
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/log/include/esp_log.h:
 
-c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h:
+c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h:
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/rom/ets_sys.h:
 

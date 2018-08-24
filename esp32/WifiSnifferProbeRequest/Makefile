@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := pds-project-wifisniffer
+PROJECT_NAME := wifi-sniffer-proberequest
 
 include $(IDF_PATH)/make/project.mk
 
