@@ -86,8 +86,6 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 		std::lock_guard<std::mutex> l(m);
 		listaRecord.push_back(record.JSONSerializer());
 		cvMinuto.notify_one();
-
-
 		printf("\n");
 	}
 
@@ -105,7 +103,12 @@ void threadGestioneConnessionePc(){
 	while (true) {
 		std::unique_lock<std::mutex> ul(m);
 		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+		std::list<std::string>::iterator it;
 		ESP_LOGD(tag, "ThreadConnessionePc -- SONO PASSATI ALMENO 20 SECONDI");
+		for (it= listaRecord.begin(); it != listaRecord.end(); it++){
+			ESP_LOGD(tag, "ThreadConnessionePc -- %s", it->c_str());
+		}
+		listaRecord.clear();
 		time(&startWaitTime);
 	}
 	ESP_LOGD(tag, "ThreadConnessionePc -- END THREAD");
