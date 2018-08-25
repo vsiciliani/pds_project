@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 //Classe Singleton che wrappa il thread per la gestione del Wifi e dell'interfaccia verso le ESP
 
@@ -40,10 +41,35 @@ namespace SnifferProbeRequestApp
         }
 
         private void elaboration() {
+            hotspot("Rete di prova", "pippopluto", true);
             while (!stopThread)
             {
-                Console.WriteLine("TEST THREAD");
                 Thread.Sleep(8000);
+            }
+        }
+
+        private void hotspot(string ssid, string key, bool status)
+        {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe");
+            processStartInfo.RedirectStandardInput = true;
+            processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.CreateNoWindow = true;
+            processStartInfo.UseShellExecute = false;
+            Process process = Process.Start(processStartInfo);
+
+            if (process != null)
+            {
+                if (status)
+                {
+                    process.StandardInput.WriteLine("netsh wlan set hostednetwork mode=allow ssid=" + ssid + " key=" + key);
+                    process.StandardInput.WriteLine("netsh wlan start hosted network");
+                    process.StandardInput.Close();
+                }
+                else
+                {
+                    process.StandardInput.WriteLine("netsh wlan stop hostednetwork");
+                    process.StandardInput.Close();
+                }
             }
         }
 

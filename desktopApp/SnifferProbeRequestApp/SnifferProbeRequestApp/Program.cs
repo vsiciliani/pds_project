@@ -13,11 +13,17 @@ namespace SnifferProbeRequestApp
         /// The main entry point for the application.
         /// </summary>
 
-        
-
         [STAThread]
         static void Main()
         {
+            //controllo di avere i permessi di amministratore
+            Console.WriteLine("Is Admin? " + Utils.IsAdmin());
+            if (!Utils.IsAdmin())
+            {
+                Utils.RestartElevated();
+                return;
+            }
+
             ThreadGestioneWifi threadGestioneWifi = ThreadGestioneWifi.getIstance();
             
             Application.EnableVisualStyles();
