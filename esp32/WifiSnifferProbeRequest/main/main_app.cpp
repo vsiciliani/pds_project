@@ -6,6 +6,7 @@
  */
 
 #include <esp_wifi.h>
+#include <esp_wifi_types.h>
 #include <nvs_flash.h>
 #include <esp_log.h>
 #include <string>
@@ -14,41 +15,39 @@
 #include <mutex>
 #include <condition_variable>
 #include <time.h>
+#include "Wifi.h"
+#include "WiFiEventHandler.h"
 #include "WifiPacket.h"
 #include "PacketInfo.h"
+#include "Socket.h"
+#include "SocketClient.h"
 #include "sdkconfig.h"
 
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
 void threadGestioneConnessionePc();
 bool checkTimeoutThreadConnessionePc();
+
+
 static char tag[]="Sniffer-ProbeRequest";
 
 std::list<std::string> listaRecord;
 std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
+WiFi wifi;
 
 extern "C" {
    void app_main();
 }
 
 
-
 void app_main() {
 
 	nvs_flash_init();
-	wifi_init_config_t config = WIFI_INIT_CONFIG_DEFAULT();
-	ESP_ERROR_CHECK(esp_wifi_init(&config));
 
-
-
-	//setto l'ESP32 per funzionare in modalita station
-	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-
-	//avvio il wifi
-	ESP_ERROR_CHECK(esp_wifi_start());
-
-	//ESP_ERROR_CHECK(esp_wifi_set_channel(7,WIFI_SECOND_CHAN_NONE));
+	wifi.connectAP("prova4", "pippopluto");
+	std::cout << "Connesso a "<<wifi.getStaSSID() << " con IP: "<<wifi.getStaIp()
+					  <<" Gateway: "<< wifi.getStaGateway() <<std::endl;
 
 	//abilito la modalità di attività promiscua
 	ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
@@ -92,22 +91,53 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 bool checkTimeoutThreadConnessionePc() {
 	time_t now;
 	time(&now);
-	if (difftime(now,startWaitTime)>60) return true;
+	if (difftime(now,startWaitTime)>20) {
+		return true;
+	}
 	else return false;
+}
+
+/** preparo il messaggio da inviare al server*/
+std::string createJSONArray(std::list<std::string>){
+	std::list<std::string>::iterator it;
+	std::string buf;
+	buf="[ ";
+	for (it= listaRecord.begin(); it != listaRecord.end(); it++){
+		if (it!= listaRecord.begin()){
+			buf+=", ";
+		}
+		buf+=it->c_str();
+	}
+	buf+="]\n";
+	std::cout << "Messaggio inviato: " << buf << std::endl;
+	return buf;
 }
 
 void threadGestioneConnessionePc(){
 	ESP_LOGD(tag, "ThreadConnessionePc -- START THREAD");
+
+	Socket *socket = new Socket();
+	int res = socket->connect("192.168.137.1", 5010);
+
+
+	ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
 	while (true) {
+		if (res < 0){
+			res = socket->connect("192.168.137.1", 5010);
+		}
+
 		std::unique_lock<std::mutex> ul(m);
 		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
-		std::list<std::string>::iterator it;
+
 		ESP_LOGD(tag, "ThreadConnessionePc -- SONO PASSATI ALMENO 20 SECONDI");
-		for (it= listaRecord.begin(); it != listaRecord.end(); it++){
-			ESP_LOGD(tag, "ThreadConnessionePc -- %s", it->c_str());
-		}
+
+		socket->send(createJSONArray(listaRecord));
+
 		listaRecord.clear();
+
 		time(&startWaitTime);
 	}
+
+	socket->close();
 	ESP_LOGD(tag, "ThreadConnessionePc -- END THREAD");
 }

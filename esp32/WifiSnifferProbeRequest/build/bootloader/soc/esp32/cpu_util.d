@@ -7,7 +7,7 @@ esp32/cpu_util.o: \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_assert.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/rtc_cntl_reg.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
- c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h
+ c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_attr.h:
 
@@ -23,5 +23,5 @@ C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/rtc_cntl
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/soc.h:
 
-c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h:
+c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h:
 /home/SicilianiVi/esp/esp-idf/components/soc/esp32/cpu_util.c:

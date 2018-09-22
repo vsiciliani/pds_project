@@ -1,6 +1,6 @@
 src/bootloader_common.o: \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/src/bootloader_common.c \
- c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h \
+ c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_err.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/log/include/esp_log.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
@@ -28,7 +28,7 @@ src/bootloader_common.o: \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include/esp_flash_partitions.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include_bootloader/bootloader_sha.h
 
-c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h:
+c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h:
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_err.h:
 
