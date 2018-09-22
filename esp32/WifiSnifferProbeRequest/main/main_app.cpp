@@ -45,7 +45,7 @@ void app_main() {
 
 	nvs_flash_init();
 
-	wifi.connectAP("prova4", "pippopluto");
+	wifi.connectAP("Vodafone-50650385", "pe7dt3793ae9t7b");
 	std::cout << "Connesso a "<<wifi.getStaSSID() << " con IP: "<<wifi.getStaIp()
 					  <<" Gateway: "<< wifi.getStaGateway() <<std::endl;
 
@@ -117,13 +117,13 @@ void threadGestioneConnessionePc(){
 	ESP_LOGD(tag, "ThreadConnessionePc -- START THREAD");
 
 	Socket *socket = new Socket();
-	int res = socket->connect("192.168.137.1", 5010);
+	int res = socket->connect("192.168.1.2", 5010);
 
 
 	ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
 	while (true) {
 		if (res < 0){
-			res = socket->connect("192.168.137.1", 5010);
+			res = socket->connect("192.168.1.2", 5010);
 		}
 
 		std::unique_lock<std::mutex> ul(m);
@@ -131,7 +131,7 @@ void threadGestioneConnessionePc(){
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- SONO PASSATI ALMENO 20 SECONDI");
 
-		socket->send(createJSONArray(listaRecord));
+		socket->send("Dispositivo 2: "+createJSONArray(listaRecord));
 
 		listaRecord.clear();
 

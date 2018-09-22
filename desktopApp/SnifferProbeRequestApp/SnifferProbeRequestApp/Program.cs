@@ -21,7 +21,7 @@ namespace SnifferProbeRequestApp
             if (!Utils.IsAdmin())
             {
                 //Utils.RestartElevated();
-                return;
+                //return;
             }
 
             ThreadGestioneWifi threadGestioneWifi = ThreadGestioneWifi.getIstance();

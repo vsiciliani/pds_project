@@ -19,6 +19,7 @@ namespace SnifferProbeRequestApp
         private Thread thread;
         private static ThreadGestioneWifi istance = null;
         private Socket listener = null;
+        private static ManualResetEvent allDone = new ManualResetEvent(false);
 
         private ThreadGestioneWifi()
         {
@@ -52,14 +53,48 @@ namespace SnifferProbeRequestApp
 
         private void elaboration()
         {
-            startHotspot("prova4", "pippopluto");
-            int MAXBUFFER = 4096;
+            //TODO: decommentare se non lavoro su PC aziendale
+            //startHotspot("prova4", "pippopluto");
             Console.WriteLine("SOCKET STARTED");
             listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(new IPEndPoint(IPAddress.Any, 5010));
-            listener.Listen(10);
-            Console.WriteLine("WAITING CONNECTION");
-            Socket socket = listener.Accept();
+            try
+            {
+                listener.Bind(new IPEndPoint(IPAddress.Any, 5010));
+                listener.Listen(10);
+
+                while (true)
+                {
+                    allDone.Reset();
+
+                    Console.WriteLine("Waiting for a connection...");
+                    listener.BeginAccept(new AsyncCallback(acceptCallback), listener);
+
+                    allDone.WaitOne();
+                }
+
+                //Socket socket = listener.Accept();
+                
+                
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            //socket.Shutdown(SocketShutdown.Both);
+            //socket.Close();
+            //stopHotspot();
+        }
+
+        public void acceptCallback(IAsyncResult ar)
+        {
+            int MAXBUFFER = 4096;
+
+            Socket listener = (Socket)ar.AsyncState;
+            Socket socket = listener.EndAccept(ar);
+
+            allDone.Set();
+            
             Console.WriteLine("CONNECTED");
 
             while (!stopThread)
@@ -77,9 +112,6 @@ namespace SnifferProbeRequestApp
                 }
                 Console.WriteLine("MESSAGE FROM CLIENT: {0}", receivedMessage);
             }
-            //socket.Shutdown(SocketShutdown.Both);
-            //socket.Close();
-            stopHotspot();
         }
 
         private void startHotspot(string ssid, string key)
