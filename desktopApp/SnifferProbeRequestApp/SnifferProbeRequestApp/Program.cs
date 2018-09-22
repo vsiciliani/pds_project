@@ -20,7 +20,7 @@ namespace SnifferProbeRequestApp
             Console.WriteLine("Is Admin? " + Utils.IsAdmin());
             if (!Utils.IsAdmin())
             {
-                Utils.RestartElevated();
+                //Utils.RestartElevated();
                 return;
             }
 
@@ -30,7 +30,7 @@ namespace SnifferProbeRequestApp
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain());
 
-            threadGestioneWifi.stop();
+            
         }
     }
 }
