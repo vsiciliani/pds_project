@@ -10,7 +10,7 @@ src/esp_image_format.o: \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_err.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include/esp_flash_partitions.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_flash_data_types.h \
- c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h \
+ c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include/esp_secure_boot.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/efuse_reg.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
@@ -42,7 +42,7 @@ C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include/esp
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_flash_data_types.h:
 
-c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h:
+c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h:
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include/esp_secure_boot.h:
 

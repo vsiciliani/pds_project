@@ -3,7 +3,7 @@ src/flash_encrypt.o: \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include_bootloader/bootloader_flash.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_err.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/spi_flash/include/esp_spi_flash.h \
- c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h \
+ c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include_bootloader/bootloader_random.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include/esp_image_format.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include/esp_flash_partitions.h \
@@ -44,7 +44,7 @@ C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_err.h:
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/spi_flash/include/esp_spi_flash.h:
 
-c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h:
+c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h:
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/bootloader_support/include_bootloader/bootloader_random.h:
 

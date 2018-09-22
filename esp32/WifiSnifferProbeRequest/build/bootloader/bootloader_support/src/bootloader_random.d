@@ -13,7 +13,7 @@ src/bootloader_random.o: \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_attr.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_dport_access.h \
- c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h \
+ c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/xtensa/xtruntime.h \
  C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/xtensa/config/core.h \
@@ -56,7 +56,7 @@ C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_attr.h:
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/esp32/include/esp_dport_access.h:
 
-c:\msys32\home\sicilianivi\esp\cpp_template\build\include\sdkconfig.h:
+c:\msys32\home\sicilianivi\esp\pds_project\esp32\wifisnifferproberequest\build\include\sdkconfig.h:
 
 C:/msys32/home/SicilianiVi/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h:
 
