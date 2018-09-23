@@ -18,7 +18,7 @@ std::string PacketInfo::JSONSerializer(){
 	char bufferss[10];
 	sprintf (bufferss, "%d", this->signalStrength);
 	return "{\"sourceAddress\": \""+ this->sourceAddress + "\", \"SSID\": \"" + this->SSID
-			+ "\", \"signalStreanght\": " + std::string(bufferss) +" }";
+			+ "\", \"signalStrength\": " + std::string(bufferss) +" }";
 }
 
 

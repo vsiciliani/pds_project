@@ -111,6 +111,11 @@ namespace SnifferProbeRequestApp
                     }
                 }
                 Console.WriteLine("MESSAGE FROM CLIENT: {0}", receivedMessage);
+                PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
+                foreach (var packet in packetsInfo.listPacketInfo)
+                {
+                    Console.WriteLine("SSID: {0}, sourceAddress: {1}, signalStrength: {2}", packet.SSID, packet.sourceAddress, packet.signalStrength);
+                }
             }
         }
 

@@ -101,14 +101,14 @@ bool checkTimeoutThreadConnessionePc() {
 std::string createJSONArray(std::list<std::string>){
 	std::list<std::string>::iterator it;
 	std::string buf;
-	buf="[ ";
+	buf="{ \"listPacketInfo\" : [ ";
 	for (it= listaRecord.begin(); it != listaRecord.end(); it++){
 		if (it!= listaRecord.begin()){
 			buf+=", ";
 		}
 		buf+=it->c_str();
 	}
-	buf+="]\n";
+	buf+="]}\n";
 	std::cout << "Messaggio inviato: " << buf << std::endl;
 	return buf;
 }
@@ -131,7 +131,7 @@ void threadGestioneConnessionePc(){
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- SONO PASSATI ALMENO 20 SECONDI");
 
-		socket->send("Dispositivo 2: "+createJSONArray(listaRecord));
+		socket->send(createJSONArray(listaRecord));
 
 		listaRecord.clear();
 
