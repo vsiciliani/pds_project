@@ -22,6 +22,7 @@
 #include "Socket.h"
 #include "SocketClient.h"
 #include "sdkconfig.h"
+#include "GPIO.h"
 
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
 void threadGestioneConnessionePc();

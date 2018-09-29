@@ -6,6 +6,7 @@
  */
 #include <esp_wifi.h>
 #include <string>
+#include <functional>
 
 #ifndef MAIN_WIFIPACKET_H_
 #define MAIN_WIFIPACKET_H_
@@ -41,6 +42,7 @@ private:
 	wifi_pkt_rx_ctrl_t metadata;
 	wifiHeader header;
     wifiPayload payload;
+    size_t hashCode;
 public:
 	WifiPacket(void* buff);
 
@@ -52,6 +54,7 @@ public:
 	unsigned short int getSSIDLength();
 	std::string getSourceMacAddress();
 	std::string getSSID();
+	size_t getHashCode();
 
 };
 
