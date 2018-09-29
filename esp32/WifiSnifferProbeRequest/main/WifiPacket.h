@@ -43,6 +43,7 @@ private:
 	wifiHeader header;
     wifiPayload payload;
     size_t hashCode;
+    size_t hashCode;
 public:
 	WifiPacket(void* buff);
 

@@ -8,7 +8,6 @@ namespace SnifferProbeRequestApp
 {
     public class PacketsInfo
     {
-
         public List<PacketInfo> listPacketInfo { get; set; }
     }
 

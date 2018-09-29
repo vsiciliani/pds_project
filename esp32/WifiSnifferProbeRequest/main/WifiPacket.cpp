@@ -6,7 +6,7 @@
  */
 
 #include "WifiPacket.h"
-#include <functional>
+
 
 WifiPacket::WifiPacket(void* buff){
 	//recupero le metainformazioni sul segnale ricevuto e il suo payload
@@ -16,8 +16,7 @@ WifiPacket::WifiPacket(void* buff){
 	wifi_packet *pacchetto = (wifi_packet *)ppkt->payload;
 	this->header = pacchetto->header;
 	this->payload = pacchetto->payload;
-	std::hash<std::string> hash_fn;
-	this->hashCode = std::ha
+	this->hashCode = 0;
 }
 
 short int WifiPacket::getSignalStrength(){
