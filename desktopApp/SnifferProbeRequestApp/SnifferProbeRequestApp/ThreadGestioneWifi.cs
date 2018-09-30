@@ -93,6 +93,8 @@ namespace SnifferProbeRequestApp
             Socket listener = (Socket)ar.AsyncState;
             Socket socket = listener.EndAccept(ar);
 
+            IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+
             allDone.Set();
             
             Console.WriteLine("CONNECTED");
@@ -114,7 +116,7 @@ namespace SnifferProbeRequestApp
                 PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
                 foreach (var packet in packetsInfo.listPacketInfo)
                 {
-                    Console.WriteLine("SSID: {0}, sourceAddress: {1}, signalStrength: {2}", packet.SSID, packet.sourceAddress, packet.signalStrength);
+                    Console.WriteLine("Device: {5} -- SSID: {0}, sourceAddress: {1}, signalStrength: {2}, , hashCode: {3}, timestamp: {4}", packet.SSID, packet.sourceAddress, packet.signalStrength, packet.hashCode, packet.timestamp, remoteIpEndPoint.Address);
                 }
             }
         }

@@ -79,7 +79,7 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 	//che il subtype sia 4 e quindi che sia una PROBE REQUEST
 	if ((pacchetto.getTypeMessage() == 0) && (pacchetto.getSubTypeMessage() == 4)) {
 
-		PacketInfo record = PacketInfo(pacchetto.getSourceMacAddress(), pacchetto.getSSID(), pacchetto.getSignalStrength());
+		PacketInfo record = PacketInfo(pacchetto.getSourceMacAddress(), pacchetto.getSSID(), pacchetto.getSignalStrength(), pacchetto.getHashCode(), pacchetto.getTimestamp());
 		ESP_LOGD(tag, "JSON: %s", record.JSONSerializer().c_str());
 		std::lock_guard<std::mutex> l(m);
 		listaRecord.push_back(record.JSONSerializer());
@@ -118,13 +118,13 @@ void threadGestioneConnessionePc(){
 	ESP_LOGD(tag, "ThreadConnessionePc -- START THREAD");
 
 	Socket *socket = new Socket();
-	int res = socket->connect("192.168.1.2", 5010);
+	int res = socket->connect("192.168.1.4", 5010);
 
 
 	ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
 	while (true) {
 		if (res < 0){
-			res = socket->connect("192.168.1.2", 5010);
+			res = socket->connect("192.168.1.4", 5010);
 		}
 
 		std::unique_lock<std::mutex> ul(m);

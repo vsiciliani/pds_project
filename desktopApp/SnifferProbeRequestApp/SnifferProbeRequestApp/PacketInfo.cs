@@ -16,5 +16,7 @@ namespace SnifferProbeRequestApp
         public string sourceAddress { get; set; }
         public string SSID { get; set; }
         public Int32 signalStrength { get; set; }
+        public string hashCode { get; set; }
+        public long timestamp { get; set; }
     }
 }

@@ -6,6 +6,7 @@
  */
 
 #include <string>
+#include <time.h>
 
 #ifndef MAIN_PACKETINFO_H_
 #define MAIN_PACKETINFO_H_
@@ -15,8 +16,10 @@ private:
 	std::string sourceAddress;
 	std::string SSID;
 	short int signalStrength;
+	size_t hashCode;
+	time_t timestamp;
 public:
-	PacketInfo(std::string sourceAddress, std::string SSID, short int signalStrength);
+	PacketInfo(std::string sourceAddress, std::string SSID, short int signalStrength, size_t hashCode, time_t timestamp);
 	std::string JSONSerializer();
 };
 

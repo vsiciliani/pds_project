@@ -6,6 +6,8 @@
  */
 
 #include "WifiPacket.h"
+#include <functional>
+#include <list>
 
 
 WifiPacket::WifiPacket(void* buff){
@@ -16,7 +18,7 @@ WifiPacket::WifiPacket(void* buff){
 	wifi_packet *pacchetto = (wifi_packet *)ppkt->payload;
 	this->header = pacchetto->header;
 	this->payload = pacchetto->payload;
-	this->hashCode = 0;
+	this->timestamp = std::time(0);
 }
 
 short int WifiPacket::getSignalStrength(){
@@ -59,4 +61,59 @@ std::string WifiPacket::getSSID(){
 		return std::string(ssid);
 	}
 }
+
+std::size_t WifiPacket::getHashCode(){
+
+	//preparazione lista per hash
+	//header
+	std::list<std::size_t> listaHash;
+	std::size_t hash = std::hash<unsigned int>{}(this->header.protocol_v);
+	listaHash.push_back(hash);
+	hash = std::hash<unsigned short>{}(this->header.type);
+	listaHash.push_back(hash);
+	hash = std::hash<unsigned short>{}(this->header.flags);
+	listaHash.push_back(hash);
+	hash = std::hash<unsigned short>{}(this->header.flags);
+	listaHash.push_back(hash);
+	hash = std::hash<unsigned int>{}(this->header.duration_id);
+	listaHash.push_back(hash);
+	for (int i=0; i<6;i++) {
+		hash = std::hash<unsigned int>{}(this->header.addr1[i]);
+		listaHash.push_back(hash);
+	}
+	for (int i=0; i<6;i++) {
+		hash = std::hash<unsigned int>{}(this->header.addr2[i]);
+		listaHash.push_back(hash);
+	}
+	for (int i=0; i<6;i++) {
+		hash = std::hash<unsigned int>{}(this->header.addr3[i]);
+		listaHash.push_back(hash);
+	}
+	hash = std::hash<unsigned int>{}(this->header.sequence_ctrl);
+	listaHash.push_back(hash);
+	//payload
+	hash = std::hash<unsigned short>{}(this->payload.element_id);
+	listaHash.push_back(hash);
+	hash = std::hash<unsigned short>{}(this->payload.SSIDlength);
+	listaHash.push_back(hash);
+	for (int i=0; i<32;i++) {
+		hash = std::hash<unsigned int>{}(this->payload.ssid[i]);
+		listaHash.push_back(hash);
+	}
+
+	std::list<std::size_t>::iterator itHash;
+
+	hash=0;
+	for (itHash= listaHash.begin(); itHash != listaHash.end(); itHash++){
+		hash+=*itHash;
+	}
+
+	return hash;
+}
+
+time_t WifiPacket::getTimestamp(){
+	return this->timestamp;
+}
+
+
 
