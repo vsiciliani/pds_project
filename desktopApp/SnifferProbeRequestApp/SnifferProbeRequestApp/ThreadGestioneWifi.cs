@@ -14,16 +14,18 @@ namespace SnifferProbeRequestApp
 {
     class ThreadGestioneWifi
     {
-        private volatile bool stopThread;
-        private ThreadStart delegateThread;
-        private Thread thread;
+        private volatile bool stopThreadElaboration;
+        private ThreadStart delegateThreadElaboration;
+        private Thread threadElaboration;
+
         private static ThreadGestioneWifi istance = null;
         private Socket listener = null;
         private static ManualResetEvent allDone = new ManualResetEvent(false);
+        private DatabaseManager dbManager = null;
 
         private ThreadGestioneWifi()
         {
-            stopThread = false;
+            stopThreadElaboration = false;
             start();
         }
 
@@ -38,17 +40,22 @@ namespace SnifferProbeRequestApp
 
         public void start()
         {
-            delegateThread = new ThreadStart(elaboration);
-            thread = new Thread(delegateThread);
-            thread.IsBackground = true;
-            thread.Start();
+            //instanzio il db manager
+            dbManager = DatabaseManager.getIstance();
+
+            delegateThreadElaboration = new ThreadStart(elaboration);
+            threadElaboration = new Thread(delegateThreadElaboration);
+            threadElaboration.IsBackground = true;
+            threadElaboration.Start();
+
+             
         }
 
         public void stop()
         {
-            stopThread = true;
+            stopThreadElaboration = true;
             //if (listener != null) listener.Stop();
-            thread.Join();
+            threadElaboration.Join();
         }
 
         private void elaboration()
@@ -72,9 +79,6 @@ namespace SnifferProbeRequestApp
                     allDone.WaitOne();
                 }
 
-                //Socket socket = listener.Accept();
-                
-                
             }
             catch (Exception)
             {
@@ -99,7 +103,7 @@ namespace SnifferProbeRequestApp
             
             Console.WriteLine("CONNECTED");
 
-            while (!stopThread)
+            while (!stopThreadElaboration)
             {
                 string receivedMessage = string.Empty;
                 while (true)
@@ -114,10 +118,16 @@ namespace SnifferProbeRequestApp
                 }
                 Console.WriteLine("MESSAGE FROM CLIENT: {0}", receivedMessage);
                 PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
+
+                //salvo i dati nella tabella raw del DB
+                dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
+                
+                /*
                 foreach (var packet in packetsInfo.listPacketInfo)
                 {
                     Console.WriteLine("Device: {5} -- SSID: {0}, sourceAddress: {1}, signalStrength: {2}, , hashCode: {3}, timestamp: {4}", packet.SSID, packet.sourceAddress, packet.signalStrength, packet.hashCode, packet.timestamp, remoteIpEndPoint.Address);
                 }
+                */
             }
         }
 
