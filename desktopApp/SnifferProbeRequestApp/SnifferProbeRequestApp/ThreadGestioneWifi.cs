@@ -53,13 +53,42 @@ namespace SnifferProbeRequestApp
 
         public void stop()
         {
+
             stopThreadElaboration = true;
+            dbManager.closeConnection();
             //if (listener != null) listener.Stop();
             threadElaboration.Join();
+            
         }
 
         private void elaboration()
         {
+            //TODO:eliminare
+            PacketsInfo packetsInfo = new PacketsInfo();
+            PacketInfo packet1 = new PacketInfo();
+            packet1.hashCode = "10";
+            packet1.signalStrength = 43;
+            packet1.sourceAddress = "127.45.32.9";
+            packet1.SSID = "pippo";
+            packet1.timestamp = 32423;
+
+            PacketInfo packet2 = new PacketInfo();
+            packet2.hashCode = "10";
+            packet2.signalStrength = 34;
+            packet2.sourceAddress = "127.45.32.9";
+            packet2.SSID = "pippo";
+            packet2.timestamp = 32423;
+
+            List<PacketInfo> list = new List<PacketInfo>();
+            list.Add(packet1);
+            list.Add(packet2);
+
+            packetsInfo.listPacketInfo = list;
+
+            dbManager.saveReceivedData(packetsInfo, IPAddress.Any);
+
+
+
             //TODO: decommentare se non lavoro su PC aziendale
             //startHotspot("prova4", "pippopluto");
             Utils.logMessage(this.ToString(), "Socket started");
@@ -73,7 +102,6 @@ namespace SnifferProbeRequestApp
                 {
                     allDone.Reset();
                     Utils.logMessage(this.ToString(), "Waiting for a connection...");
-                    //Console.WriteLine("Waiting for a connection...");
                     listener.BeginAccept(new AsyncCallback(acceptCallback), listener);
 
                     allDone.WaitOne();
@@ -102,8 +130,7 @@ namespace SnifferProbeRequestApp
             allDone.Set();
 
             Utils.logMessage(this.ToString(), "CONNECTED");
-            //Console.WriteLine("CONNECTED");
-
+            
             while (!stopThreadElaboration)
             {
                 string receivedMessage = string.Empty;
@@ -117,8 +144,8 @@ namespace SnifferProbeRequestApp
                         break;
                     }
                 }
+
                 Utils.logMessage(this.ToString(), "MESSAGE FROM CLIENT: " + receivedMessage);
-                //Console.WriteLine("MESSAGE FROM CLIENT: {0}", receivedMessage);
                 PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
 
                 //salvo i dati nella tabella raw del DB
