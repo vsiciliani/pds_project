@@ -62,7 +62,7 @@ namespace SnifferProbeRequestApp
         {
             //TODO: decommentare se non lavoro su PC aziendale
             //startHotspot("prova4", "pippopluto");
-            Console.WriteLine("SOCKET STARTED");
+            Utils.logMessage(this.ToString(), "Socket started");
             listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -72,8 +72,8 @@ namespace SnifferProbeRequestApp
                 while (true)
                 {
                     allDone.Reset();
-
-                    Console.WriteLine("Waiting for a connection...");
+                    Utils.logMessage(this.ToString(), "Waiting for a connection...");
+                    //Console.WriteLine("Waiting for a connection...");
                     listener.BeginAccept(new AsyncCallback(acceptCallback), listener);
 
                     allDone.WaitOne();
@@ -100,8 +100,9 @@ namespace SnifferProbeRequestApp
             IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
 
             allDone.Set();
-            
-            Console.WriteLine("CONNECTED");
+
+            Utils.logMessage(this.ToString(), "CONNECTED");
+            //Console.WriteLine("CONNECTED");
 
             while (!stopThreadElaboration)
             {
@@ -116,7 +117,8 @@ namespace SnifferProbeRequestApp
                         break;
                     }
                 }
-                Console.WriteLine("MESSAGE FROM CLIENT: {0}", receivedMessage);
+                Utils.logMessage(this.ToString(), "MESSAGE FROM CLIENT: " + receivedMessage);
+                //Console.WriteLine("MESSAGE FROM CLIENT: {0}", receivedMessage);
                 PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
 
                 //salvo i dati nella tabella raw del DB

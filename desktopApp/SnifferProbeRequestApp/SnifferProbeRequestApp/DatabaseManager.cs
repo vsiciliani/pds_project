@@ -48,14 +48,12 @@ namespace SnifferProbeRequestApp
             }
             query.Remove(query.Length - 1, 1); //elimino l'ultima virgola
 
-            Console.WriteLine("query: " + query.ToString());
-
             SqlCommand command = new SqlCommand(query.ToString(), connection);
             connection.Open();
             MessageBox.Show("Connection opened");
             if (command.ExecuteNonQuery() == packets.listPacketInfo.Count)
             {
-                MessageBox.Show("success");
+                Utils.logMessage(this.ToString(), "INSERT effettuata con successo");
             }
         }
 

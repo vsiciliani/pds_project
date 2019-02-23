@@ -36,5 +36,11 @@ namespace SnifferProbeRequestApp
 
             System.Windows.Forms.Application.Exit();
         }
+
+        static public void logMessage(String classe, String message)
+        {
+            String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            Console.WriteLine(timestamp + " | " + classe + " | " + message);
+        }
     }
 }
