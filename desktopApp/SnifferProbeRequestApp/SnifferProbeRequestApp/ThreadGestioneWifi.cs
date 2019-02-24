@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -87,8 +85,6 @@ namespace SnifferProbeRequestApp
 
             dbManager.saveReceivedData(packetsInfo, IPAddress.Any);
 
-
-
             //TODO: decommentare se non lavoro su PC aziendale
             //startHotspot("prova4", "pippopluto");
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
@@ -108,11 +104,12 @@ namespace SnifferProbeRequestApp
                 }
 
             }
-            catch (Exception)
-            {
-
-                throw;
+            catch (Exception e) {
+                SnifferAppException exception = new SnifferAppException("Errore durante il binding del socket", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
             }
+
             //socket.Shutdown(SocketShutdown.Both);
             //socket.Close();
             //stopHotspot();
@@ -125,8 +122,15 @@ namespace SnifferProbeRequestApp
             Socket listener = (Socket)ar.AsyncState;
             Socket socket = listener.EndAccept(ar);
 
-            IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
-
+            IPEndPoint remoteIpEndPoint = null;
+            try {
+                remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+            } catch (Exception e) {
+                SnifferAppException exception = new SnifferAppException("Errore nel riconoscere il socket remoto", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
+            }
+            
             allDone.Set();
 
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED");

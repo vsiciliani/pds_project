@@ -14,7 +14,6 @@ namespace SnifferProbeRequestApp
     {
         private static DatabaseManager istance = null;
         private String connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True";
-       // private String connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Vincenzo\\Desktop\\universita\\programmazione di sistema\\Repo_Gitlab\\pds_project\\desktopApp\\SnifferProbeRequestApp\\SnifferProbeRequestApp\\DBApp.mdf;Integrated Security=True";
         private SqlConnection connection;
         
         private DatabaseManager() {
@@ -78,11 +77,14 @@ namespace SnifferProbeRequestApp
         {
             //trovo i device che sto utilizzando
             //TODO:eliminare questa parte necessaria per i test in cui setto i device
-            Dictionary<String, String> devices = new Dictionary<String, String>();
-            devices["d1"] = "0.0.0.0";
-            devices["d2"] = "1.1.1.1";
+            Dictionary<String, String> devices = new Dictionary<String, String>
+            {
+                ["d1"] = "0.0.0.0",
+                ["d2"] = "1.1.1.1"
+            };
             //fine definizione valori di test
-
+            
+            //StringBuilders per comporre dinamicamente la query
             StringBuilder selectQuery = new StringBuilder("");
             StringBuilder fromQuery = new StringBuilder("");
             StringBuilder whereQuery = new StringBuilder("");
@@ -90,6 +92,7 @@ namespace SnifferProbeRequestApp
             selectQuery.Append("SELECT d1.SourceAddress, d1.SSID, d1.hashCode, d1.SSID, ");
             fromQuery.Append(" FROM ");
             whereQuery.Append(" WHERE");
+
             //per ogni device aggiungo i campi di select nella query,
             //una lettura sulla tabella Packets e la condizione di join
             foreach (KeyValuePair<String, String> device in devices) {
@@ -171,7 +174,6 @@ namespace SnifferProbeRequestApp
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
                 throw exception;
             }
-
 
             //elimino gli id dalla tabella "raw"
 

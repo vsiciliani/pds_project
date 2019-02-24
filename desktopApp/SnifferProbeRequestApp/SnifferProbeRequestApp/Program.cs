@@ -26,36 +26,6 @@ namespace SnifferProbeRequestApp
                 //return;
             }
 
-            // Build connection string
-
-            /*
-            string ConnectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\msys32\\home\\SicilianiVi\\esp\\pds_project\\desktopApp\\SnifferProbeRequestApp\\SnifferProbeRequestApp\\DBApp.mdf;Integrated Security=True";
-            string queryString = "SELECT id, sourceAddress FROM [dbo].[Packets]";
-
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                SqlCommand command = new SqlCommand(queryString, connection);
-                //command.Parameters.AddWithValue("@tPatSName", "Your-Parm-Value");
-                connection.Open();
-                MessageBox.Show("Connection opened");
-                SqlDataReader reader = command.ExecuteReader();
-                try
-                {
-                    while (reader.Read())
-                    {
-                        Console.WriteLine(String.Format("{0}, {1}",
-                        reader["id"], reader["sourceAddress"]));// etc
-                    }
-                }
-                finally
-                {
-                    // Always call Close when done reading.
-                    reader.Close();
-                }
-            }
-            */        
-
-            //TODO: decommentare
             ThreadGestioneWifi threadGestioneWifi = ThreadGestioneWifi.getIstance();
 
             Application.EnableVisualStyles();
