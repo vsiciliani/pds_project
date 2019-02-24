@@ -37,10 +37,21 @@ namespace SnifferProbeRequestApp
             System.Windows.Forms.Application.Exit();
         }
 
-        static public void logMessage(String classe, String message)
+        public class LogCategory
+        {
+            private LogCategory(string value) { Value = value; }
+
+            public string Value { get; set; }
+
+            public static LogCategory Info { get { return new LogCategory("Info"); } }
+            public static LogCategory Warning { get { return new LogCategory("Warning"); } }
+            public static LogCategory Error { get { return new LogCategory("Error"); } }
+        }
+
+        static public void logMessage(String classe, LogCategory category, String message)
         {
             String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            Console.WriteLine(timestamp + " | " + classe + " | " + message);
+            Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
         }
     }
 }

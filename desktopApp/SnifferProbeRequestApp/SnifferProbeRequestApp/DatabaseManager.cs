@@ -21,7 +21,17 @@ namespace SnifferProbeRequestApp
             //TODO: gestire eccezione connessione DB
             Console.WriteLine("Connection String: " + connectionString);
             connection = new SqlConnection(connectionString);
-            connection.Open();
+            try {
+                connection.Open();
+            } catch (SqlException sqle) {
+                SnifferAppException exception = new SnifferAppException("Errore di connessione durante l'apertura della stessa", sqle);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
+            } catch (Exception e) {
+                SnifferAppException exception = new SnifferAppException("Errore generico durante l'apertura della connessione", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
+            }
         }
 
         static public DatabaseManager getIstance()
@@ -99,12 +109,18 @@ namespace SnifferProbeRequestApp
             whereQuery.Remove(whereQuery.Length - 3, 3); //elimino l'ultimo AND
 
             String query = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
-            Utils.logMessage(this.ToString(), query);
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, query);
 
-            SqlCommand cmd = new SqlCommand(query, connection);
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
             DataTable table = new DataTable();
-            da.Fill(table);
+            try {
+                SqlCommand cmd = new SqlCommand(query, connection);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(table);
+            } catch (Exception e){
+                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
+            }
             List<AssembledPacketInfo> lstAssembledInfo = new List<AssembledPacketInfo>();
             
             foreach (DataRow record in table.Rows)
@@ -145,10 +161,17 @@ namespace SnifferProbeRequestApp
             Console.WriteLine("INSERT QUERY: " + insertQuery.ToString());
 
             SqlCommand command = new SqlCommand(insertQuery.ToString(), connection);
-            if (command.ExecuteNonQuery() == lstAssembledInfo.Count)
-            {
-                Utils.logMessage(this.ToString(), "INSERT in AssembledPacketInfo effettuata con successo");
+            try {
+                if (command.ExecuteNonQuery() == lstAssembledInfo.Count)
+                {
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in AssembledPacketInfo effettuata con successo");
+                }
+            } catch (Exception e) {
+                SnifferAppException exception = new SnifferAppException("Errore durante la INSERT dei dati nel DB", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
             }
+
 
             //elimino gli id dalla tabella "raw"
 

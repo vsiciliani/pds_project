@@ -18,7 +18,7 @@ namespace SnifferProbeRequestApp
         static void Main()
         {
             //controllo di avere i permessi di amministratore
-            Utils.logMessage("MAIN", "Is Admin? " + Utils.IsAdmin());
+            Utils.logMessage("MAIN", Utils.LogCategory.Info, "Is Admin? " + Utils.IsAdmin());
             //Console.WriteLine("Is Admin? " + Utils.IsAdmin());
             if (!Utils.IsAdmin())
             {
