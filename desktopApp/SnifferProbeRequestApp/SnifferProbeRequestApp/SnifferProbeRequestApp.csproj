@@ -74,6 +74,7 @@
     <Compile Include="PacketInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SnifferAppException.cs" />
     <Compile Include="ThreadGestioneWifi.cs" />
     <Compile Include="Utils.cs" />
     <EmbeddedResource Include="frmMain.resx">
