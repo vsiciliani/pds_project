@@ -13,12 +13,15 @@ namespace SnifferProbeRequestApp
     class DatabaseManager
     {
         private static DatabaseManager istance = null;
-        private String connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Vincenzo\\Desktop\\universita\\programmazione di sistema\\Repo_Gitlab\\pds_project\\desktopApp\\SnifferProbeRequestApp\\SnifferProbeRequestApp\\DBApp.mdf;Integrated Security=True";
+        private String connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True";
+       // private String connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Vincenzo\\Desktop\\universita\\programmazione di sistema\\Repo_Gitlab\\pds_project\\desktopApp\\SnifferProbeRequestApp\\SnifferProbeRequestApp\\DBApp.mdf;Integrated Security=True";
         private SqlConnection connection;
         
         private DatabaseManager() {
             //TODO: gestire eccezione connessione DB
+            Console.WriteLine("Connection String: " + connectionString);
             connection = new SqlConnection(connectionString);
+            connection.Open();
         }
 
         static public DatabaseManager getIstance()
@@ -50,7 +53,6 @@ namespace SnifferProbeRequestApp
             query.Remove(query.Length - 1, 1); //elimino l'ultima virgola
 
             SqlCommand command = new SqlCommand(query.ToString(), connection);
-            connection.Open();
             /* TODO: decommentare
             if (command.ExecuteNonQuery() == packets.listPacketInfo.Count)
             {
@@ -126,8 +128,29 @@ namespace SnifferProbeRequestApp
                     SSID, hashCode, avgTimestamp, x_pos, y_pos));
             }
 
+            //insert nella tabella AssembledPacketInfo le informazioni dei pacchetti
+            StringBuilder insertQuery = new StringBuilder();
+            insertQuery.Append("INSERT INTO [dbo].[AssembledPacketInfo] (SourceAddress, SSID, hashCode, timestamp_packet, x_position, y_position) VALUES ");
+            foreach (AssembledPacketInfo assembledInfo in lstAssembledInfo) {
+                insertQuery.Append("('" + assembledInfo.sourceAddress + "',");
+                insertQuery.Append("'" + assembledInfo.SSID + "',");
+                insertQuery.Append("'" + assembledInfo.hashCode + "',");
+                DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                DateTime date = start.AddMilliseconds(assembledInfo.timestamp).ToLocalTime();
+                insertQuery.Append("'" + date + "',");
+                insertQuery.Append(assembledInfo.x_position + ",");
+                insertQuery.Append(assembledInfo.y_position + "),");
+            }
+            insertQuery.Remove(insertQuery.Length - 1, 1); //elimino l'ultima virgola
+            Console.WriteLine("INSERT QUERY: " + insertQuery.ToString());
 
+            SqlCommand command = new SqlCommand(insertQuery.ToString(), connection);
+            if (command.ExecuteNonQuery() == lstAssembledInfo.Count)
+            {
+                Utils.logMessage(this.ToString(), "INSERT in AssembledPacketInfo effettuata con successo");
+            }
 
+            //elimino gli id dalla tabella "raw"
 
         }
 
