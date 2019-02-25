@@ -62,6 +62,7 @@ namespace SnifferProbeRequestApp
         private void elaboration()
         {
             //TODO:eliminare
+            /*
             PacketsInfo packetsInfo = new PacketsInfo();
             PacketInfo packet1 = new PacketInfo();
             packet1.hashCode = "10";
@@ -84,7 +85,7 @@ namespace SnifferProbeRequestApp
             packetsInfo.listPacketInfo = list;
 
             dbManager.saveReceivedData(packetsInfo, IPAddress.Any);
-
+            */
             //TODO: decommentare se non lavoro su PC aziendale
             //startHotspot("prova4", "pippopluto");
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
@@ -133,7 +134,7 @@ namespace SnifferProbeRequestApp
             
             allDone.Set();
 
-            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED");
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
             
             while (!stopThreadElaboration)
             {
@@ -149,7 +150,8 @@ namespace SnifferProbeRequestApp
                     }
                 }
 
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "MESSAGE FROM CLIENT: " + receivedMessage);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "MESSAGE FROM CLIENT " + remoteIpEndPoint.Address.ToString()
+                    + ": " + receivedMessage);
                 PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
 
                 //salvo i dati nella tabella raw del DB

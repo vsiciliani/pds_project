@@ -46,6 +46,7 @@ namespace SnifferProbeRequestApp
         //salva i dati ricevuti nella tabella dei dati "raw"
         public void saveReceivedData(PacketsInfo packets, IPAddress ipAddress)
         {
+            Console.WriteLine("Num packets: " + packets.listPacketInfo.Count);
             if (packets.listPacketInfo.Count == 0) return;
 
             StringBuilder query = new StringBuilder("");
@@ -61,12 +62,14 @@ namespace SnifferProbeRequestApp
             }
             query.Remove(query.Length - 1, 1); //elimino l'ultima virgola
 
+            Console.WriteLine(query);
+
             SqlCommand command = new SqlCommand(query.ToString(), connection);
-            /* TODO: decommentare
+            
             if (command.ExecuteNonQuery() == packets.listPacketInfo.Count)
             {
-                Utils.logMessage(this.ToString(), "INSERT effettuata con successo");
-            }*/
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT effettuata con successo");
+            }
 
             updateAssembled();
         }
@@ -79,8 +82,8 @@ namespace SnifferProbeRequestApp
             //TODO:eliminare questa parte necessaria per i test in cui setto i device
             Dictionary<String, String> devices = new Dictionary<String, String>
             {
-                ["d1"] = "0.0.0.0",
-                ["d2"] = "1.1.1.1"
+                ["d1"] = "192.168.1.5",
+                ["d2"] = "192.168.1.9"
             };
             //fine definizione valori di test
             
@@ -124,8 +127,15 @@ namespace SnifferProbeRequestApp
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
                 throw exception;
             }
+
+            //controllo se devo assemblare dei dati
+            if (table.Rows.Count == 0) return; 
+
             List<AssembledPacketInfo> lstAssembledInfo = new List<AssembledPacketInfo>();
-            
+
+            //delete query dei processati dalla tabella "raw"
+            StringBuilder deleteQuery = new StringBuilder("DELETE FROM [dbo].[Packets] WHERE id IN (");
+
             foreach (DataRow record in table.Rows)
             {
                 String hashCode = (String) record["hashCode"];
@@ -136,6 +146,8 @@ namespace SnifferProbeRequestApp
                 foreach (KeyValuePair<String, String> device in devices) {
                     signalStrength[device.Key] = (Int32) record[device.Key + "_signalStrength"];
                     avgTimestamp += (Int64)record[device.Key + "_timestamp"];
+                    Int32 id_packet = (Int32)record[device.Key + "_id"];
+                    deleteQuery.Append(id_packet.ToString()+",");
                 }
                 avgTimestamp = avgTimestamp / (Int64)devices.Count;
 
@@ -150,6 +162,7 @@ namespace SnifferProbeRequestApp
             //insert nella tabella AssembledPacketInfo le informazioni dei pacchetti
             StringBuilder insertQuery = new StringBuilder();
             insertQuery.Append("INSERT INTO [dbo].[AssembledPacketInfo] (SourceAddress, SSID, hashCode, timestamp_packet, x_position, y_position) VALUES ");
+
             foreach (AssembledPacketInfo assembledInfo in lstAssembledInfo) {
                 insertQuery.Append("('" + assembledInfo.sourceAddress + "',");
                 insertQuery.Append("'" + assembledInfo.SSID + "',");
@@ -175,8 +188,26 @@ namespace SnifferProbeRequestApp
                 throw exception;
             }
 
-            //elimino gli id dalla tabella "raw"
 
+            //elimino gli id dalla tabella "raw"
+            deleteQuery.Remove(deleteQuery.Length - 1, 1); //elimino l'ultima virgola nalla IN
+            deleteQuery.Append(")"); //chiudo la parentesi della IN
+            Console.WriteLine("DELETE QUERY: " + deleteQuery.ToString());
+            
+            SqlCommand deleteCommand = new SqlCommand(deleteQuery.ToString(), connection);
+            try
+            {
+                if (deleteCommand.ExecuteNonQuery() == lstAssembledInfo.Count)
+                {
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "DELETE da Packets effettuata con successo");
+                }
+            }
+            catch (Exception e)
+            {
+                SnifferAppException exception = new SnifferAppException("Errore durante la DELETE dei dati dalla tabella Packets", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
+            }
         }
 
         //calcola la posizione del device
