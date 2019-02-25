@@ -8,6 +8,7 @@
 #include "WifiPacket.h"
 #include <functional>
 #include <list>
+#include <sys/time.h>
 
 
 WifiPacket::WifiPacket(void* buff){
@@ -18,7 +19,7 @@ WifiPacket::WifiPacket(void* buff){
 	wifi_packet *pacchetto = (wifi_packet *)ppkt->payload;
 	this->header = pacchetto->header;
 	this->payload = pacchetto->payload;
-	this->timestamp = std::time(0);
+	this->timestamp = std::time(nullptr);
 }
 
 short int WifiPacket::getSignalStrength(){
