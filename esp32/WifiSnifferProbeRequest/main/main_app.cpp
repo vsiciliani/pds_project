@@ -20,7 +20,7 @@
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "Socket.h"
-#include "SocketClient.h"
+//#include "SocketClient.h"
 #include "sdkconfig.h"
 #include "GPIO.h"
 
@@ -118,7 +118,7 @@ void threadGestioneConnessionePc(){
 	ESP_LOGD(tag, "ThreadConnessionePc -- START THREAD");
 
 	Socket *socket = new Socket();
-	int res = socket->connect("192.168.1.4", 5010);
+	int res = socket->connect("192.168.1.5", 5010);
 
 
 	ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");

@@ -39,7 +39,7 @@ namespace SnifferProbeRequestApp
         public void start()
         {
             //instanzio il db manager
-            dbManager = DatabaseManager.getIstance();
+            dbManager = DatabaseManager.getInstance();
 
             delegateThreadElaboration = new ThreadStart(elaboration);
             threadElaboration = new Thread(delegateThreadElaboration);
@@ -135,7 +135,11 @@ namespace SnifferProbeRequestApp
             allDone.Set();
 
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
-            
+
+            Device device = new Device(remoteIpEndPoint.Address.ToString(), 1, 0, 0);
+            CommonData.lstNoConfDevices.TryAdd(device.ipAddress, device);
+            CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
+
             while (!stopThreadElaboration)
             {
                 string receivedMessage = string.Empty;
@@ -156,52 +160,9 @@ namespace SnifferProbeRequestApp
 
                 //salvo i dati nella tabella raw del DB
                 dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
-                
-                /*
-                foreach (var packet in packetsInfo.listPacketInfo)
-                {
-                    Console.WriteLine("Device: {5} -- SSID: {0}, sourceAddress: {1}, signalStrength: {2}, , hashCode: {3}, timestamp: {4}", packet.SSID, packet.sourceAddress, packet.signalStrength, packet.hashCode, packet.timestamp, remoteIpEndPoint.Address);
-                }
-                */
+    
             }
         }
-
-        private void startHotspot(string ssid, string key)
-        {
-            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe")
-            {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true,
-                UseShellExecute = false
-            };
-            Process process = Process.Start(processStartInfo);
-
-            if (process != null)
-            {
-                process.StandardInput.WriteLine("netsh wlan set hostednetwork mode=allow ssid=" + ssid + " key=" + key);
-                process.StandardInput.WriteLine("netsh wlan start hosted network");
-                process.StandardInput.Close();
-                Console.WriteLine("Wifi network started");
-            }
-        }
-
-        private void stopHotspot()
-        {
-            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe")
-            {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true,
-                UseShellExecute = false
-            };
-            Process process = Process.Start(processStartInfo);
-
-            process.StandardInput.WriteLine("netsh wlan stop hostednetwork");
-            process.StandardInput.Close();
-            Console.WriteLine("Wifi network closed");
-        }
-
     }
 }
 
