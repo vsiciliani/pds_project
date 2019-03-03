@@ -111,16 +111,17 @@ namespace SnifferProbeRequestApp
                     // 
                     // lblPosizioneDevice
                     // 
-                    lblPosizioneDevice.AutoSize = true;
-                    lblPosizioneDevice.Location = new Point(7, 26);
-                    lblPosizioneDevice.Size = new Size(72, 18);
-                    lblPosizioneDevice.Text = "Posizione: ("+device.Value.x_position +","+device.Value.y_position +")";
+                    Label lblPosizioneDeviceConf = new Label();
+                    lblPosizioneDeviceConf.AutoSize = true;
+                    lblPosizioneDeviceConf.Location = new Point(7, 26);
+                    lblPosizioneDeviceConf.Size = new Size(72, 18);
+                    lblPosizioneDeviceConf.Text = "Posizione: ("+device.Value.x_position +","+device.Value.y_position +")";
 
                     //aggiorno elenco devices configurati
                     TabPage tabPage = new TabPage();
 
-                    tabPage.Controls.Add(lblPosizioneDevice);
                     tabPage.Controls.Add(lblIpDeviceConf);
+                    tabPage.Controls.Add(lblPosizioneDeviceConf);
                     tabPage.Location = new Point(4, 27);
                     tabPage.Padding = new Padding(3);
                     tabPage.Size = new Size(298, 59);
