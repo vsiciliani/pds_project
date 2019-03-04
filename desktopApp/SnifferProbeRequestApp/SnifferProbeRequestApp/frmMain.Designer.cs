@@ -29,14 +29,15 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.groupBoxSettings = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnIdentifica = new System.Windows.Forms.Button();
             this.txtYPosition = new System.Windows.Forms.TextBox();
             this.txtXPosition = new System.Windows.Forms.TextBox();
             this.btnConfigura = new System.Windows.Forms.Button();
@@ -46,6 +47,13 @@
             this.lblConfiguraDevice = new System.Windows.Forms.Label();
             this.tabDeviceConf = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.lblPosizioneDevice = new System.Windows.Forms.Label();
             this.lblIpDeviceConf = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -90,6 +98,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btnIdentifica);
             this.groupBox1.Controls.Add(this.txtYPosition);
             this.groupBox1.Controls.Add(this.txtXPosition);
             this.groupBox1.Controls.Add(this.btnConfigura);
@@ -110,25 +119,34 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Wifi Devices";
             // 
+            // btnIdentifica
+            // 
+            this.btnIdentifica.Location = new System.Drawing.Point(161, 339);
+            this.btnIdentifica.Name = "btnIdentifica";
+            this.btnIdentifica.Size = new System.Drawing.Size(73, 28);
+            this.btnIdentifica.TabIndex = 11;
+            this.btnIdentifica.Text = "Identifica";
+            this.btnIdentifica.UseVisualStyleBackColor = true;
+            // 
             // txtYPosition
             // 
-            this.txtYPosition.Location = new System.Drawing.Point(250, 252);
+            this.txtYPosition.Location = new System.Drawing.Point(250, 307);
             this.txtYPosition.Name = "txtYPosition";
             this.txtYPosition.Size = new System.Drawing.Size(62, 25);
             this.txtYPosition.TabIndex = 10;
             // 
             // txtXPosition
             // 
-            this.txtXPosition.Location = new System.Drawing.Point(250, 218);
+            this.txtXPosition.Location = new System.Drawing.Point(250, 273);
             this.txtXPosition.Name = "txtXPosition";
             this.txtXPosition.Size = new System.Drawing.Size(62, 25);
             this.txtXPosition.TabIndex = 9;
             // 
             // btnConfigura
             // 
-            this.btnConfigura.Location = new System.Drawing.Point(165, 284);
+            this.btnConfigura.Location = new System.Drawing.Point(238, 339);
             this.btnConfigura.Name = "btnConfigura";
-            this.btnConfigura.Size = new System.Drawing.Size(148, 28);
+            this.btnConfigura.Size = new System.Drawing.Size(75, 28);
             this.btnConfigura.TabIndex = 8;
             this.btnConfigura.Text = "Configura";
             this.btnConfigura.UseVisualStyleBackColor = true;
@@ -137,7 +155,7 @@
             // lblYPosition
             // 
             this.lblYPosition.AutoSize = true;
-            this.lblYPosition.Location = new System.Drawing.Point(162, 255);
+            this.lblYPosition.Location = new System.Drawing.Point(162, 310);
             this.lblYPosition.Name = "lblYPosition";
             this.lblYPosition.Size = new System.Drawing.Size(89, 18);
             this.lblYPosition.TabIndex = 7;
@@ -146,7 +164,7 @@
             // lblXPosition
             // 
             this.lblXPosition.AutoSize = true;
-            this.lblXPosition.Location = new System.Drawing.Point(162, 221);
+            this.lblXPosition.Location = new System.Drawing.Point(162, 276);
             this.lblXPosition.Name = "lblXPosition";
             this.lblXPosition.Size = new System.Drawing.Size(91, 18);
             this.lblXPosition.TabIndex = 6;
@@ -158,7 +176,7 @@
             this.lstBoxNoConfDevice.ForeColor = System.Drawing.SystemColors.WindowText;
             this.lstBoxNoConfDevice.FormattingEnabled = true;
             this.lstBoxNoConfDevice.ItemHeight = 18;
-            this.lstBoxNoConfDevice.Location = new System.Drawing.Point(10, 218);
+            this.lstBoxNoConfDevice.Location = new System.Drawing.Point(10, 273);
             this.lstBoxNoConfDevice.Name = "lstBoxNoConfDevice";
             this.lstBoxNoConfDevice.Size = new System.Drawing.Size(145, 94);
             this.lstBoxNoConfDevice.TabIndex = 5;
@@ -167,7 +185,7 @@
             // 
             this.lblConfiguraDevice.AutoSize = true;
             this.lblConfiguraDevice.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
-            this.lblConfiguraDevice.Location = new System.Drawing.Point(7, 196);
+            this.lblConfiguraDevice.Location = new System.Drawing.Point(7, 251);
             this.lblConfiguraDevice.Name = "lblConfiguraDevice";
             this.lblConfiguraDevice.Size = new System.Drawing.Size(157, 18);
             this.lblConfiguraDevice.TabIndex = 4;
@@ -180,21 +198,87 @@
             this.tabDeviceConf.Location = new System.Drawing.Point(6, 94);
             this.tabDeviceConf.Name = "tabDeviceConf";
             this.tabDeviceConf.SelectedIndex = 0;
-            this.tabDeviceConf.Size = new System.Drawing.Size(306, 90);
+            this.tabDeviceConf.Size = new System.Drawing.Size(308, 155);
             this.tabDeviceConf.TabIndex = 3;
             this.tabDeviceConf.Visible = false;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.button2);
+            this.tabPage1.Controls.Add(this.button1);
+            this.tabPage1.Controls.Add(this.textBox2);
+            this.tabPage1.Controls.Add(this.label3);
+            this.tabPage1.Controls.Add(this.textBox1);
+            this.tabPage1.Controls.Add(this.label2);
+            this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.lblPosizioneDevice);
             this.tabPage1.Controls.Add(this.lblIpDeviceConf);
             this.tabPage1.Location = new System.Drawing.Point(4, 27);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(298, 59);
+            this.tabPage1.Size = new System.Drawing.Size(300, 124);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(7, 90);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(133, 23);
+            this.button2.TabIndex = 8;
+            this.button2.Text = "Elimina device";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(189, 62);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(73, 27);
+            this.button1.TabIndex = 7;
+            this.button1.Text = "Modifica";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(117, 64);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(57, 25);
+            this.textBox2.TabIndex = 6;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(93, 67);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(18, 18);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "Y:";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(30, 64);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(57, 25);
+            this.textBox1.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(4, 67);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(20, 18);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "X:";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(5, 45);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(135, 18);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Modifica coordinate:";
             // 
             // lblPosizioneDevice
             // 
@@ -219,7 +303,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 27);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(298, 59);
+            this.tabPage2.Size = new System.Drawing.Size(300, 119);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -227,12 +311,12 @@
             // lblNoDeviceConf
             // 
             this.lblNoDeviceConf.AutoSize = true;
+            this.lblNoDeviceConf.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Italic);
             this.lblNoDeviceConf.Location = new System.Drawing.Point(9, 94);
             this.lblNoDeviceConf.Name = "lblNoDeviceConf";
-            this.lblNoDeviceConf.Size = new System.Drawing.Size(192, 18);
+            this.lblNoDeviceConf.Size = new System.Drawing.Size(190, 18);
             this.lblNoDeviceConf.TabIndex = 1;
             this.lblNoDeviceConf.Text = "Non ci sono device configurati";
-            this.lblNoDeviceConf.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Italic);
             // 
             // lblElencoDeviceConf
             // 
@@ -250,9 +334,9 @@
             this.lblNumDeviceNonConf.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
             this.lblNumDeviceNonConf.Location = new System.Drawing.Point(6, 46);
             this.lblNumDeviceNonConf.Name = "lblNumDeviceNonConf";
-            this.lblNumDeviceNonConf.Size = new System.Drawing.Size(206, 18);
+            this.lblNumDeviceNonConf.Size = new System.Drawing.Size(216, 18);
             this.lblNumDeviceNonConf.TabIndex = 1;
-            this.lblNumDeviceNonConf.Text = "Numero device non configurati: ";
+            this.lblNumDeviceNonConf.Text = "Numero device non configurati:  0";
             // 
             // lblNumDeviceConf
             // 
@@ -260,9 +344,9 @@
             this.lblNumDeviceConf.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
             this.lblNumDeviceConf.Location = new System.Drawing.Point(7, 25);
             this.lblNumDeviceConf.Name = "lblNumDeviceConf";
-            this.lblNumDeviceConf.Size = new System.Drawing.Size(179, 18);
+            this.lblNumDeviceConf.Size = new System.Drawing.Size(189, 18);
             this.lblNumDeviceConf.TabIndex = 0;
-            this.lblNumDeviceConf.Text = "Numero device configurati: ";
+            this.lblNumDeviceConf.Text = "Numero device configurati:  0";
             // 
             // groupBoxView1
             // 
@@ -292,21 +376,21 @@
             // 
             this.chartNumberDevice.BorderlineWidth = 0;
             this.chartNumberDevice.CausesValidation = false;
-            chartArea1.Name = "ChartArea1";
-            this.chartNumberDevice.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chartNumberDevice.Legends.Add(legend1);
+            chartArea3.Name = "ChartArea1";
+            this.chartNumberDevice.ChartAreas.Add(chartArea3);
+            legend3.Name = "Legend1";
+            this.chartNumberDevice.Legends.Add(legend3);
             this.chartNumberDevice.Location = new System.Drawing.Point(6, 49);
             this.chartNumberDevice.Name = "chartNumberDevice";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-            series1.IsVisibleInLegend = false;
-            series1.IsXValueIndexed = true;
-            series1.Legend = "Legend1";
-            series1.Name = "N. dispositivi univoci";
-            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
-            series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
-            this.chartNumberDevice.Series.Add(series1);
+            series3.ChartArea = "ChartArea1";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+            series3.IsVisibleInLegend = false;
+            series3.IsXValueIndexed = true;
+            series3.Legend = "Legend1";
+            series3.Name = "N. dispositivi univoci";
+            series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
+            series3.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
+            this.chartNumberDevice.Series.Add(series3);
             this.chartNumberDevice.Size = new System.Drawing.Size(996, 277);
             this.chartNumberDevice.TabIndex = 0;
             this.chartNumberDevice.Text = "chartNumberDevice";
@@ -324,17 +408,17 @@
             // 
             // chartPositionDevice
             // 
-            chartArea2.Name = "ChartArea1";
-            this.chartPositionDevice.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chartPositionDevice.Legends.Add(legend2);
+            chartArea4.Name = "ChartArea1";
+            this.chartPositionDevice.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.chartPositionDevice.Legends.Add(legend4);
             this.chartPositionDevice.Location = new System.Drawing.Point(7, 27);
             this.chartPositionDevice.Name = "chartPositionDevice";
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.chartPositionDevice.Series.Add(series2);
+            series4.ChartArea = "ChartArea1";
+            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series4.Legend = "Legend1";
+            series4.Name = "Series1";
+            this.chartPositionDevice.Series.Add(series4);
             this.chartPositionDevice.Size = new System.Drawing.Size(995, 279);
             this.chartPositionDevice.TabIndex = 0;
             this.chartPositionDevice.Text = "chart1";
@@ -460,6 +544,14 @@
         private System.Windows.Forms.Button btnConfigura;
         private System.Windows.Forms.Label lblYPosition;
         private System.Windows.Forms.Label lblXPosition;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnIdentifica;
     }
 }
 

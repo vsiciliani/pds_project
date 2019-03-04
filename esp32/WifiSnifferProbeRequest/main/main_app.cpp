@@ -46,6 +46,16 @@ void app_main() {
 
 	nvs_flash_init();
 
+	//codice per il lampeggio del led
+	/*ESP32CPP::GPIO::setOutput(GPIO_NUM_2); //GPIO_NUM_2BUILTIN LED
+	while (true){
+		ESP32CPP::GPIO::high(GPIO_NUM_2);
+		sleep(2);
+		ESP32CPP::GPIO::low(GPIO_NUM_2);
+		sleep(2);
+	}*/
+
+
 	wifi.connectAP("Vodafone-50650385", "pe7dt3793ae9t7b");
 	std::cout << "Connesso a "<<wifi.getStaSSID() << " con IP: "<<wifi.getStaIp()
 					  <<" Gateway: "<< wifi.getStaGateway() <<std::endl;
