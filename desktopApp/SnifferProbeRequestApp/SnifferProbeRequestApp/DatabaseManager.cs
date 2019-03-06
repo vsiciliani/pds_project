@@ -12,8 +12,8 @@ namespace SnifferProbeRequestApp
 {
     class DatabaseManager
     {
-        private static DatabaseManager istance = null;
-        private String connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True";
+        private static DatabaseManager instance = null;
+        private String connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True;MultipleActiveResultSets=True;";
         private SqlConnection connection;
         
         private DatabaseManager() {
@@ -33,13 +33,13 @@ namespace SnifferProbeRequestApp
             }
         }
 
-        static public DatabaseManager getIstance()
+        static public DatabaseManager getInstance()
         {
-            if (istance == null)
+            if (instance == null)
             {
-                istance = new DatabaseManager();
+                instance = new DatabaseManager();
             }
-            return istance;
+            return instance;
         }
 
         //TODO: gestire eccezione insert errata
@@ -83,7 +83,7 @@ namespace SnifferProbeRequestApp
             Dictionary<String, String> devices = new Dictionary<String, String>
             {
                 ["d1"] = "192.168.1.5",
-                ["d2"] = "192.168.1.9"
+                ["d2"] = "192.168.1.8"
             };
             //fine definizione valori di test
             
@@ -209,6 +209,36 @@ namespace SnifferProbeRequestApp
                 throw exception;
             }
         }
+
+        //conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)
+        public KeyValuePair<DateTime, Int32> countDevice()
+        {
+
+            //String selectQuery = "SELECT Current_TimeStamp  AS date_time, COUNT(DISTINCT sourceAddress) AS countDevice FROM dbo.AssembledPacketInfo WHERE timestamp_packet > DateADD(mi, -5, Current_TimeStamp)";
+            String selectQuery = "SELECT Current_TimeStamp  AS date_time, COUNT(DISTINCT sourceAddress) AS countDevice FROM dbo.AssembledPacketInfo";
+
+            DataTable resultCount = new DataTable();
+            try
+            {
+                SqlCommand cmd = new SqlCommand(selectQuery, connection);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(resultCount);
+            }
+            catch (Exception e)
+            {
+                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
+            }
+
+            DateTime time = (DateTime)resultCount.Rows[0]["date_time"];
+            Int32 count = (Int32)resultCount.Rows[0]["countDevice"];
+            KeyValuePair<DateTime, Int32> result = new KeyValuePair<DateTime, Int32>(time, count);
+
+            return result;
+        }
+
+
 
         //calcola la posizione del device
         private void getPosition()

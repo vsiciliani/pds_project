@@ -37,6 +37,42 @@ namespace SnifferProbeRequestApp
             System.Windows.Forms.Application.Exit();
         }
 
+        private static void startHotspot(string ssid, string key)
+        {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe")
+            {
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+            Process process = Process.Start(processStartInfo);
+
+            if (process != null)
+            {
+                process.StandardInput.WriteLine("netsh wlan set hostednetwork mode=allow ssid=" + ssid + " key=" + key);
+                process.StandardInput.WriteLine("netsh wlan start hosted network");
+                process.StandardInput.Close();
+                Console.WriteLine("Wifi network started");
+            }
+        }
+
+        private static void stopHotspot()
+        {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe")
+            {
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+            Process process = Process.Start(processStartInfo);
+
+            process.StandardInput.WriteLine("netsh wlan stop hostednetwork");
+            process.StandardInput.Close();
+            Console.WriteLine("Wifi network closed");
+        }
+
         public class LogCategory
         {
             private LogCategory(string value) { Value = value; }

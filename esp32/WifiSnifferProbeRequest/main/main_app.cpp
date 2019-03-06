@@ -20,7 +20,7 @@
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "Socket.h"
-#include "SocketClient.h"
+//#include "SocketClient.h"
 #include "sdkconfig.h"
 #include "GPIO.h"
 
@@ -45,6 +45,16 @@ extern "C" {
 void app_main() {
 
 	nvs_flash_init();
+
+	//codice per il lampeggio del led
+	/*ESP32CPP::GPIO::setOutput(GPIO_NUM_2); //GPIO_NUM_2BUILTIN LED
+	while (true){
+		ESP32CPP::GPIO::high(GPIO_NUM_2);
+		sleep(2);
+		ESP32CPP::GPIO::low(GPIO_NUM_2);
+		sleep(2);
+	}*/
+
 
 	wifi.connectAP("Vodafone-50650385", "pe7dt3793ae9t7b");
 	std::cout << "Connesso a "<<wifi.getStaSSID() << " con IP: "<<wifi.getStaIp()
@@ -118,7 +128,7 @@ void threadGestioneConnessionePc(){
 	ESP_LOGD(tag, "ThreadConnessionePc -- START THREAD");
 
 	Socket *socket = new Socket();
-	int res = socket->connect("192.168.1.4", 5010);
+	int res = socket->connect("192.168.1.5", 5010);
 
 
 	ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
