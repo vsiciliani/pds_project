@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SnifferProbeRequestApp
@@ -27,7 +28,8 @@ namespace SnifferProbeRequestApp
         public static event EventHandler LstConfDevicesChanged;
 
         //LISTA DEVICE NON CONFIGUARATI
-        public static ConcurrentDictionary<String, Device> lstNoConfDevices = new ConcurrentDictionary<String, Device>();
+        public static ConcurrentDictionary<String, ManualResetEvent> lstNoConfDevices = new ConcurrentDictionary<String, ManualResetEvent>();
+        public static String paramConfDevice = null;
 
         //delegato per lanciare gli eventi dopo la modifica della lstConfDevices
         public static void OnLstNoConfDevicesChanged(object sender, EventArgs e)

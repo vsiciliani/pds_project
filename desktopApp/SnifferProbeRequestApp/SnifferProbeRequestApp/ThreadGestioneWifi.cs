@@ -99,29 +99,32 @@ namespace SnifferProbeRequestApp
                 {
                     allDone.Reset();
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
-                    listener.BeginAccept(new AsyncCallback(acceptCallback), listener);
 
+                    Socket socketConnesso = listener.Accept();
+                    Thread threadGestioneDevice = new Thread(() => gestioneDevice(socketConnesso));
+                    threadGestioneDevice.Start();
+                    threadGestioneDevice.IsBackground = false;
                     allDone.WaitOne();
+                    //TODO: chiudere i thread
                 }
 
             }
             catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante il binding del socket", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                listener.Shutdown(SocketShutdown.Both);
+                listener.Close();
                 throw exception;
             }
 
-            //socket.Shutdown(SocketShutdown.Both);
-            //socket.Close();
+            
             //stopHotspot();
         }
 
-        public void acceptCallback(IAsyncResult ar)
+        public void gestioneDevice(Socket socket)
         {
             int MAXBUFFER = 4096;
-
-            Socket listener = (Socket)ar.AsyncState;
-            Socket socket = listener.EndAccept(ar);
+            bool check;
 
             IPEndPoint remoteIpEndPoint = null;
             try {
@@ -137,8 +140,36 @@ namespace SnifferProbeRequestApp
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
             Device device = new Device(remoteIpEndPoint.Address.ToString(), 1, 0, 0);
-            CommonData.lstNoConfDevices.TryAdd(device.ipAddress, device);
+            ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
+            CommonData.lstNoConfDevices.TryAdd(device.ipAddress, deviceConfEvent);
             CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
+
+            deviceConfEvent.WaitOne();
+
+            byte[] messageToSend = null;
+            int byteSent;
+            //controllo se il device è stato eliminato dalla lista dei device non configurati
+            do
+            {
+                if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
+                    //il device è stato configurato
+                    break;
+                } else {
+                    //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
+                    messageToSend = Encoding.ASCII.GetBytes("IDENTIFICA");
+                    check = socket.Connected;
+                    byteSent = socket.Send(messageToSend);
+
+                    messageToSend = null;
+                    deviceConfEvent.Reset();
+                    deviceConfEvent.WaitOne();
+                }
+            } while (true);
+
+            messageToSend = Encoding.ASCII.GetBytes("CONFOK");
+            check = socket.Connected;
+            byteSent = socket.Send(messageToSend);
+
 
             while (!stopThreadElaboration)
             {
@@ -160,8 +191,9 @@ namespace SnifferProbeRequestApp
 
                 //salvo i dati nella tabella raw del DB
                 dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
-    
             }
+            socket.Shutdown(SocketShutdown.Both);
+            socket.Close();
         }
     }
 }

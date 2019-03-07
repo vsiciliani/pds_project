@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -34,6 +35,21 @@ namespace SnifferProbeRequestApp
             updateChartNumberDevice();
         }
 
+        private void btnIdentifica_Click(object sender, EventArgs e)
+        {
+            if (lstBoxNoConfDevice.SelectedItem == null) {
+                MessageBox.Show("Selezionare un device dall'elenco",
+                    "Seleziona il device da configurare", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } else { //i parametri sono validi
+
+                //leggo l'IP del device selezionato
+                String ipAddress = lstBoxNoConfDevice.SelectedItem.ToString();
+                ManualResetEvent deviceEvent = null;
+                CommonData.lstNoConfDevices.TryGetValue(ipAddress, out deviceEvent);
+                deviceEvent.Set();
+            }
+        }
+
         private void btnConfigura_Click(object sender, EventArgs e)
         {
             Int32 xPosition = 0, yPosition = 0;
@@ -47,17 +63,26 @@ namespace SnifferProbeRequestApp
             } else if (!int.TryParse(txtYPosition.Text, out yPosition)) {
                 MessageBox.Show("Posizione Y non valida",
                     "Inserire un valore numerico per la posizione Y", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            } else {
-                //i parametri sono validi
+            } else { //i parametri sono validi
+
+                //leggo l'IP del device selezionato
                 String ipAddress = lstBoxNoConfDevice.SelectedItem.ToString();
                 
+                //creo l'oggetto Device
                 Device device = new Device(lstBoxNoConfDevice.SelectedItem.ToString(), 1, xPosition, yPosition);
                 try {
                     //devo togliere il device dalla lista dei non configurati e aggiungerlo tra quelli configurati
+
+                    //aggiungo il device alla lista degi device configurati e lancio il delegato associato
                     CommonData.lstConfDevices.TryAdd(device.ipAddress, device);
                     CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
-                   
-                    CommonData.lstNoConfDevices.TryRemove(device.ipAddress, out device);
+
+                    //elimino il device dalla lista dei device non configurati e lancio il delegato associato
+                    //semaforo per gestire la concorrenza con il thread che gestisce la connessione con il device
+                    ManualResetEvent deviceEvent = null;
+                    CommonData.lstNoConfDevices.TryRemove(device.ipAddress, out deviceEvent);
+                    
+                    deviceEvent.Set();
                     CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
                     //ripulisco la textbox
@@ -101,7 +126,7 @@ namespace SnifferProbeRequestApp
                 CommonData.lstConfDevices.TryRemove(deviceIp, out device);
                 CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
-                CommonData.lstNoConfDevices.TryAdd(deviceIp, device);
+                CommonData.lstNoConfDevices.TryAdd(deviceIp, null);
                 CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
             }
             catch (Exception)
@@ -110,6 +135,8 @@ namespace SnifferProbeRequestApp
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        
 
         //CUSTOM PROCEDURE
         public void updateChartNumberDevice() {
@@ -124,8 +151,8 @@ namespace SnifferProbeRequestApp
                 lblNumDeviceNonConf.Text = "Numero device non configurati: " + CommonData.lstNoConfDevices.Count;
 
                 lstBoxNoConfDevice.Items.Clear();
-                foreach (KeyValuePair<String, Device> device in CommonData.lstNoConfDevices) {
-                    lstBoxNoConfDevice.Items.Add(device.Value.ipAddress);
+                foreach (KeyValuePair<String, ManualResetEvent> device in CommonData.lstNoConfDevices) {
+                    lstBoxNoConfDevice.Items.Add(device.Key);
 
                 }
                 
@@ -241,6 +268,6 @@ namespace SnifferProbeRequestApp
 
         }
 
-       
+        
     }
 }

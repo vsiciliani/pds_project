@@ -35,7 +35,7 @@ bool SocketClient::conn(std::string address , int port)
     else    {   /* OK , nothing */  }
 
     //setup address structure
-    if(inet_addr(address.c_str()) == -1)
+    /*if(inet_addr(address.c_str()) == -1)
     {
         struct hostent *he;
         struct in_addr **addr_list;
@@ -68,7 +68,8 @@ bool SocketClient::conn(std::string address , int port)
     {
         server.sin_addr.s_addr = inet_addr( address.c_str() );
     }
-
+	*/
+    server.sin_addr.s_addr = inet_addr( address.c_str() );
     server.sin_family = AF_INET;
     server.sin_port = port;
 
@@ -76,7 +77,7 @@ bool SocketClient::conn(std::string address , int port)
     if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
     {
         perror("connect failed. Error");
-        return 1;
+        return false;
     }
 
     std::cout<<"Connected\n";

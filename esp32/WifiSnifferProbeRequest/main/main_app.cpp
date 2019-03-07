@@ -20,13 +20,16 @@
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "Socket.h"
-//#include "SocketClient.h"
+#include "SocketClient.h"
 #include "sdkconfig.h"
 #include "GPIO.h"
+
 
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
 void threadGestioneConnessionePc();
 bool checkTimeoutThreadConnessionePc();
+void connectSocket();
+void blinkLed();
 
 
 static char tag[]="Sniffer-ProbeRequest";
@@ -36,6 +39,7 @@ std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
 WiFi wifi;
+Socket *s;
 
 extern "C" {
    void app_main();
@@ -46,19 +50,45 @@ void app_main() {
 
 	nvs_flash_init();
 
-	//codice per il lampeggio del led
-	/*ESP32CPP::GPIO::setOutput(GPIO_NUM_2); //GPIO_NUM_2BUILTIN LED
-	while (true){
-		ESP32CPP::GPIO::high(GPIO_NUM_2);
-		sleep(2);
-		ESP32CPP::GPIO::low(GPIO_NUM_2);
-		sleep(2);
-	}*/
-
+	//setto il led come output
+	ESP32CPP::GPIO::setOutput(GPIO_NUM_2); //GPIO_NUM_2BUILTIN LED
 
 	wifi.connectAP("Vodafone-50650385", "pe7dt3793ae9t7b");
 	std::cout << "Connesso a "<<wifi.getStaSSID() << " con IP: "<<wifi.getStaIp()
 					  <<" Gateway: "<< wifi.getStaGateway() <<std::endl;
+
+	s = new Socket();
+
+	connectSocket();
+
+
+
+	 	/*int res = socket->connect("192.168.1.5", 5010);
+
+		if (res < 0) {
+			ESP_LOGD(tag, "ThreadConnessionePc -- Connessione con il server fallita");
+		} else {
+			ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
+		}*/
+
+		unsigned char data[10];
+
+		//CONFIGURAZIONE INIZIALE
+
+		do {
+			int numByteReceived = s->receive(data,15);
+			ESP_LOGD(tag, "messaggio ricevuto: %s", data);
+			if (memcmp(data, "IDENTIFICA",numByteReceived)==0) {
+					ESP_LOGD(tag, "ho ricevuto IDENTIFICA");
+					std::thread threadBlinkLed (blinkLed);
+					threadBlinkLed.detach();
+					//ripulisco il buffer
+					memset(data, 0, 15 * (sizeof data[0]) );
+			} else if (memcmp(data, "CONFOK",numByteReceived)==0){
+				break;
+			} else { ESP_LOGD(tag, "Ricevuto messaggio non valido"); }
+		} while (true);
+
 
 	//abilito la modalità di attività promiscua
 	ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
@@ -126,29 +156,56 @@ std::string createJSONArray(std::list<std::string>){
 
 void threadGestioneConnessionePc(){
 	ESP_LOGD(tag, "ThreadConnessionePc -- START THREAD");
-
-	Socket *socket = new Socket();
+	/*Socket *socket = new Socket();
 	int res = socket->connect("192.168.1.5", 5010);
 
-
 	ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
+	*/
 	while (true) {
-		if (res < 0){
-			res = socket->connect("192.168.1.4", 5010);
-		}
+		connectSocket();
 
 		std::unique_lock<std::mutex> ul(m);
 		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- SONO PASSATI ALMENO 20 SECONDI");
 
-		socket->send(createJSONArray(listaRecord));
+		s->send(createJSONArray(listaRecord));
 
 		listaRecord.clear();
 
 		time(&startWaitTime);
 	}
 
-	socket->close();
+	//socket->close();
 	ESP_LOGD(tag, "ThreadConnessionePc -- END THREAD");
+
+}
+
+void connectSocket(){
+	int res = s->connect("192.168.1.5", 5010);
+
+	while (res < 0) {
+		ESP_LOGD(tag, "ThreadConnessionePc -- Connessione con il server fallita. Nuovo tentativo tra 10 secondi...");
+		sleep(10);
+		res = s->connect("192.168.1.5", 5010);
+	}
+
+	ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
+	return;
+
+}
+
+void blinkLed(){
+	time_t blink_time_start;
+	time_t blink_time;
+	time(&blink_time_start);
+
+	do {
+		ESP32CPP::GPIO::high(GPIO_NUM_2);
+		sleep(1);
+		ESP32CPP::GPIO::low(GPIO_NUM_2);
+		sleep(1);
+		time(&blink_time);
+	} while(difftime(blink_time,blink_time_start)<30);
+
 }
