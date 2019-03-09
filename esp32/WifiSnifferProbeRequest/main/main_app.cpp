@@ -95,15 +95,18 @@ void app_main() {
 	ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
 	while (true) {
+		//verifico la connessione al socket
 		connectSocket();
-
+		//salvo il timestamp per calcolare il tempo di flush verso il server
 		time(&startWaitTime);
 
+		//prendo il lock per leggere la lista di PacketInfo
 		std::unique_lock<std::mutex> ul(m);
+		//condition variable sul tempo di attesa per il flush
 		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- Invio dati dei pacchetti al server");
-
+		//send dei dati verso il server
 		s->send(createJSONArray(listaRecord));
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- Dati dei pacchetti inviati con successo");
