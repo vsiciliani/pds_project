@@ -182,15 +182,17 @@ void threadGestioneConnessionePc(){
 }
 
 void connectSocket(){
-	int res = s->connect("192.168.1.5", 5010);
+	if (!s->isValid()){
+		int res = s->connect("192.168.1.100", 5010);
 
-	while (res < 0) {
-		ESP_LOGD(tag, "ThreadConnessionePc -- Connessione con il server fallita. Nuovo tentativo tra 10 secondi...");
-		sleep(10);
-		res = s->connect("192.168.1.5", 5010);
+			while (res < 0) {
+				ESP_LOGD(tag, "ThreadConnessionePc -- Connessione con il server fallita. Nuovo tentativo tra 10 secondi...");
+				sleep(10);
+				res = s->connect("192.168.1.100", 5010);
+			}
+			ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
 	}
 
-	ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
 	return;
 
 }
