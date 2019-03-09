@@ -23,12 +23,11 @@
 #include "sdkconfig.h"
 #include "GPIO.h"
 
-
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
-void threadGestioneConnessionePc();
 bool checkTimeoutThreadConnessionePc();
 void connectSocket();
 void blinkLed();
+std::string createJSONArray(std::list<std::string>);
 
 
 static char tag[]="Sniffer-ProbeRequest";
@@ -96,12 +95,25 @@ void app_main() {
 	//setto l'handler che gestisce la ricezione del pacchetto
 	ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
-	//lancio il thread che gestisce la connessione e lo scambio di messaggi con il pc
-	std::thread threadConnessionePc (threadGestioneConnessionePc);
+	while (true) {
+		connectSocket();
 
-	//aspetto la terminazione del thread
-	threadConnessionePc.join();
-	//flush dello standard output
+		time(&startWaitTime);
+
+		std::unique_lock<std::mutex> ul(m);
+		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+
+		ESP_LOGD(tag, "ThreadConnessionePc -- Invio dati dei pacchetti al server");
+
+		s->send(createJSONArray(listaRecord));
+
+		ESP_LOGD(tag, "ThreadConnessionePc -- Dati dei pacchetti inviati con successo");
+
+		//pulisco la lista di PacketInfo
+		listaRecord.clear();
+
+	}
+
 	fflush(stdout);
 
 }
@@ -157,31 +169,6 @@ std::string createJSONArray(std::list<std::string>){
 	buf+="]}\n";
 	std::cout << "Messaggio inviato: " << buf << std::endl;
 	return buf;
-}
-
-void threadGestioneConnessionePc(){
-	ESP_LOGD(tag, "ThreadConnessionePc -- START THREAD");
-
-	time(&startWaitTime);
-
-	while (true) {
-		connectSocket();
-
-		std::unique_lock<std::mutex> ul(m);
-		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
-
-		ESP_LOGD(tag, "ThreadConnessionePc -- SONO PASSATI ALMENO 20 SECONDI");
-
-		s->send(createJSONArray(listaRecord));
-
-		listaRecord.clear();
-
-		time(&startWaitTime);
-	}
-
-	//socket->close();
-	ESP_LOGD(tag, "ThreadConnessionePc -- END THREAD");
-
 }
 
 //funzione che esegue la connessione al socket se non e' già connesso
