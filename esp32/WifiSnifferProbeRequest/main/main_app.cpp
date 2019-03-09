@@ -16,7 +16,6 @@
 #include <condition_variable>
 #include <time.h>
 #include "Wifi.h"
-#include "WiFiEventHandler.h"
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "Socket.h"
