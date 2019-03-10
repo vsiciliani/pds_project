@@ -79,14 +79,15 @@ namespace SnifferProbeRequestApp
         private void updateAssembled()
         {
             //trovo i device che sto utilizzando
-            //TODO:eliminare questa parte necessaria per i test in cui setto i device
-            Dictionary<String, String> devices = new Dictionary<String, String>
-            {
-                ["d1"] = "192.168.1.5",
-                ["d2"] = "192.168.1.8"
-            };
-            //fine definizione valori di test
-            
+            Dictionary<String, String> devices = new Dictionary<String, String>();
+
+            int id = 1;
+
+            foreach (String device in CommonData.lstConfDevices.Keys) {
+                devices.Add("d"+id.ToString(), device);
+                id++;
+            }
+
             //StringBuilders per comporre dinamicamente la query
             StringBuilder selectQuery = new StringBuilder("");
             StringBuilder fromQuery = new StringBuilder("");

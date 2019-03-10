@@ -109,7 +109,6 @@ namespace SnifferProbeRequestApp
                     threadGestioneDevice.Start();
                     threadGestioneDevice.IsBackground = false;
                     allDone.WaitOne();
-                    //TODO: chiudere i thread
                 }
 
             }
@@ -120,7 +119,6 @@ namespace SnifferProbeRequestApp
                 listener.Close();
                 throw exception;
             }
-
             
             //stopHotspot();
         }
@@ -159,26 +157,33 @@ namespace SnifferProbeRequestApp
             {
                 if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
                     //il device è stato configurato
+                    string receivedMessage;
+                    do {
+                        Utils.sendMessage(socket, "CONFOK");
+                        
+                        //ricevo ACK CONFOK dal device
+                        receivedMessage = string.Empty;
+                        byte[] receivedBytes = new byte[MAXBUFFER];
+                        int numBytes = socket.Receive(receivedBytes);
+                        receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);                      
+                    } while (receivedMessage != "CONFOK ACK\n");
                     break;
+                    
                 } else {
                     //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
-                    messageToSend = Encoding.ASCII.GetBytes("IDENTIFICA");
-                    check = socket.Connected;
-                    byteSent = socket.Send(messageToSend);
-
+                    //messageToSend = Encoding.ASCII.GetBytes("");
+                    //byteSent = socket.Send(messageToSend);
+                    Utils.sendMessage(socket, "IDENTIFICA");
+                    //pulisco il buffer del messaggio da inviare
                     messageToSend = null;
                     deviceConfEvent.Reset();
                     deviceConfEvent.WaitOne();
                 }
             } while (true);
 
-            messageToSend = Encoding.ASCII.GetBytes("CONFOK");
-            check = socket.Connected;
-            byteSent = socket.Send(messageToSend);
-
-
             while (!stopThreadElaboration)
             {
+                //buffer di ricezione
                 string receivedMessage = string.Empty;
                 while (true)
                 {
@@ -193,6 +198,7 @@ namespace SnifferProbeRequestApp
 
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "MESSAGE FROM CLIENT " + remoteIpEndPoint.Address.ToString()
                     + ": " + receivedMessage);
+                //deserializzazione del JSON ricevuto
                 PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
 
                 //salvo i dati nella tabella raw del DB
