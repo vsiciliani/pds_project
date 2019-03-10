@@ -26,6 +26,7 @@ static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t 
 bool checkTimeoutThreadConnessionePc();
 void connectSocket();
 void blinkLed();
+void syncClock();
 std::string createJSONArray(std::list<std::string>);
 bool sendMessage(std::string message);
 
@@ -37,6 +38,8 @@ std::condition_variable cvMinuto;
 time_t startWaitTime;
 WiFi wifi;
 Socket *s;
+//buffer per salvare i messaggi in ingresso
+unsigned char bufferReceive[128];
 
 extern "C" {
    void app_main();
@@ -62,11 +65,11 @@ void app_main() {
 	connectSocket();
 
 	//CONFIGURAZIONE INIZIALE
-	//buffer per salvare i messaggi in ingresso
-	unsigned char bufferReceive[128];
 
 	//ciclo per gestire i messaggi della configurazione iniziale del dispositivo
 	do {
+		//ripulisco il buffer di ricezione
+		memset(bufferReceive, 0, 128 * (sizeof bufferReceive[0]) );
 		//ricevo il messaggio
 		int numByteReceived = s->receive(bufferReceive,128);
 		ESP_LOGD(tag, "messaggio ricevuto: %s", bufferReceive);
@@ -83,8 +86,8 @@ void app_main() {
 				memset(bufferReceive, 0, 128 * (sizeof bufferReceive[0]) );
 		} else if (memcmp(bufferReceive, "CONFOK",numByteReceived)==0){
 			//se ricevo CONFOK invio ACK e termino il ciclo della configurazione
+			syncClock();
 			sendMessage("CONFOK ACK\n");
-			//s->send();
 			break;
 		} else { ESP_LOGD(tag, "Ricevuto messaggio non valido"); }
 	} while (true);
@@ -110,7 +113,6 @@ void app_main() {
 		ESP_LOGD(tag, "ThreadConnessionePc -- Invio dati dei pacchetti al server");
 		//send dei dati verso il server
 		sendMessage(createJSONArray(listaRecord));
-		//s->send(createJSONArray(listaRecord));
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- Dati dei pacchetti inviati con successo");
 
@@ -189,7 +191,6 @@ void connectSocket(){
 			}
 			ESP_LOGD(tag, "ThreadConnessionePc -- Socket connesso");
 	}
-
 	return;
 }
 
@@ -200,6 +201,36 @@ bool sendMessage(std::string message){
 		numByteSent = s->send(message);
 	} while (numByteSent != message.length());
 	return true;
+}
+
+void syncClock(){
+	long delay = 0;
+	long request_timestamp;
+	long reply_timestamp;
+	long received_timestamp;
+	//time_t reply_timestamp;
+	for (int i=0; i<4; i++){
+		time(&request_timestamp);
+		sendMessage("SYNC_CLOCK\n");
+		memset(bufferReceive, 0, 128 * (sizeof bufferReceive[0]) );
+		int recv = s->receive(bufferReceive,8);
+		std::cout << "Buffer received: " << bufferReceive << std::endl;
+		received_timestamp = bufferReceive[0] | (bufferReceive[1] << 8) | (bufferReceive[2] << 16) | (bufferReceive[3] << 24) | (bufferReceive[4] << 32) | (bufferReceive[5] << 40) | (bufferReceive[6] << 48) | (bufferReceive[7] << 56) ;
+		time(&reply_timestamp);
+		std::cout << "Bytes ricevuti: " << recv << std::endl;
+		std::cout << "Timestamp ricevuto dalla sincronizzazione: " << received_timestamp << std::endl;
+
+		//reply_timestamp=lwip_ntohl(reply_timestamp);
+		delay = delay + (reply_timestamp - request_timestamp);
+	}
+	//calcolo il delay medio delle 4 richieste
+	delay = delay/4;
+	std::cout << "Delay: " << delay << std::endl;
+	//setto il timer dell'ESP
+	struct timeval tv;
+	tv.tv_sec = received_timestamp + (delay/2);
+	settimeofday(&tv, NULL);
+	std::cout << "Tempo settato: " << tv.tv_sec;
 }
 
 //procedura che gestire il lampeggio del led quando viene richiesta dal server l'IDENTIFICAZIONE

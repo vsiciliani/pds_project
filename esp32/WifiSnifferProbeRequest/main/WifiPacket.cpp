@@ -19,7 +19,7 @@ WifiPacket::WifiPacket(void* buff){
 	wifi_packet *pacchetto = (wifi_packet *)ppkt->payload;
 	this->header = pacchetto->header;
 	this->payload = pacchetto->payload;
-	this->timestamp = std::time(nullptr);
+	this->timestamp = time(nullptr);
 }
 
 short int WifiPacket::getSignalStrength(){

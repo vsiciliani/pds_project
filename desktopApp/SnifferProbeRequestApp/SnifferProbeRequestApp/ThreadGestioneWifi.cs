@@ -158,21 +158,29 @@ namespace SnifferProbeRequestApp
                 if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
                     //il device è stato configurato
                     string receivedMessage;
+                    
+                    Utils.sendMessage(socket, "CONFOK");
                     do {
-                        Utils.sendMessage(socket, "CONFOK");
-                        
-                        //ricevo ACK CONFOK dal device
+                        //posso riceve CONFOK O la richiesta di SYNC
                         receivedMessage = string.Empty;
                         byte[] receivedBytes = new byte[MAXBUFFER];
                         int numBytes = socket.Receive(receivedBytes);
-                        receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);                      
+                        receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
+                        //se ricevo la richiesta di SYNC invio il timestamp attuale
+                        if (receivedMessage == "SYNC_CLOCK\n") {
+                            //invio i millisecondi del timestamp
+                            DateTime dt1970 = new DateTime(1970, 1, 1);
+                            long millisToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);
+
+                            socket.Send(BitConverter.GetBytes(millisToSend));
+                            Console.WriteLine(millisToSend.ToString());
+                        }
                     } while (receivedMessage != "CONFOK ACK\n");
+
                     break;
                     
                 } else {
                     //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
-                    //messageToSend = Encoding.ASCII.GetBytes("");
-                    //byteSent = socket.Send(messageToSend);
                     Utils.sendMessage(socket, "IDENTIFICA");
                     //pulisco il buffer del messaggio da inviare
                     messageToSend = null;

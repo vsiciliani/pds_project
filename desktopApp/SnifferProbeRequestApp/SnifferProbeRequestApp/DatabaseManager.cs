@@ -57,7 +57,7 @@ namespace SnifferProbeRequestApp
                 query.Append("'" + packet.SSID + "',");
                 query.Append(packet.signalStrength + ",");
                 query.Append("'" + packet.hashCode + "',");
-                query.Append(packet.timestamp + ",");
+                query.Append(packet.timestamp*1000 + ","); //*1000 per passare dai secondi ai millisecondi
                 query.Append("'" + ipAddress.ToString() + "'),");
             }
             query.Remove(query.Length - 1, 1); //elimino l'ultima virgola
