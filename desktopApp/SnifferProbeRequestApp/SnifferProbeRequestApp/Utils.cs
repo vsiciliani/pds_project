@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
@@ -88,6 +89,16 @@ namespace SnifferProbeRequestApp
         {
             String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
+        }
+
+        static public void sendMessage(Socket socket, String message)
+        {
+            byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
+            int byteSent;
+            do {
+                byteSent = socket.Send(messageToSend);
+            } while (byteSent != messageToSend.Length);
+            logMessage("Utils.cs -- Send Message", LogCategory.Info, message);
         }
     }
 }

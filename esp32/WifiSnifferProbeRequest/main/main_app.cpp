@@ -27,7 +27,7 @@ bool checkTimeoutThreadConnessionePc();
 void connectSocket();
 void blinkLed();
 std::string createJSONArray(std::list<std::string>);
-
+bool sendMessage(std::string message);
 
 static char tag[]="Sniffer-ProbeRequest";
 
@@ -82,7 +82,9 @@ void app_main() {
 				//ripulisco il buffer
 				memset(bufferReceive, 0, 128 * (sizeof bufferReceive[0]) );
 		} else if (memcmp(bufferReceive, "CONFOK",numByteReceived)==0){
-			//se ricevo CONFOK termino il ciclo della configurazione
+			//se ricevo CONFOK invio ACK e termino il ciclo della configurazione
+			sendMessage("CONFOK ACK\n");
+			//s->send();
 			break;
 		} else { ESP_LOGD(tag, "Ricevuto messaggio non valido"); }
 	} while (true);
@@ -107,7 +109,8 @@ void app_main() {
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- Invio dati dei pacchetti al server");
 		//send dei dati verso il server
-		s->send(createJSONArray(listaRecord));
+		sendMessage(createJSONArray(listaRecord));
+		//s->send(createJSONArray(listaRecord));
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- Dati dei pacchetti inviati con successo");
 
@@ -190,6 +193,15 @@ void connectSocket(){
 	return;
 }
 
+//procedura per inviare un messaggio (stringa) al server
+bool sendMessage(std::string message){
+	int numByteSent;
+	do {
+		numByteSent = s->send(message);
+	} while (numByteSent != message.length());
+	return true;
+}
+
 //procedura che gestire il lampeggio del led quando viene richiesta dal server l'IDENTIFICAZIONE
 void blinkLed(){
 	time_t blink_time_start;
@@ -203,5 +215,4 @@ void blinkLed(){
 		sleep(1);
 		time(&blink_time);
 	} while(difftime(blink_time,blink_time_start)<30); //lampeggia per 30 secondi
-
 }
