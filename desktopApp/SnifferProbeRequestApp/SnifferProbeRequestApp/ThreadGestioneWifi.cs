@@ -41,6 +41,7 @@ namespace SnifferProbeRequestApp
             //instanzio il db manager
             dbManager = DatabaseManager.getInstance();
 
+            //starto il thread in background che gestisce le connessioni con i devices
             delegateThreadElaboration = new ThreadStart(elaboration);
             threadElaboration = new Thread(delegateThreadElaboration);
             threadElaboration.IsBackground = true;
@@ -89,9 +90,11 @@ namespace SnifferProbeRequestApp
             //TODO: decommentare se non lavoro su PC aziendale
             //startHotspot("prova4", "pippopluto");
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
+            //socket in ascolto
             listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
+                //pongo il socket in ascolto sulla porta 5010
                 listener.Bind(new IPEndPoint(IPAddress.Any, 5010));
                 listener.Listen(10);
 
@@ -101,6 +104,7 @@ namespace SnifferProbeRequestApp
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
 
                     Socket socketConnesso = listener.Accept();
+                    //thread per gestire il socket connesso con il device
                     Thread threadGestioneDevice = new Thread(() => gestioneDevice(socketConnesso));
                     threadGestioneDevice.Start();
                     threadGestioneDevice.IsBackground = false;
@@ -140,8 +144,10 @@ namespace SnifferProbeRequestApp
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
             Device device = new Device(remoteIpEndPoint.Address.ToString(), 1, 0, 0);
+            //event per gestire la sincronizzazione con il thread dell'interfaccia grafica
             ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
             CommonData.lstNoConfDevices.TryAdd(device.ipAddress, deviceConfEvent);
+            //delegato per gestire la variazione della lista dei device da configurare
             CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
             deviceConfEvent.WaitOne();
