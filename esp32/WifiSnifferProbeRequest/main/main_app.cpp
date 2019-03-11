@@ -229,8 +229,12 @@ void syncClock(){
 	//setto il timer dell'ESP
 	struct timeval tv;
 	tv.tv_sec = received_timestamp + (delay/2);
+	tv.tv_usec = 0;
 	settimeofday(&tv, NULL);
-	std::cout << "Tempo settato: " << tv.tv_sec;
+	std::cout << "Tempo settato: " << tv.tv_sec << " | " << tv.tv_usec;
+	time(&request_timestamp);
+	std::cout << "Tempo del ESP: " << request_timestamp;
+
 }
 
 //procedura che gestire il lampeggio del led quando viene richiesta dal server l'IDENTIFICAZIONE
