@@ -99,6 +99,9 @@ void app_main() {
 	//setto l'handler che gestisce la ricezione del pacchetto
 	ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
+	//setto un counter per effettuare la sincronizzazione del clock ogni 10 iterazioni
+	int numIteration = 0;
+
 	while (true) {
 		//verifico la connessione al socket
 		connectSocket();
@@ -111,8 +114,22 @@ void app_main() {
 		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- Invio dati dei pacchetti al server");
+		numIteration ++;
 		//send dei dati verso il server
+
 		sendMessage(createJSONArray(listaRecord));
+
+		//aspetto che l'invio dei dati sia completato
+		s->receive(bufferReceive,128);
+
+		if (numIteration >= 1) {
+			//rieseguo la sincronizzazione del clock
+			syncClock();
+			sendMessage("SYNC_OK\n");
+		} else {
+			//non eseguo la sincronizzazione
+			sendMessage("NO_SYNC\n");
+		}
 
 		ESP_LOGD(tag, "ThreadConnessionePc -- Dati dei pacchetti inviati con successo");
 
@@ -214,27 +231,19 @@ void syncClock(){
 		sendMessage("SYNC_CLOCK\n");
 		memset(bufferReceive, 0, 128 * (sizeof bufferReceive[0]) );
 		int recv = s->receive(bufferReceive,8);
-		std::cout << "Buffer received: " << bufferReceive << std::endl;
 		received_timestamp = bufferReceive[0] | (bufferReceive[1] << 8) | (bufferReceive[2] << 16) | (bufferReceive[3] << 24) | (bufferReceive[4] << 32) | (bufferReceive[5] << 40) | (bufferReceive[6] << 48) | (bufferReceive[7] << 56) ;
 		time(&reply_timestamp);
-		std::cout << "Bytes ricevuti: " << recv << std::endl;
-		std::cout << "Timestamp ricevuto dalla sincronizzazione: " << received_timestamp << std::endl;
 
 		//reply_timestamp=lwip_ntohl(reply_timestamp);
 		delay = delay + (reply_timestamp - request_timestamp);
 	}
 	//calcolo il delay medio delle 4 richieste
 	delay = delay/4;
-	std::cout << "Delay: " << delay << std::endl;
 	//setto il timer dell'ESP
 	struct timeval tv;
 	tv.tv_sec = received_timestamp + (delay/2);
 	tv.tv_usec = 0;
 	settimeofday(&tv, NULL);
-	std::cout << "Tempo settato: " << tv.tv_sec << " | " << tv.tv_usec;
-	time(&request_timestamp);
-	std::cout << "Tempo del ESP: " << request_timestamp;
-
 }
 
 //procedura che gestire il lampeggio del led quando viene richiesta dal server l'IDENTIFICAZIONE

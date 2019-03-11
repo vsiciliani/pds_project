@@ -58,8 +58,7 @@ namespace SnifferProbeRequestApp
             }
         }
 
-        private static void stopHotspot()
-        {
+        private static void stopHotspot() {
             ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe")
             {
                 RedirectStandardInput = true,
@@ -74,8 +73,7 @@ namespace SnifferProbeRequestApp
             Console.WriteLine("Wifi network closed");
         }
 
-        public class LogCategory
-        {
+        public class LogCategory {
             private LogCategory(string value) { Value = value; }
 
             public string Value { get; set; }
@@ -85,14 +83,12 @@ namespace SnifferProbeRequestApp
             public static LogCategory Error { get { return new LogCategory("Error"); } }
         }
 
-        static public void logMessage(String classe, LogCategory category, String message)
-        {
+        static public void logMessage(String classe, LogCategory category, String message) {
             String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
         }
 
-        static public void sendMessage(Socket socket, String message)
-        {
+        static public void sendMessage(Socket socket, String message) {
             byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
             int byteSent;
             do {
@@ -100,5 +96,13 @@ namespace SnifferProbeRequestApp
             } while (byteSent != messageToSend.Length);
             logMessage("Utils.cs -- Send Message", LogCategory.Info, message);
         }
+
+        static public void syncClock(Socket socket) {
+            //invio i millisecondi del timestamp
+            DateTime dt1970 = new DateTime(1970, 1, 1);
+            long millisToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);
+            socket.Send(BitConverter.GetBytes(millisToSend));
+        }
+
     }
 }

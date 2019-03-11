@@ -126,8 +126,7 @@ namespace SnifferProbeRequestApp
         public void gestioneDevice(Socket socket)
         {
             int MAXBUFFER = 4096;
-            bool check;
-
+            
             IPEndPoint remoteIpEndPoint = null;
             try {
                 remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
@@ -150,8 +149,6 @@ namespace SnifferProbeRequestApp
 
             deviceConfEvent.WaitOne();
 
-            byte[] messageToSend = null;
-            int byteSent;
             //controllo se il device è stato eliminato dalla lista dei device non configurati
             do
             {
@@ -168,12 +165,8 @@ namespace SnifferProbeRequestApp
                         receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
                         //se ricevo la richiesta di SYNC invio il timestamp attuale
                         if (receivedMessage == "SYNC_CLOCK\n") {
-                            //invio i millisecondi del timestamp
-                            DateTime dt1970 = new DateTime(1970, 1, 1);
-                            long millisToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);
-
-                            socket.Send(BitConverter.GetBytes(millisToSend));
-                            Console.WriteLine(millisToSend.ToString());
+                            //invio il timestap del server
+                            Utils.syncClock(socket);
                         }
                     } while (receivedMessage != "CONFOK ACK\n");
 
@@ -183,23 +176,19 @@ namespace SnifferProbeRequestApp
                     //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
                     Utils.sendMessage(socket, "IDENTIFICA");
                     //pulisco il buffer del messaggio da inviare
-                    messageToSend = null;
                     deviceConfEvent.Reset();
                     deviceConfEvent.WaitOne();
                 }
             } while (true);
 
-            while (!stopThreadElaboration)
-            {
+            while (!stopThreadElaboration) {
                 //buffer di ricezione
                 string receivedMessage = string.Empty;
-                while (true)
-                {
+                while (true) {
                     byte[] receivedBytes = new byte[MAXBUFFER];
                     int numBytes = socket.Receive(receivedBytes);
                     receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
-                    if (receivedMessage.IndexOf("\n") > -1)
-                    {
+                    if (receivedMessage.IndexOf("\n") > -1) {
                         break;
                     }
                 }
@@ -211,9 +200,26 @@ namespace SnifferProbeRequestApp
 
                 //salvo i dati nella tabella raw del DB
                 dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
+
+                //invio un messaggio per dire che la ricezione è avvenuta con successo
+                Utils.sendMessage(socket, "RICEVE_OK");
+                
+                do {
+                    receivedMessage = string.Empty;
+                    byte[] receivedBytes2 = new byte[MAXBUFFER];
+                    int numBytes2 = socket.Receive(receivedBytes2);
+                    receivedMessage += Encoding.ASCII.GetString(receivedBytes2, 0, numBytes2);
+
+                    //se ricevo la richiesta di SYNC invio il timestamp attuale
+                    if (receivedMessage == "SYNC_CLOCK\n") {
+                        Utils.syncClock(socket);
+                        Console.WriteLine("STO RISINCRONIZZANDO");
+                    }
+                } while (receivedMessage == "SYNC_CLOCK\n");              
             }
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
+            
         }
     }
 }
