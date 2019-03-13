@@ -169,8 +169,8 @@ namespace SnifferProbeRequestApp
                 insertQuery.Append("'" + assembledInfo.SSID + "',");
                 insertQuery.Append("'" + assembledInfo.hashCode + "',");
                 DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                DateTime date = start.AddMilliseconds(assembledInfo.timestamp).ToLocalTime();
-                insertQuery.Append("'" + date + "',");
+                DateTime date = start.AddMilliseconds(assembledInfo.timestamp);
+                insertQuery.Append("'" + date.ToString("MM/dd/yyyy HH:mm:ss") + "',");
                 insertQuery.Append(assembledInfo.x_position + ",");
                 insertQuery.Append(assembledInfo.y_position + "),");
             }
