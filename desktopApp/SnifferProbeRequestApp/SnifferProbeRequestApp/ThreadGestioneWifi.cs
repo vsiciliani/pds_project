@@ -92,6 +92,7 @@ namespace SnifferProbeRequestApp
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
             //socket in ascolto
             listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            List<Thread> listaThreadSocket = new List<Thread>();
             try
             {
                 //pongo il socket in ascolto sulla porta 5010
@@ -102,15 +103,19 @@ namespace SnifferProbeRequestApp
                 {
                     allDone.Reset();
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
-
+                    
                     Socket socketConnesso = listener.Accept();
                     //thread per gestire il socket connesso con il device
                     Thread threadGestioneDevice = new Thread(() => gestioneDevice(socketConnesso));
+                    listaThreadSocket.Add(threadGestioneDevice);
                     threadGestioneDevice.Start();
                     threadGestioneDevice.IsBackground = false;
+                    
+
+                    //listener.BeginAccept(new AsyncCallback(acceptCallback), listener);
+
                     allDone.WaitOne();
                 }
-
             }
             catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante il binding del socket", e);
@@ -118,15 +123,20 @@ namespace SnifferProbeRequestApp
                 listener.Shutdown(SocketShutdown.Both);
                 listener.Close();
                 throw exception;
+            } finally {
+                listaThreadSocket.ForEach(thread => thread.Join());
             }
             
             //stopHotspot();
         }
 
-        public void gestioneDevice(Socket socket)
-        {
+        public void gestioneDevice(Socket socket) {
+        //public void acceptCallback(IAsyncResult ar) {
             int MAXBUFFER = 4096;
-            
+
+            //Socket listener = (Socket)ar.AsyncState;
+            //Socket socket = listener.EndAccept(ar);
+
             IPEndPoint remoteIpEndPoint = null;
             try {
                 remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
@@ -154,21 +164,22 @@ namespace SnifferProbeRequestApp
             {
                 if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
                     //il device è stato configurato
-                    string receivedMessage;
+                    String syncMessage;
                     
                     Utils.sendMessage(socket, "CONFOK");
                     do {
                         //posso riceve CONFOK O la richiesta di SYNC
-                        receivedMessage = string.Empty;
+                        /*receivedMessage = string.Empty;
                         byte[] receivedBytes = new byte[MAXBUFFER];
                         int numBytes = socket.Receive(receivedBytes);
-                        receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
+                        receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);*/
+                        syncMessage = Utils.receiveMessage(socket);
                         //se ricevo la richiesta di SYNC invio il timestamp attuale
-                        if (receivedMessage == "SYNC_CLOCK\n") {
+                        if (syncMessage == "SYNC_CLOCK\n") {
                             //invio il timestap del server
                             Utils.syncClock(socket);
                         }
-                    } while (receivedMessage != "CONFOK ACK\n");
+                    } while (syncMessage != "CONFOK_ACK\n");
 
                     break;
                     
@@ -181,41 +192,41 @@ namespace SnifferProbeRequestApp
                 }
             } while (true);
 
+            String messagePacketsInfo;
+
             while (!stopThreadElaboration) {
-                //buffer di ricezione
-                string receivedMessage = string.Empty;
-                while (true) {
-                    byte[] receivedBytes = new byte[MAXBUFFER];
-                    int numBytes = socket.Receive(receivedBytes);
-                    receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
-                    if (receivedMessage.IndexOf("\n") > -1) {
-                        break;
-                    }
-                }
+
+                //invio messaggio per indicare che può iniziare l'invio
+                Utils.sendMessage(socket, "START_SEND");
+
+                //Thread.Sleep(18000);
+
+                //ricevo messaggio con i dati dei pacchetti
+                messagePacketsInfo = Utils.receiveMessage(socket);
 
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "MESSAGE FROM CLIENT " + remoteIpEndPoint.Address.ToString()
-                    + ": " + receivedMessage);
+                    + ": " + messagePacketsInfo);
                 //deserializzazione del JSON ricevuto
-                PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
+                PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messagePacketsInfo);
 
-                //salvo i dati nella tabella raw del DB
-                dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
-
+                if (packetsInfo.listPacketInfo.Count > 0) {
+                    //salvo i dati nella tabella raw del DB
+                    dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
+                }
+                
                 //invio un messaggio per dire che la ricezione è avvenuta con successo
                 Utils.sendMessage(socket, "RICEVE_OK");
-                
-                do {
-                    receivedMessage = string.Empty;
-                    byte[] receivedBytes2 = new byte[MAXBUFFER];
-                    int numBytes2 = socket.Receive(receivedBytes2);
-                    receivedMessage += Encoding.ASCII.GetString(receivedBytes2, 0, numBytes2);
 
+                String syncMessage;
+                do {
+                    //ricevo messaggio per la sincronizzazione
+                    syncMessage = Utils.receiveMessage(socket);
+                    
                     //se ricevo la richiesta di SYNC invio il timestamp attuale
-                    if (receivedMessage == "SYNC_CLOCK\n") {
+                    if (syncMessage == "SYNC_CLOCK\n") {
                         Utils.syncClock(socket);
-                        Console.WriteLine("STO RISINCRONIZZANDO");
                     }
-                } while (receivedMessage == "SYNC_CLOCK\n");              
+                } while (syncMessage == "SYNC_CLOCK\n");              
             }
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();

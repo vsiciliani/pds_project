@@ -5,12 +5,15 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SnifferProbeRequestApp
 {
-    static class Utils
-    {
+    static class Utils {
+
+        static int MAXBUFFER = 4096;
+
         static public bool IsAdmin()
         {
             WindowsIdentity id = WindowsIdentity.GetCurrent();
@@ -97,7 +100,25 @@ namespace SnifferProbeRequestApp
             logMessage("Utils.cs -- Send Message", LogCategory.Info, message);
         }
 
-        static public void syncClock(Socket socket) {
+        static public String receiveMessage(Socket socket) {
+            String receivedMessage = String.Empty;
+            while (true) {
+                byte[] receivedBytes = new byte[MAXBUFFER];
+                Utils.logMessage("Utils.receviceMessage", Utils.LogCategory.Info, "In attesa di dati");
+                //socket.ReceiveTimeout=90000;
+                
+                int numBytes = socket.Receive(receivedBytes);
+                receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
+                if (receivedMessage.IndexOf("\n") > -1) {
+                    break;
+                }
+            }
+            Utils.logMessage("Utils.receviceMessage", Utils.LogCategory.Info, "Messaggio Ricevuto: " + receivedMessage);
+            return receivedMessage;
+        }
+            
+
+    static public void syncClock(Socket socket) {
             //invio i millisecondi del timestamp
             DateTime dt1970 = new DateTime(1970, 1, 1);
             long millisToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);
