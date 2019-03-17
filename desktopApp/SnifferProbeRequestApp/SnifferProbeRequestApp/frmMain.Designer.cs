@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.groupBoxSettings = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnIdentifica = new System.Windows.Forms.Button();
@@ -127,6 +127,7 @@
             this.btnIdentifica.TabIndex = 11;
             this.btnIdentifica.Text = "Identifica";
             this.btnIdentifica.UseVisualStyleBackColor = true;
+            this.btnIdentifica.Click += new System.EventHandler(this.btnIdentifica_Click);
             // 
             // txtYPosition
             // 
@@ -303,7 +304,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 27);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(300, 119);
+            this.tabPage2.Size = new System.Drawing.Size(300, 124);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -376,21 +377,21 @@
             // 
             this.chartNumberDevice.BorderlineWidth = 0;
             this.chartNumberDevice.CausesValidation = false;
-            chartArea3.Name = "ChartArea1";
-            this.chartNumberDevice.ChartAreas.Add(chartArea3);
-            legend3.Name = "Legend1";
-            this.chartNumberDevice.Legends.Add(legend3);
+            chartArea1.Name = "ChartArea1";
+            this.chartNumberDevice.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chartNumberDevice.Legends.Add(legend1);
             this.chartNumberDevice.Location = new System.Drawing.Point(6, 49);
             this.chartNumberDevice.Name = "chartNumberDevice";
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-            series3.IsVisibleInLegend = false;
-            series3.IsXValueIndexed = true;
-            series3.Legend = "Legend1";
-            series3.Name = "N. dispositivi univoci";
-            series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
-            series3.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
-            this.chartNumberDevice.Series.Add(series3);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+            series1.IsVisibleInLegend = false;
+            series1.IsXValueIndexed = true;
+            series1.Legend = "Legend1";
+            series1.Name = "N. dispositivi univoci";
+            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
+            series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
+            this.chartNumberDevice.Series.Add(series1);
             this.chartNumberDevice.Size = new System.Drawing.Size(996, 277);
             this.chartNumberDevice.TabIndex = 0;
             this.chartNumberDevice.Text = "chartNumberDevice";
@@ -408,17 +409,17 @@
             // 
             // chartPositionDevice
             // 
-            chartArea4.Name = "ChartArea1";
-            this.chartPositionDevice.ChartAreas.Add(chartArea4);
-            legend4.Name = "Legend1";
-            this.chartPositionDevice.Legends.Add(legend4);
+            chartArea2.Name = "ChartArea1";
+            this.chartPositionDevice.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chartPositionDevice.Legends.Add(legend2);
             this.chartPositionDevice.Location = new System.Drawing.Point(7, 27);
             this.chartPositionDevice.Name = "chartPositionDevice";
-            series4.ChartArea = "ChartArea1";
-            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series4.Legend = "Legend1";
-            series4.Name = "Series1";
-            this.chartPositionDevice.Series.Add(series4);
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chartPositionDevice.Series.Add(series2);
             this.chartPositionDevice.Size = new System.Drawing.Size(995, 279);
             this.chartPositionDevice.TabIndex = 0;
             this.chartPositionDevice.Text = "chart1";

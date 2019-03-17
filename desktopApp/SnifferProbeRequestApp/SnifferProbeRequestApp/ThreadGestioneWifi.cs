@@ -41,6 +41,7 @@ namespace SnifferProbeRequestApp
             //instanzio il db manager
             dbManager = DatabaseManager.getInstance();
 
+            //starto il thread in background che gestisce le connessioni con i devices
             delegateThreadElaboration = new ThreadStart(elaboration);
             threadElaboration = new Thread(delegateThreadElaboration);
             threadElaboration.IsBackground = true;
@@ -89,9 +90,12 @@ namespace SnifferProbeRequestApp
             //TODO: decommentare se non lavoro su PC aziendale
             //startHotspot("prova4", "pippopluto");
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
+            //socket in ascolto
             listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            List<Thread> listaThreadSocket = new List<Thread>();
             try
             {
+                //pongo il socket in ascolto sulla porta 5010
                 listener.Bind(new IPEndPoint(IPAddress.Any, 5010));
                 listener.Listen(10);
 
@@ -99,29 +103,39 @@ namespace SnifferProbeRequestApp
                 {
                     allDone.Reset();
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
-                    listener.BeginAccept(new AsyncCallback(acceptCallback), listener);
+                    
+                    Socket socketConnesso = listener.Accept();
+                    //thread per gestire il socket connesso con il device
+                    Thread threadGestioneDevice = new Thread(() => gestioneDevice(socketConnesso));
+                    listaThreadSocket.Add(threadGestioneDevice);
+                    threadGestioneDevice.Start();
+                    threadGestioneDevice.IsBackground = false;
+                    
+
+                    //listener.BeginAccept(new AsyncCallback(acceptCallback), listener);
 
                     allDone.WaitOne();
                 }
-
             }
             catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante il binding del socket", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                listener.Shutdown(SocketShutdown.Both);
+                listener.Close();
                 throw exception;
+            } finally {
+                listaThreadSocket.ForEach(thread => thread.Join());
             }
-
-            //socket.Shutdown(SocketShutdown.Both);
-            //socket.Close();
+            
             //stopHotspot();
         }
 
-        public void acceptCallback(IAsyncResult ar)
-        {
+        public void gestioneDevice(Socket socket) {
+        //public void acceptCallback(IAsyncResult ar) {
             int MAXBUFFER = 4096;
 
-            Socket listener = (Socket)ar.AsyncState;
-            Socket socket = listener.EndAccept(ar);
+            //Socket listener = (Socket)ar.AsyncState;
+            //Socket socket = listener.EndAccept(ar);
 
             IPEndPoint remoteIpEndPoint = null;
             try {
@@ -137,31 +151,82 @@ namespace SnifferProbeRequestApp
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
             Device device = new Device(remoteIpEndPoint.Address.ToString(), 1, 0, 0);
-            CommonData.lstNoConfDevices.TryAdd(device.ipAddress, device);
+            //event per gestire la sincronizzazione con il thread dell'interfaccia grafica
+            ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
+            CommonData.lstNoConfDevices.TryAdd(device.ipAddress, deviceConfEvent);
+            //delegato per gestire la variazione della lista dei device da configurare
             CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
-            while (!stopThreadElaboration)
+            deviceConfEvent.WaitOne();
+
+            //controllo se il device è stato eliminato dalla lista dei device non configurati
+            do
             {
-                string receivedMessage = string.Empty;
-                while (true)
-                {
-                    byte[] receivedBytes = new byte[MAXBUFFER];
-                    int numBytes = socket.Receive(receivedBytes);
-                    receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
-                    if (receivedMessage.IndexOf("\n") > -1)
-                    {
-                        break;
-                    }
+                if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
+                    //il device è stato configurato
+                    String syncMessage;
+                    
+                    Utils.sendMessage(socket, "CONFOK");
+                    do {
+                        //posso riceve CONFOK O la richiesta di SYNC
+                        /*receivedMessage = string.Empty;
+                        byte[] receivedBytes = new byte[MAXBUFFER];
+                        int numBytes = socket.Receive(receivedBytes);
+                        receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);*/
+                        syncMessage = Utils.receiveMessage(socket);
+                        //se ricevo la richiesta di SYNC invio il timestamp attuale
+                        if (syncMessage == "SYNC_CLOCK\n") {
+                            //invio il timestap del server
+                            Utils.syncClock(socket);
+                        }
+                    } while (syncMessage != "CONFOK_ACK\n");
+
+                    break;
+                    
+                } else {
+                    //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
+                    Utils.sendMessage(socket, "IDENTIFICA");
+                    //pulisco il buffer del messaggio da inviare
+                    deviceConfEvent.Reset();
+                    deviceConfEvent.WaitOne();
                 }
+            } while (true);
 
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "MESSAGE FROM CLIENT " + remoteIpEndPoint.Address.ToString()
-                    + ": " + receivedMessage);
-                PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(receivedMessage);
+            String messagePacketsInfo;
 
-                //salvo i dati nella tabella raw del DB
-                dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
-    
+            while (!stopThreadElaboration) {
+
+                //invio messaggio per indicare che può iniziare l'invio
+                Utils.sendMessage(socket, "START_SEND");
+
+                //ricevo messaggio con i dati dei pacchetti
+                messagePacketsInfo = Utils.receiveMessage(socket);
+
+                //deserializzazione del JSON ricevuto
+                PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messagePacketsInfo);
+
+                if (packetsInfo.listPacketInfo.Count > 0) {
+                    //salvo i dati nella tabella raw del DB
+                    dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
+                }
+                
+                //invio un messaggio per dire che la ricezione è avvenuta con successo
+                Utils.sendMessage(socket, "RICEVE_OK");
+
+                String syncMessage;
+                do {
+                    //ricevo messaggio per la sincronizzazione
+                    syncMessage = Utils.receiveMessage(socket);
+                    
+                    //se ricevo la richiesta di SYNC invio il timestamp attuale
+                    if (syncMessage == "SYNC_CLOCK\n") {
+                        Utils.syncClock(socket);
+                    }
+                } while (syncMessage == "SYNC_CLOCK\n");              
             }
+            socket.Shutdown(SocketShutdown.Both);
+            socket.Close();
+            
         }
     }
 }

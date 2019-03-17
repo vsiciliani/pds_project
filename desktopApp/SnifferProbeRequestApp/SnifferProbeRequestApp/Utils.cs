@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SnifferProbeRequestApp
 {
     static class Utils
     {
+
+        static int MAXBUFFER = 4096;
+
         static public bool IsAdmin()
         {
             WindowsIdentity id = WindowsIdentity.GetCurrent();
@@ -89,5 +95,53 @@ namespace SnifferProbeRequestApp
             String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
         }
+
+        static public void sendMessage(Socket socket, String message)
+        {
+            byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
+            int byteSent;
+            do
+            {
+                byteSent = socket.Send(messageToSend);
+            } while (byteSent != messageToSend.Length);
+            IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+            logMessage("Utils.cs -- Send Message", LogCategory.Info,
+                "Receiver: " + remoteIpEndPoint.Address.ToString() + " Message: " + message);
+        }
+
+        static public String receiveMessage(Socket socket)
+        {
+            String receivedMessage = String.Empty;
+            IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+            while (true)
+            {
+                byte[] receivedBytes = new byte[MAXBUFFER];
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, 
+                    "Device :" + remoteIpEndPoint.Address.ToString() + " In attesa di dati");
+                //socket.ReceiveTimeout=90000;
+
+                int numBytes = socket.Receive(receivedBytes);
+                receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
+                if (receivedMessage.IndexOf("\n") > -1)
+                {
+                    break;
+                }
+            }
+            //receivedMessage.Replace("\n", "");
+            
+            Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
+                "Sender: " + remoteIpEndPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("\n",""));
+            return receivedMessage;
+        }
+
+
+        static public void syncClock(Socket socket)
+        {
+            //invio i millisecondi del timestamp
+            DateTime dt1970 = new DateTime(1970, 1, 1);
+            long millisToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);
+            socket.Send(BitConverter.GetBytes(millisToSend));
+        }
+
     }
 }
