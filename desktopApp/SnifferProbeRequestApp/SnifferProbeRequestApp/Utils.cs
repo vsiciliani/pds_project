@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
@@ -10,7 +11,8 @@ using System.Threading.Tasks;
 
 namespace SnifferProbeRequestApp
 {
-    static class Utils {
+    static class Utils
+    {
 
         static int MAXBUFFER = 4096;
 
@@ -61,7 +63,8 @@ namespace SnifferProbeRequestApp
             }
         }
 
-        private static void stopHotspot() {
+        private static void stopHotspot()
+        {
             ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe")
             {
                 RedirectStandardInput = true,
@@ -76,7 +79,8 @@ namespace SnifferProbeRequestApp
             Console.WriteLine("Wifi network closed");
         }
 
-        public class LogCategory {
+        public class LogCategory
+        {
             private LogCategory(string value) { Value = value; }
 
             public string Value { get; set; }
@@ -86,39 +90,53 @@ namespace SnifferProbeRequestApp
             public static LogCategory Error { get { return new LogCategory("Error"); } }
         }
 
-        static public void logMessage(String classe, LogCategory category, String message) {
+        static public void logMessage(String classe, LogCategory category, String message)
+        {
             String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
         }
 
-        static public void sendMessage(Socket socket, String message) {
+        static public void sendMessage(Socket socket, String message)
+        {
             byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
             int byteSent;
-            do {
+            do
+            {
                 byteSent = socket.Send(messageToSend);
             } while (byteSent != messageToSend.Length);
-            logMessage("Utils.cs -- Send Message", LogCategory.Info, message);
+            IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+            logMessage("Utils.cs -- Send Message", LogCategory.Info,
+                "Receiver: " + remoteIpEndPoint.Address.ToString() + " Message: " + message);
         }
 
-        static public String receiveMessage(Socket socket) {
+        static public String receiveMessage(Socket socket)
+        {
             String receivedMessage = String.Empty;
-            while (true) {
+            IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+            while (true)
+            {
                 byte[] receivedBytes = new byte[MAXBUFFER];
-                Utils.logMessage("Utils.receviceMessage", Utils.LogCategory.Info, "In attesa di dati");
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, 
+                    "Device :" + remoteIpEndPoint.Address.ToString() + " In attesa di dati");
                 //socket.ReceiveTimeout=90000;
-                
+
                 int numBytes = socket.Receive(receivedBytes);
                 receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
-                if (receivedMessage.IndexOf("\n") > -1) {
+                if (receivedMessage.IndexOf("\n") > -1)
+                {
                     break;
                 }
             }
-            Utils.logMessage("Utils.receviceMessage", Utils.LogCategory.Info, "Messaggio Ricevuto: " + receivedMessage);
+            //receivedMessage.Replace("\n", "");
+            
+            Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
+                "Sender: " + remoteIpEndPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("\n",""));
             return receivedMessage;
         }
-            
 
-    static public void syncClock(Socket socket) {
+
+        static public void syncClock(Socket socket)
+        {
             //invio i millisecondi del timestamp
             DateTime dt1970 = new DateTime(1970, 1, 1);
             long millisToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);

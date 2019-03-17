@@ -117,7 +117,7 @@ void app_main() {
 
 		//salvo il timestamp per calcolare il tempo di flush verso il server
 		time(&startWaitTime);
-		sleep(10);
+		sleep(60);
 		//prendo il lock per leggere la lista di PacketInfo
 		std::unique_lock<std::mutex> ul(m);
 		//condition variable sul tempo di attesa per il flush

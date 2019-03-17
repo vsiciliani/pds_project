@@ -17,8 +17,8 @@ namespace SnifferProbeRequestApp
         private SqlConnection connection;
         
         private DatabaseManager() {
-            //TODO: gestire eccezione connessione DB
-            Console.WriteLine("Connection String: " + connectionString);
+            
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Connection String: " + connectionString);
             connection = new SqlConnection(connectionString);
             try {
                 connection.Open();
@@ -46,7 +46,6 @@ namespace SnifferProbeRequestApp
         //salva i dati ricevuti nella tabella dei dati "raw"
         public void saveReceivedData(PacketsInfo packets, IPAddress ipAddress)
         {
-            Console.WriteLine("Num packets: " + packets.listPacketInfo.Count);
             if (packets.listPacketInfo.Count == 0) return;
 
             StringBuilder query = new StringBuilder("");
@@ -62,13 +61,10 @@ namespace SnifferProbeRequestApp
             }
             query.Remove(query.Length - 1, 1); //elimino l'ultima virgola
 
-            Console.WriteLine(query);
-
             SqlCommand command = new SqlCommand(query.ToString(), connection);
             
-            if (command.ExecuteNonQuery() == packets.listPacketInfo.Count)
-            {
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT effettuata con successo");
+            if (command.ExecuteNonQuery() == packets.listPacketInfo.Count)  {
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in Packets effettuata con successo");
             }
 
             updateAssembled();
@@ -116,8 +112,7 @@ namespace SnifferProbeRequestApp
             whereQuery.Remove(whereQuery.Length - 3, 3); //elimino l'ultimo AND
 
             String query = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
-            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, query);
-
+            
             DataTable table = new DataTable();
             try {
                 SqlCommand cmd = new SqlCommand(query, connection);
@@ -175,12 +170,10 @@ namespace SnifferProbeRequestApp
                 insertQuery.Append(assembledInfo.y_position + "),");
             }
             insertQuery.Remove(insertQuery.Length - 1, 1); //elimino l'ultima virgola
-            Console.WriteLine("INSERT QUERY: " + insertQuery.ToString());
-
+            
             SqlCommand command = new SqlCommand(insertQuery.ToString(), connection);
             try {
-                if (command.ExecuteNonQuery() == lstAssembledInfo.Count)
-                {
+                if (command.ExecuteNonQuery() == lstAssembledInfo.Count) {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in AssembledPacketInfo effettuata con successo");
                 }
             } catch (Exception e) {
@@ -193,18 +186,14 @@ namespace SnifferProbeRequestApp
             //elimino gli id dalla tabella "raw"
             deleteQuery.Remove(deleteQuery.Length - 1, 1); //elimino l'ultima virgola nalla IN
             deleteQuery.Append(")"); //chiudo la parentesi della IN
-            Console.WriteLine("DELETE QUERY: " + deleteQuery.ToString());
             
             SqlCommand deleteCommand = new SqlCommand(deleteQuery.ToString(), connection);
-            try
-            {
-                if (deleteCommand.ExecuteNonQuery() == lstAssembledInfo.Count)
-                {
+            try {
+                if (deleteCommand.ExecuteNonQuery() == lstAssembledInfo.Count) {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "DELETE da Packets effettuata con successo");
                 }
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante la DELETE dei dati dalla tabella Packets", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
                 throw exception;
@@ -212,21 +201,18 @@ namespace SnifferProbeRequestApp
         }
 
         //conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)
-        public KeyValuePair<DateTime, Int32> countDevice()
-        {
+        public KeyValuePair<DateTime, Int32> countDevice() {
 
             //String selectQuery = "SELECT Current_TimeStamp  AS date_time, COUNT(DISTINCT sourceAddress) AS countDevice FROM dbo.AssembledPacketInfo WHERE timestamp_packet > DateADD(mi, -5, Current_TimeStamp)";
             String selectQuery = "SELECT Current_TimeStamp  AS date_time, COUNT(DISTINCT sourceAddress) AS countDevice FROM dbo.AssembledPacketInfo";
 
             DataTable resultCount = new DataTable();
-            try
-            {
+            try {
                 SqlCommand cmd = new SqlCommand(selectQuery, connection);
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(resultCount);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
                 throw exception;
@@ -239,17 +225,12 @@ namespace SnifferProbeRequestApp
             return result;
         }
 
-
-
         //calcola la posizione del device
-        private void getPosition()
-        {
+        private void getPosition() {
 
         }
 
-
-        public void closeConnection()
-        {
+        public void closeConnection() {
             connection.Close();
         }
 

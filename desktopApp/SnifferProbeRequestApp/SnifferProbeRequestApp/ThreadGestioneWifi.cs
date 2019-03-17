@@ -199,13 +199,9 @@ namespace SnifferProbeRequestApp
                 //invio messaggio per indicare che può iniziare l'invio
                 Utils.sendMessage(socket, "START_SEND");
 
-                //Thread.Sleep(18000);
-
                 //ricevo messaggio con i dati dei pacchetti
                 messagePacketsInfo = Utils.receiveMessage(socket);
 
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "MESSAGE FROM CLIENT " + remoteIpEndPoint.Address.ToString()
-                    + ": " + messagePacketsInfo);
                 //deserializzazione del JSON ricevuto
                 PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messagePacketsInfo);
 
