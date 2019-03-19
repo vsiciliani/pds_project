@@ -11,42 +11,34 @@ using System.Threading.Tasks;
 
 namespace SnifferProbeRequestApp
 {
-    static class Utils
-    {
+    static class Utils {
 
         static int MAXBUFFER = 4096;
 
-        static public bool IsAdmin()
-        {
+        static public bool IsAdmin() {
             WindowsIdentity id = WindowsIdentity.GetCurrent();
             WindowsPrincipal p = new WindowsPrincipal(id);
             return p.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
-        static public void RestartElevated()
-        {
+        static public void RestartElevated() {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.UseShellExecute = true;
             startInfo.CreateNoWindow = true;
             startInfo.WorkingDirectory = Environment.CurrentDirectory;
             startInfo.FileName = System.Windows.Forms.Application.ExecutablePath;
             startInfo.Verb = "runas";
-            try
-            {
+            try {
                 Process p = Process.Start(startInfo);
-            }
-            catch
-            {
+            } catch {
 
             }
 
             System.Windows.Forms.Application.Exit();
         }
 
-        private static void startHotspot(string ssid, string key)
-        {
-            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe")
-            {
+        private static void startHotspot(string ssid, string key) {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe") {
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
@@ -54,8 +46,7 @@ namespace SnifferProbeRequestApp
             };
             Process process = Process.Start(processStartInfo);
 
-            if (process != null)
-            {
+            if (process != null) {
                 process.StandardInput.WriteLine("netsh wlan set hostednetwork mode=allow ssid=" + ssid + " key=" + key);
                 process.StandardInput.WriteLine("netsh wlan start hosted network");
                 process.StandardInput.Close();
@@ -63,10 +54,8 @@ namespace SnifferProbeRequestApp
             }
         }
 
-        private static void stopHotspot()
-        {
-            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe")
-            {
+        private static void stopHotspot() {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe") {
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
@@ -79,8 +68,7 @@ namespace SnifferProbeRequestApp
             Console.WriteLine("Wifi network closed");
         }
 
-        public class LogCategory
-        {
+        public class LogCategory {
             private LogCategory(string value) { Value = value; }
 
             public string Value { get; set; }
@@ -90,18 +78,15 @@ namespace SnifferProbeRequestApp
             public static LogCategory Error { get { return new LogCategory("Error"); } }
         }
 
-        static public void logMessage(String classe, LogCategory category, String message)
-        {
+        static public void logMessage(String classe, LogCategory category, String message) {
             String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
         }
 
-        static public void sendMessage(Socket socket, String message)
-        {
+        static public void sendMessage(Socket socket, String message) {
             byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
             int byteSent;
-            do
-            {
+            do {
                 byteSent = socket.Send(messageToSend);
             } while (byteSent != messageToSend.Length);
             IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
@@ -109,25 +94,20 @@ namespace SnifferProbeRequestApp
                 "Receiver: " + remoteIpEndPoint.Address.ToString() + " Message: " + message);
         }
 
-        static public String receiveMessage(Socket socket)
-        {
+        static public String receiveMessage(Socket socket) {
             String receivedMessage = String.Empty;
             IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
-            while (true)
-            {
+            while (true) {
                 byte[] receivedBytes = new byte[MAXBUFFER];
                 Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, 
                     "Device :" + remoteIpEndPoint.Address.ToString() + " In attesa di dati");
-                //socket.ReceiveTimeout=90000;
-
+                
                 int numBytes = socket.Receive(receivedBytes);
                 receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
-                if (receivedMessage.IndexOf("\n") > -1)
-                {
+                if (receivedMessage.IndexOf("\n") > -1) {
                     break;
                 }
             }
-            //receivedMessage.Replace("\n", "");
             
             Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
                 "Sender: " + remoteIpEndPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("\n",""));
@@ -135,13 +115,11 @@ namespace SnifferProbeRequestApp
         }
 
 
-        static public void syncClock(Socket socket)
-        {
-            //invio i millisecondi del timestamp
+        static public void syncClock(Socket socket) {
+            //invio i secondi del timestamp
             DateTime dt1970 = new DateTime(1970, 1, 1);
-            long millisToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);
-            socket.Send(BitConverter.GetBytes(millisToSend));
+            long secToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);
+            socket.Send(BitConverter.GetBytes(secToSend));
         }
-
     }
 }

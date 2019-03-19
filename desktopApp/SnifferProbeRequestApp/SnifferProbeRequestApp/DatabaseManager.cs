@@ -72,8 +72,7 @@ namespace SnifferProbeRequestApp
 
         //aggrega i dati "raw", calcola la posizione, salva i dati nella tabella assembled
         //e pulisce i dati "raw"
-        private void updateAssembled()
-        {
+        private void updateAssembled() {
             //trovo i device che sto utilizzando
             Dictionary<String, String> devices = new Dictionary<String, String>();
 
@@ -132,8 +131,7 @@ namespace SnifferProbeRequestApp
             //delete query dei processati dalla tabella "raw"
             StringBuilder deleteQuery = new StringBuilder("DELETE FROM [dbo].[Packets] WHERE id IN (");
 
-            foreach (DataRow record in table.Rows)
-            {
+            foreach (DataRow record in table.Rows) {
                 String hashCode = (String) record["hashCode"];
                 String sourceAddress = (String) record["SourceAddress"];
                 String SSID = (String) record["SSID"];
@@ -181,8 +179,7 @@ namespace SnifferProbeRequestApp
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
                 throw exception;
             }
-
-
+            
             //elimino gli id dalla tabella "raw"
             deleteQuery.Remove(deleteQuery.Length - 1, 1); //elimino l'ultima virgola nalla IN
             deleteQuery.Append(")"); //chiudo la parentesi della IN
