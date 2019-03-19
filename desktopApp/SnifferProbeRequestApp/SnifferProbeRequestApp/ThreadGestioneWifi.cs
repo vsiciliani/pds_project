@@ -63,8 +63,9 @@ namespace SnifferProbeRequestApp
                 //pongo il socket in ascolto sulla porta 5010
                 listener.Bind(new IPEndPoint(IPAddress.Any, 5010));
                 listener.Listen(10);
+                listener.ReceiveTimeout = 10000;
 
-                while (true) {
+                while (!stopThreadElaboration) {
                     allDone.Reset();
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
                     
@@ -94,6 +95,10 @@ namespace SnifferProbeRequestApp
         //public void acceptCallback(IAsyncResult ar) {
             int MAXBUFFER = 4096;
 
+            //setto i timeout del socket
+            socket.ReceiveTimeout = 100000; //5 minuti
+            socket.SendTimeout = 30000; //30 secondi
+
             IPEndPoint remoteIpEndPoint = null;
             try {
                 remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
@@ -105,90 +110,96 @@ namespace SnifferProbeRequestApp
             
             allDone.Set();
 
-            Device device;
+            try {
+                Device device;
 
-            //verifico se il dispositivo con quell'IP era già connesso
-            if (CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
-                //se era gia connesso invio solo il CONFOK
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
+                //verifico se il dispositivo con quell'IP era già connesso
+                if (CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
+                    //se era gia connesso invio solo il CONFOK
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
-                Utils.sendMessage(socket, "CONFOK");
+                    Utils.sendMessage(socket, "CONFOK");
 
-            } else {
-                //se non era già configurato aspetto l'evento di Configurazione dall'interfaccia grafica
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
+                } else {
+                    //se non era già configurato aspetto l'evento di Configurazione dall'interfaccia grafica
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
-                device = new Device(remoteIpEndPoint.Address.ToString(), 1, 0, 0);
-                //event per gestire la sincronizzazione con il thread dell'interfaccia grafica
-                ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
-                CommonData.lstNoConfDevices.TryAdd(device.ipAddress, deviceConfEvent);
-                //delegato per gestire la variazione della lista dei device da configurare
-                CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
+                    device = new Device(remoteIpEndPoint.Address.ToString(), 1, 0, 0);
+                    //event per gestire la sincronizzazione con il thread dell'interfaccia grafica
+                    ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
+                    CommonData.lstNoConfDevices.TryAdd(device.ipAddress, deviceConfEvent);
+                    //delegato per gestire la variazione della lista dei device da configurare
+                    CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
-                deviceConfEvent.WaitOne();
+                    deviceConfEvent.WaitOne();
 
-                //controllo se il device è stato eliminato dalla lista dei device non configurati
-                do {
-                    if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
-                        //il device è stato configurato
-                        Utils.sendMessage(socket, "CONFOK");
-                        break;
-                    } else {
-                        //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
-                        Utils.sendMessage(socket, "IDENTIFICA");
-                        //pulisco il buffer del messaggio da inviare
-                        deviceConfEvent.Reset();
-                        deviceConfEvent.WaitOne();
-                    }
-                } while (true);
-            }
-
-            String syncMessage;
-
-            do {
-                //posso riceve CONFOK O la richiesta di SYNC
-                
-                syncMessage = Utils.receiveMessage(socket);
-                //se ricevo la richiesta di SYNC invio il timestamp attuale
-                if (syncMessage == "SYNC_CLOCK\n") {
-                    //invio il timestap del server
-                    Utils.syncClock(socket);
+                    //controllo se il device è stato eliminato dalla lista dei device non configurati
+                    do {
+                        if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
+                            //il device è stato configurato
+                            Utils.sendMessage(socket, "CONFOK");
+                            break;
+                        } else {
+                            //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
+                            Utils.sendMessage(socket, "IDENTIFICA");
+                            //pulisco il buffer del messaggio da inviare
+                            deviceConfEvent.Reset();
+                            deviceConfEvent.WaitOne();
+                        }
+                    } while (true);
                 }
-            } while (syncMessage != "CONFOK_ACK\n");
 
-            String messagePacketsInfo;
-
-            while (!stopThreadElaboration) {
-
-                //invio messaggio per indicare che può iniziare l'invio
-                Utils.sendMessage(socket, "START_SEND");
-
-                //ricevo messaggio con i dati dei pacchetti
-                messagePacketsInfo = Utils.receiveMessage(socket);
-
-                //deserializzazione del JSON ricevuto
-                PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messagePacketsInfo);
-
-                if (packetsInfo.listPacketInfo.Count > 0) {
-                    //salvo i dati nella tabella raw del DB
-                    dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
-                }
-                
-                //invio un messaggio per dire che la ricezione è avvenuta con successo
-                Utils.sendMessage(socket, "RICEVE_OK");
+                String syncMessage;
 
                 do {
-                    //ricevo messaggio per la sincronizzazione
+                    //posso riceve CONFOK O la richiesta di SYNC
+
                     syncMessage = Utils.receiveMessage(socket);
-                    
                     //se ricevo la richiesta di SYNC invio il timestamp attuale
                     if (syncMessage == "SYNC_CLOCK\n") {
+                        //invio il timestap del server
                         Utils.syncClock(socket);
                     }
-                } while (syncMessage == "SYNC_CLOCK\n");              
-            }
-            socket.Shutdown(SocketShutdown.Both);
-            socket.Close();            
+                } while (syncMessage != "CONFOK_ACK\n");
+
+                String messagePacketsInfo;
+
+                while (!stopThreadElaboration) {
+
+                    //invio messaggio per indicare che può iniziare l'invio
+                    Utils.sendMessage(socket, "START_SEND");
+
+                    //ricevo messaggio con i dati dei pacchetti
+                    messagePacketsInfo = Utils.receiveMessage(socket);
+
+                    //deserializzazione del JSON ricevuto
+                    PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messagePacketsInfo);
+
+                    if (packetsInfo.listPacketInfo.Count > 0) {
+                        //salvo i dati nella tabella raw del DB
+                        dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
+                    }
+
+                    //invio un messaggio per dire che la ricezione è avvenuta con successo
+                    Utils.sendMessage(socket, "RICEVE_OK");
+
+                    do {
+                        //ricevo messaggio per la sincronizzazione
+                        syncMessage = Utils.receiveMessage(socket);
+
+                        //se ricevo la richiesta di SYNC invio il timestamp attuale
+                        if (syncMessage == "SYNC_CLOCK\n") {
+                            Utils.syncClock(socket);
+                        }
+                    } while (syncMessage == "SYNC_CLOCK\n");
+                }
+            } catch (SnifferAppTimeoutSocketException e){
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, e.Message);
+            } finally {
+                socket.Shutdown(SocketShutdown.Both);
+                socket.Close();
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket chiuso");
+            }         
         }
     }
 }

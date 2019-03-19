@@ -15,13 +15,11 @@ namespace SnifferProbeRequestApp
         /// </summary>
 
         [STAThread]
-        static void Main()
-        {
+        static void Main() {
             //controllo di avere i permessi di amministratore
             Utils.logMessage("MAIN", Utils.LogCategory.Info, "Is Admin? " + Utils.IsAdmin());
             //Console.WriteLine("Is Admin? " + Utils.IsAdmin());
-            if (!Utils.IsAdmin())
-            {
+            if (!Utils.IsAdmin()) {
                 //Utils.RestartElevated();
                 //return;
             }
