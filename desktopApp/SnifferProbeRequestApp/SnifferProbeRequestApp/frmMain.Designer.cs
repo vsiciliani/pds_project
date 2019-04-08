@@ -1,4 +1,4 @@
-﻿namespace SnifferProbeRequestApp {
+﻿namespace SnifferProbeRequestApp   {
     public partial class frmMain {
         /// <summary>
         /// Required designer variable.

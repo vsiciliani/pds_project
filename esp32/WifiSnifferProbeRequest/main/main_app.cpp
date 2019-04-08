@@ -29,6 +29,7 @@ void blinkLed();
 void syncClock();
 std::string createJSONArray(std::list<std::string>);
 bool sendMessage(std::string message);
+int receiveMessage(unsigned char buffer[128], size_t size);
 
 static char tag[]="Sniffer-ProbeRequest";
 
@@ -41,6 +42,10 @@ Socket *s;
 //buffer per salvare i messaggi in ingresso
 unsigned char bufferReceive[128];
 int numByteReceived;
+//memoria inizialmente disponibile
+float memorySpace;
+//mi salvo quanta memoria ho ancora disponibile
+//int freeMemory;
 
 extern "C" {
    void app_main();
@@ -56,6 +61,7 @@ void app_main() {
 
 	//connetto il dispositivo alla rete Wifi
 	wifi.connectAP("Vodafone-50650385", "pe7dt3793ae9t7b");
+	//wifi.connectAP("APAndroid2", "pippopluto");
 	//TODO: verificare connessione WIFI
 	std::cout << "Connesso a "<<wifi.getStaSSID() << " con IP: "<<wifi.getStaIp()
 					  <<" Gateway: "<< wifi.getStaGateway() <<std::endl;
@@ -65,15 +71,12 @@ void app_main() {
 
 	//connetto il socket
 	connectSocket();
-
+	s->setTimeout(5);
 	//CONFIGURAZIONE INIZIALE
 
 	//ciclo per gestire i messaggi della configurazione iniziale del dispositivo
 	do {
-		//ripulisco il buffer di ricezione
-		memset(bufferReceive, 0, 128 * (sizeof bufferReceive[0]) );
-		//ricevo il messaggio
-		numByteReceived = s->receive(bufferReceive,128);
+		numByteReceived = receiveMessage(bufferReceive,128);
 		ESP_LOGI(tag, "messaggio ricevuto: %s", bufferReceive);
 
 		//controllo il contenuto del messaggio
@@ -84,8 +87,6 @@ void app_main() {
 				std::thread threadBlinkLed (blinkLed);
 				//stacco il thread dal flusso principale
 				threadBlinkLed.detach();
-				//ripulisco il buffer
-				memset(bufferReceive, 0, 128 * (sizeof bufferReceive[0]) );
 		} else if (memcmp(bufferReceive, "CONFOK",numByteReceived)==0){
 			//se ricevo CONFOK invio ACK e termino il ciclo della configurazione
 			syncClock();
@@ -104,24 +105,27 @@ void app_main() {
 
 	//setto un counter per effettuare la sincronizzazione del clock ogni 10 iterazioni
 	int numIteration = 0;
+	//salvo la memoria a disposizione
+	memorySpace = xPortGetFreeHeapSize();
+	std::cout<<"Memoria disponibile " << memorySpace << std::endl;
 
 	while (true) {
 		//verifico la connessione al socket
 		//connectSocket();
 
 		//ricevo l'ok per il SEND ("START_SEND")
-		numByteReceived = s->receive(bufferReceive,128);
-		if (memcmp(bufferReceive, "START_SEND",numByteReceived)==0) {
-			ESP_LOGI(tag, "ThreadConnessionePc -- Ricevuto START_SEND");
-		}
+		do {
+			numByteReceived = receiveMessage(bufferReceive,128);
+		} while (memcmp(bufferReceive, "START_SEND",numByteReceived)==0);
+		ESP_LOGI(tag, "ThreadConnessionePc -- Ricevuto START_SEND");
 
 		//salvo il timestamp per calcolare il tempo di flush verso il server
 		time(&startWaitTime);
-		sleep(60);
+		//sleep(15);
 		//prendo il lock per leggere la lista di PacketInfo
 		std::unique_lock<std::mutex> ul(m);
 		//condition variable sul tempo di attesa per il flush
-		//cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+		cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
 
 		ESP_LOGI(tag, "ThreadConnessionePc -- Invio dati dei pacchetti al server");
 		numIteration ++;
@@ -130,12 +134,11 @@ void app_main() {
 		sendMessage(createJSONArray(listaRecord));
 
 		//aspetto che l'invio dei dati sia completato ("RICEVE_OK")
-		numByteReceived = s->receive(bufferReceive,128);
-		if (memcmp(bufferReceive, "RICEVE_OK",numByteReceived)==0) {
-			ESP_LOGI(tag, "ThreadConnessionePc -- Dati dei pacchetti inviati con successo");
-		} else {
-			ESP_LOGE(tag, "ThreadConnessionePc -- Ricevuto un messaggio diverso da RICEVE_OK");
-		}
+		do {
+			numByteReceived = receiveMessage(bufferReceive,128);
+		} while (memcmp(bufferReceive, "RICEVE_OK",numByteReceived)==0);
+
+		ESP_LOGI(tag, "ThreadConnessionePc -- Ricevuto RICEVE_OK");
 
 		if (numIteration >= 3) {
 			//rieseguo la sincronizzazione del clock
@@ -179,6 +182,8 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 		//lock sulla scrittura della lista che contiene gli oggetti PacketInfo
 		std::lock_guard<std::mutex> l(m);
 		listaRecord.push_back(record.JSONSerializer());
+
+		//std::cout<<"Memoria disposinibile: " << freeMemory << std::endl;
 		//setto la condition variable
 		cvMinuto.notify_one();
 		ESP_LOGI(tag, "ThreadGestionePacchetto -- Pacchetto ricevuto ed elaborato");
@@ -190,7 +195,11 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 bool checkTimeoutThreadConnessionePc() {
 	time_t now;
 	time(&now);
-	if (difftime(now,startWaitTime)>1) {
+	float freeMemory = xPortGetFreeHeapSize();
+	std::cout<<"Memoria disposinibile: " << freeMemory << std::endl;
+	float percMemoryAvailable =freeMemory/memorySpace;
+	std::cout<<"Percentuale " << percMemoryAvailable << std::endl;
+	if ((difftime(now,startWaitTime)>15) || (percMemoryAvailable < 0.1)) {
 		return true;
 	}
 	else return false;
@@ -216,12 +225,14 @@ std::string createJSONArray(std::list<std::string>){
 void connectSocket(){
 	if (!s->isValid()){
 		int res = s->connect("192.168.1.100", 5010);
+		//int res = s->connect("192.168.43.213", 5010);
 
 			while (res < 0) {
 				ESP_LOGI(tag, "ThreadConnessionePc -- Connessione con il server fallita. Nuovo tentativo tra 10 secondi...");
 				//attende 10 secondi tra un tentativo di connessione e il successivo
 				sleep(10);
 				res = s->connect("192.168.1.100", 5010);
+				//res = s->connect("192.168.43.213", 5010);
 			}
 			ESP_LOGI(tag, "ThreadConnessionePc -- Socket connesso");
 	}
@@ -238,6 +249,14 @@ bool sendMessage(std::string message){
 	return true;
 }
 
+//procedura per ricevere un messaggio (stringa) dal socket
+int receiveMessage(unsigned char buffer[128], size_t size){
+	//ripulisco il buffer di ricezione
+	memset(buffer, 0, size * (sizeof buffer[0]) );
+	int numByteReceived = s->receive(buffer,size);
+	return numByteReceived;
+}
+
 void syncClock(){
 	long delay = 0;
 	long request_timestamp;
@@ -247,8 +266,7 @@ void syncClock(){
 	for (int i=0; i<4; i++){
 		time(&request_timestamp);
 		sendMessage("SYNC_CLOCK\n");
-		memset(bufferReceive, 0, 128 * (sizeof bufferReceive[0]) );
-		int recv = s->receive(bufferReceive,8);
+		numByteReceived = receiveMessage(bufferReceive,8);
 		received_timestamp = bufferReceive[0] | (bufferReceive[1] << 8) | (bufferReceive[2] << 16) | (bufferReceive[3] << 24) | (bufferReceive[4] << 32) | (bufferReceive[5] << 40) | (bufferReceive[6] << 48) | (bufferReceive[7] << 56) ;
 		time(&reply_timestamp);
 
