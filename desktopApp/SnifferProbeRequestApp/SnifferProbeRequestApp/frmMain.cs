@@ -88,10 +88,11 @@ namespace SnifferProbeRequestApp
                     //ripulisco la textbox
                     txtXPosition.Clear();
                     txtYPosition.Clear();
-                } catch (Exception)
+                } catch (Exception ex)
                 {
                     MessageBox.Show("Errore", "Si è verificato un errore durante la configurazione del dispositivo", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Error, ex.ToString());
                 }
             }
         }

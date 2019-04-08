@@ -118,7 +118,7 @@ namespace SnifferProbeRequestApp
                 }
             }
             Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
-                "Sender: " + remoteIpEndPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("\n",""));
+                "Sender: " + remoteIpEndPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("\n", ""));
             return receivedMessage;
         }
 
