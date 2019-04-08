@@ -87,14 +87,73 @@ void app_main() {
 				std::thread threadBlinkLed (blinkLed);
 				//stacco il thread dal flusso principale
 				threadBlinkLed.detach();
-		} else if (memcmp(bufferReceive, "CONFOK",numByteReceived)==0){
+		/*} else if (memcmp(bufferReceive, "CONFOK",numByteReceived)==0){
 			//se ricevo CONFOK invio ACK e termino il ciclo della configurazione
 			syncClock();
 			sendMessage("CONFOK_ACK\n");
-			break;
+			//break;*/
+		} else if (memcmp(bufferReceive, "START_SEND",numByteReceived)==0){
+			ESP_LOGI(tag, "ThreadConnessionePc -- Ricevuto START_SEND");
+
+			//setto l'handler che gestisce la ricezione del pacchetto
+			ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
+
+			//abilito la modalità di attività promiscua
+			ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
+			ESP_LOGI(tag, "ThreadConnessionePc -- Modalita schema promiscua abilitata");
+
+			//salvo il timestamp per calcolare il tempo di flush verso il server
+			time(&startWaitTime);
+
+			//salvo la memoria a disposizione
+			memorySpace = xPortGetFreeHeapSize();
+			std::cout<<"Memoria disponibile " << memorySpace << std::endl;
+
+			//prendo il lock per leggere la lista di PacketInfo
+			std::unique_lock<std::mutex> ul(m);
+			//condition variable sul tempo di attesa per il flush
+			cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+
+			ESP_LOGI(tag, "ThreadConnessionePc -- Invio dati dei pacchetti al server");
+			//send dei dati verso il server
+
+			sendMessage(createJSONArray(listaRecord));
+
+			/*do {
+
+				numByteReceived = receiveMessage(bufferReceive,128);
+			//aspetto che l'invio dei dati sia completato ("RICEVE_OK")
+			} while (memcmp(bufferReceive, "RICEVE_OK",numByteReceived)==0);
+
+			ESP_LOGI(tag, "ThreadConnessionePc -- Ricevuto RICEVE_OK");
+			sendMessage("RICEVE_OK_ACK\n");*/
+
+			//pulisco la lista di PacketInfo
+			listaRecord.clear();
+
+			//disabilito la modalità di attività promiscua
+			ESP_ERROR_CHECK(esp_wifi_set_promiscuous(false));
+			ESP_LOGI(tag, "ThreadConnessionePc -- Modalita schema promiscua disabilitata");
+
+
 		} else { ESP_LOGI(tag, "Ricevuto messaggio non valido"); }
 	} while (true);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
 
 	//setto l'handler che gestisce la ricezione del pacchetto
 	ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
@@ -159,7 +218,7 @@ void app_main() {
 	}
 
 	fflush(stdout);
-
+	 */
 }
 
 //processo di gestione del pacchetto Wifi sniffato

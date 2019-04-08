@@ -118,7 +118,7 @@ namespace SnifferProbeRequestApp
                     //se era gia connesso invio solo il CONFOK
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
-                    Utils.sendMessage(socket, "CONFOK");
+                    //Utils.sendMessage(socket, "CONFOK");
 
                 } else {
                     //se non era già configurato aspetto l'evento di Configurazione dall'interfaccia grafica
@@ -137,7 +137,7 @@ namespace SnifferProbeRequestApp
                     do {
                         if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
                             //il device è stato configurato
-                            Utils.sendMessage(socket, "CONFOK");
+                            //Utils.sendMessage(socket, "CONFOK");
                             break;
                         } else {
                             //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
@@ -151,7 +151,7 @@ namespace SnifferProbeRequestApp
 
                 String syncMessage;
 
-                do {
+                /*do {
                     //posso riceve CONFOK O la richiesta di SYNC
 
                     syncMessage = Utils.receiveMessage(socket);
@@ -160,7 +160,7 @@ namespace SnifferProbeRequestApp
                         //invio il timestap del server
                         Utils.syncClock(socket);
                     }
-                } while (syncMessage != "CONFOK_ACK\n");
+                } while (syncMessage != "CONFOK_ACK\n");*/
 
                 String messagePacketsInfo;
 
@@ -169,8 +169,15 @@ namespace SnifferProbeRequestApp
                     //invio messaggio per indicare che può iniziare l'invio
                     Utils.sendMessage(socket, "START_SEND");
 
-                    //ricevo messaggio con i dati dei pacchetti
                     messagePacketsInfo = Utils.receiveMessage(socket);
+
+                    /*do {
+                        //ricevo messaggio con i dati dei pacchetti
+                        
+                        //invio un messaggio per dire che la ricezione è avvenuta con successo
+                        Utils.sendMessage(socket, "RICEVE_OK");
+                        syncMessage = Utils.receiveMessage(socket);
+                    } while (syncMessage != "RICEVE_OK_ACK\n");*/
 
                     //deserializzazione del JSON ricevuto
                     PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messagePacketsInfo);
@@ -180,10 +187,7 @@ namespace SnifferProbeRequestApp
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
                     }
 
-                    //invio un messaggio per dire che la ricezione è avvenuta con successo
-                    Utils.sendMessage(socket, "RICEVE_OK");
-
-                    do {
+                    /*do {
                         //ricevo messaggio per la sincronizzazione
                         syncMessage = Utils.receiveMessage(socket);
 
@@ -191,7 +195,7 @@ namespace SnifferProbeRequestApp
                         if (syncMessage == "SYNC_CLOCK\n") {
                             Utils.syncClock(socket);
                         }
-                    } while (syncMessage == "SYNC_CLOCK\n");
+                    } while (syncMessage == "SYNC_CLOCK\n");*/
                 }
             } catch (SnifferAppTimeoutSocketException e){
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, e.Message);
