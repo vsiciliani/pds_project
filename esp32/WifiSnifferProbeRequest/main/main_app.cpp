@@ -5,6 +5,7 @@
  *      Author: SicilianiVi
  */
 
+#include <iostream>
 #include <esp_wifi.h>
 #include <esp_wifi_types.h>
 #include <nvs_flash.h>
@@ -19,6 +20,7 @@
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "Socket.h"
+#include "SocketC.h"
 #include "sdkconfig.h"
 #include "GPIO.h"
 
@@ -29,7 +31,7 @@ void blinkLed();
 void syncClock();
 std::string createJSONArray(std::list<std::string>);
 bool sendMessage(std::string message);
-int receiveMessage(unsigned char buffer[128], size_t size);
+std::string receiveMessage();
 
 static char tag[]="Sniffer-ProbeRequest";
 
@@ -38,9 +40,9 @@ std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
 WiFi wifi;
-Socket *s;
+SocketC *s;
 //buffer per salvare i messaggi in ingresso
-unsigned char bufferReceive[128];
+char bufferReceive[128];
 int numByteReceived;
 //memoria inizialmente disponibile
 float memorySpace;
@@ -67,32 +69,29 @@ void app_main() {
 					  <<" Gateway: "<< wifi.getStaGateway() <<std::endl;
 
 	//creo il socket
-	s = new Socket();
+	//s = new Socket();
+
+	s=new SocketC("192.168.1.100",5010);
 
 	//connetto il socket
 	connectSocket();
-	s->setTimeout(5);
+	//s->setTimeout(5);
 	//CONFIGURAZIONE INIZIALE
 
 	//ciclo per gestire i messaggi della configurazione iniziale del dispositivo
 	do {
-		numByteReceived = receiveMessage(bufferReceive,128);
-		ESP_LOGI(tag, "messaggio ricevuto: %s", bufferReceive);
+		std::string message= receiveMessage();
+		//ESP_LOGI(tag, "messaggio ricevuto: %s", message);
 
-		//controllo il contenuto del messaggio
-		if (memcmp(bufferReceive, "IDENTIFICA",numByteReceived)==0) {
-				//ho ricevuto la richiesta di IDENTIFICAZIONE
-				ESP_LOGI(tag, "ho ricevuto IDENTIFICA");
-				//lancio il thread che si occupa di far lampeggiare il led
-				std::thread threadBlinkLed (blinkLed);
-				//stacco il thread dal flusso principale
-				threadBlinkLed.detach();
-		/*} else if (memcmp(bufferReceive, "CONFOK",numByteReceived)==0){
-			//se ricevo CONFOK invio ACK e termino il ciclo della configurazione
-			syncClock();
-			sendMessage("CONFOK_ACK\n");
-			//break;*/
-		} else if (memcmp(bufferReceive, "START_SEND",numByteReceived)==0){
+		std::cout << "messaggio ricevuto: " << message << std::endl;
+
+		if (message.compare("IDENTIFICA")==0){
+			ESP_LOGI(tag, "ho ricevuto IDENTIFICA");
+			//lancio il thread che si occupa di far lampeggiare il led
+			std::thread threadBlinkLed (blinkLed);
+			//stacco il thread dal flusso principale
+			threadBlinkLed.detach();
+		} else if (message.compare("START_SEND")==0){
 			ESP_LOGI(tag, "ThreadConnessionePc -- Ricevuto START_SEND");
 
 			//setto l'handler che gestisce la ricezione del pacchetto
@@ -120,7 +119,7 @@ void app_main() {
 			sendMessage(createJSONArray(listaRecord));
 
 			/*do {
-
+				sendMessage(createJSONArray(listaRecord));
 				numByteReceived = receiveMessage(bufferReceive,128);
 			//aspetto che l'invio dei dati sia completato ("RICEVE_OK")
 			} while (memcmp(bufferReceive, "RICEVE_OK",numByteReceived)==0);
@@ -137,6 +136,16 @@ void app_main() {
 
 
 		} else { ESP_LOGI(tag, "Ricevuto messaggio non valido"); }
+
+
+
+
+
+
+
+		//controllo il contenuto del messaggio
+		//if (memcmp(bufferReceive, "IDENTIFICA",numByteReceived)==0) {
+
 	} while (true);
 
 
@@ -282,20 +291,17 @@ std::string createJSONArray(std::list<std::string>){
 
 //funzione che esegue la connessione al socket se non e' già connesso
 void connectSocket(){
-	if (!s->isValid()){
-		int res = s->connect("192.168.1.100", 5010);
-		//int res = s->connect("192.168.43.213", 5010);
+	//int res = s->connect("192.168.1.100", 5010);
+	int res = s->connect();
 
-			while (res < 0) {
-				ESP_LOGI(tag, "ThreadConnessionePc -- Connessione con il server fallita. Nuovo tentativo tra 10 secondi...");
-				//attende 10 secondi tra un tentativo di connessione e il successivo
-				sleep(10);
-				res = s->connect("192.168.1.100", 5010);
-				//res = s->connect("192.168.43.213", 5010);
-			}
-			ESP_LOGI(tag, "ThreadConnessionePc -- Socket connesso");
+	while (res < 0) {
+		ESP_LOGI(tag, "ThreadConnessionePc -- Connessione con il server fallita. Nuovo tentativo tra 10 secondi...");
+		//attende 10 secondi tra un tentativo di connessione e il successivo
+		sleep(10);
+		//res = s->connect("192.168.1.100", 5010);
+		res = s->connect();
 	}
-	return;
+	ESP_LOGI(tag, "ThreadConnessionePc -- Socket connesso");
 }
 
 //procedura per inviare un messaggio (stringa) al server
@@ -309,11 +315,10 @@ bool sendMessage(std::string message){
 }
 
 //procedura per ricevere un messaggio (stringa) dal socket
-int receiveMessage(unsigned char buffer[128], size_t size){
+std::string receiveMessage(){
 	//ripulisco il buffer di ricezione
-	memset(buffer, 0, size * (sizeof buffer[0]) );
-	int numByteReceived = s->receive(buffer,size);
-	return numByteReceived;
+	//int numByteReceived = s->receive(buffer,size);
+	return s->receive();
 }
 
 void syncClock(){
@@ -325,7 +330,11 @@ void syncClock(){
 	for (int i=0; i<4; i++){
 		time(&request_timestamp);
 		sendMessage("SYNC_CLOCK\n");
-		numByteReceived = receiveMessage(bufferReceive,8);
+		std::string message = receiveMessage();
+
+		char buffer[8];
+		strcpy(buffer, message.c_str());
+
 		received_timestamp = bufferReceive[0] | (bufferReceive[1] << 8) | (bufferReceive[2] << 16) | (bufferReceive[3] << 24) | (bufferReceive[4] << 32) | (bufferReceive[5] << 40) | (bufferReceive[6] << 48) | (bufferReceive[7] << 56) ;
 		time(&reply_timestamp);
 

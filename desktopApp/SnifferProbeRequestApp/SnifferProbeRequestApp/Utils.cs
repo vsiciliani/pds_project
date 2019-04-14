@@ -83,42 +83,39 @@ namespace SnifferProbeRequestApp
             Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
         }
 
-        static public void sendMessage(Socket socket, String message) {
+        static public void sendMessage(NetworkStream stream, IPEndPoint endPoint, String message) {
             byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
-            int byteSent;
+            
             try {
-                do {
-                    byteSent = socket.Send(messageToSend);
-                } while (byteSent != messageToSend.Length);
-                IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+                    stream.Write(messageToSend, 0, messageToSend.Length);
                 logMessage("Utils.cs -- Send Message", LogCategory.Info,
-                    "Receiver: " + remoteIpEndPoint.Address.ToString() + " Message: " + message);
+                    "Receiver: " + endPoint.Address.ToString() + " Message: " + message);
             } catch (SocketException e) {
                 SnifferAppTimeoutSocketException exception = new SnifferAppTimeoutSocketException("Superato timeout di attesa per l'invio sul socket", e);
                 throw exception;
             }
         }
 
-        static public String receiveMessage(Socket socket) {
+        static public String receiveMessage(NetworkStream stream, IPEndPoint endPoint) {
             String receivedMessage = String.Empty;
-            IPEndPoint remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+            
             while (true) {
                 byte[] receivedBytes = new byte[MAXBUFFER];
                 Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, 
-                    "Device :" + remoteIpEndPoint.Address.ToString() + " In attesa di dati");
+                    "Device :" + endPoint.Address.ToString() + " In attesa di dati");
                 try {
-                    int numBytes = socket.Receive(receivedBytes);
+                    int numBytes = stream.Read(receivedBytes, 0, receivedBytes.Length);
                     receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
                     if (receivedMessage.IndexOf("\n") > -1) {
                         break;
                     }
-                } catch (SocketException e) {
+                } catch (System.IO.IOException e) {
                     SnifferAppTimeoutSocketException exception = new SnifferAppTimeoutSocketException("Superato timeout di attesa per la ricezione sul socket", e);
                     throw exception;
                 }
             }
             Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
-                "Sender: " + remoteIpEndPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("\n", ""));
+                "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("\n", ""));
             return receivedMessage;
         }
 
