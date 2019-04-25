@@ -6,7 +6,6 @@
  */
 
 #include "WifiPacket.h"
-#include <functional>
 #include <list>
 #include <sys/time.h>
 

@@ -17,7 +17,7 @@ namespace SnifferProbeRequestApp
         private Thread threadElaboration;
 
         private static ThreadGestioneWifi istance = null;
-        private TcpListener server = null;
+        private TcpListener listener = null;
         //private Socket listener = null;
         private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DatabaseManager dbManager = null;
@@ -59,29 +59,22 @@ namespace SnifferProbeRequestApp
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
             //socket in ascolto
 
-            // Set the TcpListener on port 13000.
+            // setto il listener sulla porta 5010.
             Int32 port = 5010;
             IPAddress localAddr = IPAddress.Any;
-
-            // TcpListener server = new TcpListener(port);
-            server = new TcpListener(localAddr, port);
+            listener = new TcpListener(localAddr, port);
             
-            // Start listening for client requests.
-            server.Start();
+            // starto il listener in attesa di connessione dei client
+            listener.Start();
 
-            //listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             List<Thread> listaThreadSocket = new List<Thread>();
             try {
-                //pongo il socket in ascolto sulla porta 5010
-                //listener.Bind(new IPEndPoint(IPAddress.Any, 5010));
-                //listener.Listen(10);
-                //listener.ReceiveTimeout = 10000;
-
+                
                 while (!stopThreadElaboration) {
                     allDone.Reset();
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
-                    TcpClient client = server.AcceptTcpClient();
-                    //Socket socketConnesso = listener.Accept();
+                    TcpClient client = listener.AcceptTcpClient();
+                    
                     //thread per gestire il socket connesso con il device
                     Thread threadGestioneDevice = new Thread(() => gestioneDevice(client));
                     threadGestioneDevice.IsBackground = false;
@@ -95,7 +88,7 @@ namespace SnifferProbeRequestApp
             } catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante il binding del socket", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                server.Stop();
+                listener.Stop();
                 throw exception;
             } finally {
                 listaThreadSocket.ForEach(thread => thread.Join());
@@ -105,13 +98,9 @@ namespace SnifferProbeRequestApp
         }
 
         public void gestioneDevice(TcpClient client) {
-        //public void acceptCallback(IAsyncResult ar) {
+
             int MAXBUFFER = 4096;
 
-            //setto i timeout del socket
-            //socket.ReceiveTimeout = 100000; //5 minuti
-            //socket.SendTimeout = 30000; //30 secondi
-            
             IPEndPoint remoteIpEndPoint = null;
             NetworkStream stream = client.GetStream();
             try {
@@ -163,53 +152,49 @@ namespace SnifferProbeRequestApp
                     } while (true);
                 }
 
-                String syncMessage;
-
                 /*do {
                     //posso riceve CONFOK O la richiesta di SYNC
 
                     syncMessage = Utils.receiveMessage(socket);
                     //se ricevo la richiesta di SYNC invio il timestamp attuale
-                    if (syncMessage == "SYNC_CLOCK\n") {
+                    if (syncMessage == "SYNC_CLOCK//n") {
                         //invio il timestap del server
                         Utils.syncClock(socket);
                     }
-                } while (syncMessage != "CONFOK_ACK\n");*/
+                } while (syncMessage != "CONFOK_ACK//n");*/
 
-                String messagePacketsInfo;
+                String messageReceived;
+                Int16 countSyncTimestamp = 0;
 
                 while (!stopThreadElaboration) {
+
+                    if (countSyncTimestamp == 0) {
+                        Utils.sendMessage(stream, remoteIpEndPoint, "SYNC_CLOCK");
+                        messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+
+                        //posso ricevere SYNC_CLOCK_START (devo sincronizzare) o SYNC_CLOCK_STOP (sincronizzazione terminata)
+                        while (messageReceived == "SYNC_CLOCK_START//n") {
+                            Utils.syncClock(client.Client);
+                            messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+                        }
+                        //sincronizzo i timestamp ogni 5 interazioni
+                        countSyncTimestamp = 5;
+                    }
 
                     //invio messaggio per indicare che può iniziare l'invio
                     Utils.sendMessage(stream, remoteIpEndPoint, "START_SEND");
 
-                    messagePacketsInfo = Utils.receiveMessage(stream, remoteIpEndPoint);
-
-                    /*do {
-                        //ricevo messaggio con i dati dei pacchetti
-                        
-                        //invio un messaggio per dire che la ricezione è avvenuta con successo
-                        Utils.sendMessage(stream, remoteIpEndPoint, "RICEVE_OK");
-                        syncMessage = Utils.receiveMessage(stream, remoteIpEndPoint);
-                    } while (syncMessage != "RICEVE_OK_ACK\n");*/
+                    messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
 
                     //deserializzazione del JSON ricevuto
-                    PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messagePacketsInfo);
+                    PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
 
                     if (packetsInfo.listPacketInfo.Count > 0) {
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
                     }
-
-                    /*do {
-                        //ricevo messaggio per la sincronizzazione
-                        syncMessage = Utils.receiveMessage(socket);
-
-                        //se ricevo la richiesta di SYNC invio il timestamp attuale
-                        if (syncMessage == "SYNC_CLOCK\n") {
-                            Utils.syncClock(socket);
-                        }
-                    } while (syncMessage == "SYNC_CLOCK\n");*/
+                    //decremento il contatore per la sincronizzazione dei timestamp
+                    countSyncTimestamp--;
                 }
             } catch (SnifferAppTimeoutSocketException e){
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, e.Message);

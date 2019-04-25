@@ -106,7 +106,7 @@ namespace SnifferProbeRequestApp
                 try {
                     int numBytes = stream.Read(receivedBytes, 0, receivedBytes.Length);
                     receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
-                    if (receivedMessage.IndexOf("\n") > -1) {
+                    if (receivedMessage.IndexOf("//n") > -1) {
                         break;
                     }
                 } catch (System.IO.IOException e) {
@@ -115,7 +115,7 @@ namespace SnifferProbeRequestApp
                 }
             }
             Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
-                "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("\n", ""));
+                "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("//n", ""));
             return receivedMessage;
         }
 
