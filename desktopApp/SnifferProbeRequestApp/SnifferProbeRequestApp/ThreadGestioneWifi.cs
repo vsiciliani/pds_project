@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Sockets;
 
 //Classe Singleton che wrappa il thread per la gestione del Wifi e dell'interfaccia verso le ESP
-
 namespace SnifferProbeRequestApp
 {
     class ThreadGestioneWifi
@@ -81,8 +80,6 @@ namespace SnifferProbeRequestApp
                     threadGestioneDevice.Start();
                     listaThreadSocket.Add(threadGestioneDevice);
                     
-                    
-                    
                     allDone.WaitOne();
                 }
             } catch (Exception e) {
@@ -151,17 +148,6 @@ namespace SnifferProbeRequestApp
                         }
                     } while (true);
                 }
-
-                /*do {
-                    //posso riceve CONFOK O la richiesta di SYNC
-
-                    syncMessage = Utils.receiveMessage(socket);
-                    //se ricevo la richiesta di SYNC invio il timestamp attuale
-                    if (syncMessage == "SYNC_CLOCK//n") {
-                        //invio il timestap del server
-                        Utils.syncClock(socket);
-                    }
-                } while (syncMessage != "CONFOK_ACK//n");*/
 
                 String messageReceived;
                 Int16 countSyncTimestamp = 0;
