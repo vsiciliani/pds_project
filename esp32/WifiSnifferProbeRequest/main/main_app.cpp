@@ -14,6 +14,7 @@
 #include <list>
 #include <thread>
 #include <mutex>
+#include <math.h>
 #include <condition_variable>
 #include <time.h>
 #include "Wifi.h"
@@ -40,15 +41,15 @@ std::condition_variable cvMinuto;
 time_t startWaitTime;
 WiFi wifi;
 Socket *s;
-//buffer per salvare i messaggi in ingresso
-char bufferReceive[128];
-int numByteReceived;
 //memoria inizialmente disponibile
 float memorySpace;
 
 //definizione costanti
-std::string wifiSSID = "APAndroid2";
-std::string wifiPassword = "pippopluto";
+//std::string wifiSSID = "APAndroid2";
+//std::string wifiPassword = "pippopluto";
+
+std::string wifiSSID = "dlink-natale";
+std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
 int intervalloConnessionePc = 15;
 
 extern "C" {
@@ -76,7 +77,7 @@ void app_main() {
 	ESP_LOGI(tag, "Connesso a %s con IP: %s Gateway: %s",wifi.getStaSSID().c_str(), wifi.getStaIp().c_str(), wifi.getStaGateway().c_str());
 
 	//creo il socket
-	s=new Socket("192.168.43.213",5010);
+	s=new Socket("192.168.1.100",5010);
 
 	//connetto il socket
 	connectSocket();
@@ -150,6 +151,7 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 	if ((pacchetto.getTypeMessage() == 0) && (pacchetto.getSubTypeMessage() == 4)) {
 		//creo l'oggetto PacketInfo per contenere le informazioni del pacchetto
 		PacketInfo record = PacketInfo(pacchetto.getSourceMacAddress(), pacchetto.getSSID(), pacchetto.getSignalStrength(), pacchetto.getHashCode(), pacchetto.getTimestamp());
+
 		//lock sulla scrittura della lista che contiene gli oggetti PacketInfo
 		std::lock_guard<std::mutex> l(m);
 		listaRecord.push_back(record.JSONSerializer());
@@ -167,6 +169,7 @@ bool checkTimeoutThreadConnessionePc() {
 	float freeMemory = xPortGetFreeHeapSize();
 	float percMemoryAvailable =freeMemory/memorySpace;
 	ESP_LOGI(tag, "Percentuale memoria libera: %f", percMemoryAvailable);
+	//flusho il buffer verso il server è passato il tempo successivo o se la memoria libera e meno del 10 percento
 	if ((difftime(now,startWaitTime)>intervalloConnessionePc) || (percMemoryAvailable < 0.1)) {
 		return true;
 	}
@@ -224,14 +227,16 @@ void syncClock(){
 	long request_timestamp;
 	long reply_timestamp;
 	long received_timestamp;
-	//time_t reply_timestamp;
+
 	for (int i=0; i<4; i++){
 		time(&request_timestamp);
 		sendMessage("SYNC_CLOCK_START//n");
 		s->receiveRaw();
 
-		received_timestamp = s->buffer_ric[0] | (s->buffer_ric[1] << 8) | (s->buffer_ric[2] << 16) | (s->buffer_ric[3] << 24) |
-				(s->buffer_ric[4] << 32) | (s->buffer_ric[5] << 40) | (s->buffer_ric[6] << 48) | (s->buffer_ric[7] << 56) ;
+		received_timestamp = 0;
+		for (int j=0; j<8; j++){
+			received_timestamp += (s->buffer_ric[j] * pow(2, j*8));
+		}
 		time(&reply_timestamp);
 
 		delay = delay + (reply_timestamp - request_timestamp);

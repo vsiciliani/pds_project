@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
@@ -47,7 +45,6 @@ namespace SnifferProbeRequestApp
         public void stop() {
             stopThreadElaboration = true;
             dbManager.closeConnection();
-            //if (listener != null) listener.Stop();
             threadElaboration.Join();       
         }
 
@@ -56,8 +53,7 @@ namespace SnifferProbeRequestApp
             //TODO: decommentare se non lavoro su PC aziendale
             //startHotspot("prova4", "pippopluto");
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
-            //socket in ascolto
-
+            
             // setto il listener sulla porta 5010.
             Int32 port = 5010;
             IPAddress localAddr = IPAddress.Any;
@@ -96,8 +92,6 @@ namespace SnifferProbeRequestApp
 
         public void gestioneDevice(TcpClient client) {
 
-            int MAXBUFFER = 4096;
-
             IPEndPoint remoteIpEndPoint = null;
             NetworkStream stream = client.GetStream();
             try {
@@ -115,19 +109,16 @@ namespace SnifferProbeRequestApp
 
                 //verifico se il dispositivo con quell'IP era già connesso
                 if (CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
-                    //se era gia connesso invio solo il CONFOK
+                    //il dispositivo era gia configurato
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
-
-                    //Utils.sendMessage(socket, "CONFOK");
-
+                    
                 } else {
                     //se non era già configurato aspetto l'evento di Configurazione dall'interfaccia grafica
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
-                    device = new Device(remoteIpEndPoint.Address.ToString(), 1, 0, 0);
                     //event per gestire la sincronizzazione con il thread dell'interfaccia grafica
                     ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
-                    CommonData.lstNoConfDevices.TryAdd(device.ipAddress, deviceConfEvent);
+                    CommonData.lstNoConfDevices.TryAdd(remoteIpEndPoint.Address.ToString(), deviceConfEvent);
                     //delegato per gestire la variazione della lista dei device da configurare
                     CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
@@ -137,7 +128,6 @@ namespace SnifferProbeRequestApp
                     do {
                         if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
                             //il device è stato configurato
-                            //Utils.sendMessage(socket, "CONFOK");
                             break;
                         } else {
                             //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
@@ -175,7 +165,9 @@ namespace SnifferProbeRequestApp
                     //deserializzazione del JSON ricevuto
                     PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
 
-                    if (packetsInfo.listPacketInfo.Count > 0) {
+                    //controllo che ci siano messaggi e che il device sia tra quelli configurati
+                    if (packetsInfo.listPacketInfo.Count > 0 &&
+                        CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
                     }
@@ -191,4 +183,3 @@ namespace SnifferProbeRequestApp
         }
     }
 }
-

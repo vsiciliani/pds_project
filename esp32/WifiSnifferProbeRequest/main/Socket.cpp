@@ -8,7 +8,7 @@
 #include "Socket.h"
 
 Socket::Socket(const char* serverAddress, int serverPort){
-	//const struct addrinfo hints;
+
 	int result=0;
 
 	if (this->socket!=-1) return;
@@ -31,7 +31,6 @@ int Socket::connect(){
 }
 
 int Socket::send(std::string message){
-	//add convertion from string to char*
 	char buffer[message.size() + 1];
 	strcpy(buffer, message.c_str());
 

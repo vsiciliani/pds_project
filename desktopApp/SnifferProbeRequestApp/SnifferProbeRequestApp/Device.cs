@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SnifferProbeRequestApp
@@ -12,13 +13,15 @@ namespace SnifferProbeRequestApp
         public Int32 codDevice { get; set; }
         public Int32 x_position { get; set; }
         public Int32 y_position { get; set; }
+        public ManualResetEvent evento { get; set; }
 
-        public Device(string ipAddress, Int32 codDevice, Int32 x_position, Int32 y_position)
+        public Device(string ipAddress, Int32 codDevice, Int32 x_position, Int32 y_position, ManualResetEvent evento)
         {
             this.ipAddress = ipAddress;
             this.codDevice = codDevice;
             this.x_position = x_position;
             this.y_position = y_position;
+            this.evento = evento;
         }
 
         
