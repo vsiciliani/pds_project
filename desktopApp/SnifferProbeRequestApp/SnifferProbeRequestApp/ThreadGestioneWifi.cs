@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
 //Classe Singleton che wrappa il thread per la gestione del Wifi e dell'interfaccia verso le ESP
-
 namespace SnifferProbeRequestApp
 {
     class ThreadGestioneWifi
@@ -17,7 +14,8 @@ namespace SnifferProbeRequestApp
         private Thread threadElaboration;
 
         private static ThreadGestioneWifi istance = null;
-        private Socket listener = null;
+        private TcpListener listener = null;
+        //private Socket listener = null;
         private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DatabaseManager dbManager = null;
 
@@ -47,7 +45,6 @@ namespace SnifferProbeRequestApp
         public void stop() {
             stopThreadElaboration = true;
             dbManager.closeConnection();
-            //if (listener != null) listener.Stop();
             threadElaboration.Join();       
         }
 
@@ -56,33 +53,35 @@ namespace SnifferProbeRequestApp
             //TODO: decommentare se non lavoro su PC aziendale
             //startHotspot("prova4", "pippopluto");
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
-            //socket in ascolto
-            listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            
+            // setto il listener sulla porta 5010.
+            Int32 port = 5010;
+            IPAddress localAddr = IPAddress.Any;
+            listener = new TcpListener(localAddr, port);
+            
+            // starto il listener in attesa di connessione dei client
+            listener.Start();
+
             List<Thread> listaThreadSocket = new List<Thread>();
             try {
-                //pongo il socket in ascolto sulla porta 5010
-                listener.Bind(new IPEndPoint(IPAddress.Any, 5010));
-                listener.Listen(10);
-                listener.ReceiveTimeout = 10000;
-
+                
                 while (!stopThreadElaboration) {
                     allDone.Reset();
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
+                    TcpClient client = listener.AcceptTcpClient();
                     
-                    Socket socketConnesso = listener.Accept();
                     //thread per gestire il socket connesso con il device
-                    Thread threadGestioneDevice = new Thread(() => gestioneDevice(socketConnesso));
-                    listaThreadSocket.Add(threadGestioneDevice);
-                    threadGestioneDevice.Start();
+                    Thread threadGestioneDevice = new Thread(() => gestioneDevice(client));
                     threadGestioneDevice.IsBackground = false;
+                    threadGestioneDevice.Start();
+                    listaThreadSocket.Add(threadGestioneDevice);
                     
                     allDone.WaitOne();
                 }
             } catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante il binding del socket", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                listener.Shutdown(SocketShutdown.Both);
-                listener.Close();
+                listener.Stop();
                 throw exception;
             } finally {
                 listaThreadSocket.ForEach(thread => thread.Join());
@@ -91,17 +90,12 @@ namespace SnifferProbeRequestApp
             //stopHotspot();
         }
 
-        public void gestioneDevice(Socket socket) {
-        //public void acceptCallback(IAsyncResult ar) {
-            int MAXBUFFER = 4096;
-
-            //setto i timeout del socket
-            socket.ReceiveTimeout = 100000; //5 minuti
-            socket.SendTimeout = 30000; //30 secondi
+        public void gestioneDevice(TcpClient client) {
 
             IPEndPoint remoteIpEndPoint = null;
+            NetworkStream stream = client.GetStream();
             try {
-                remoteIpEndPoint = socket.RemoteEndPoint as IPEndPoint;
+                remoteIpEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
             } catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore nel riconoscere il socket remoto", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
@@ -115,19 +109,16 @@ namespace SnifferProbeRequestApp
 
                 //verifico se il dispositivo con quell'IP era già connesso
                 if (CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
-                    //se era gia connesso invio solo il CONFOK
+                    //il dispositivo era gia configurato
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
-
-                    Utils.sendMessage(socket, "CONFOK");
-
+                    
                 } else {
                     //se non era già configurato aspetto l'evento di Configurazione dall'interfaccia grafica
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
-                    device = new Device(remoteIpEndPoint.Address.ToString(), 1, 0, 0);
                     //event per gestire la sincronizzazione con il thread dell'interfaccia grafica
                     ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
-                    CommonData.lstNoConfDevices.TryAdd(device.ipAddress, deviceConfEvent);
+                    CommonData.lstNoConfDevices.TryAdd(remoteIpEndPoint.Address.ToString(), deviceConfEvent);
                     //delegato per gestire la variazione della lista dei device da configurare
                     CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
@@ -137,11 +128,10 @@ namespace SnifferProbeRequestApp
                     do {
                         if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
                             //il device è stato configurato
-                            Utils.sendMessage(socket, "CONFOK");
                             break;
                         } else {
                             //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
-                            Utils.sendMessage(socket, "IDENTIFICA");
+                            Utils.sendMessage(stream, remoteIpEndPoint, "IDENTIFICA");
                             //pulisco il buffer del messaggio da inviare
                             deviceConfEvent.Reset();
                             deviceConfEvent.WaitOne();
@@ -149,58 +139,47 @@ namespace SnifferProbeRequestApp
                     } while (true);
                 }
 
-                String syncMessage;
-
-                do {
-                    //posso riceve CONFOK O la richiesta di SYNC
-
-                    syncMessage = Utils.receiveMessage(socket);
-                    //se ricevo la richiesta di SYNC invio il timestamp attuale
-                    if (syncMessage == "SYNC_CLOCK\n") {
-                        //invio il timestap del server
-                        Utils.syncClock(socket);
-                    }
-                } while (syncMessage != "CONFOK_ACK\n");
-
-                String messagePacketsInfo;
+                String messageReceived;
+                Int16 countSyncTimestamp = 0;
 
                 while (!stopThreadElaboration) {
 
-                    //invio messaggio per indicare che può iniziare l'invio
-                    Utils.sendMessage(socket, "START_SEND");
+                    if (countSyncTimestamp == 0) {
+                        Utils.sendMessage(stream, remoteIpEndPoint, "SYNC_CLOCK");
+                        messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
 
-                    //ricevo messaggio con i dati dei pacchetti
-                    messagePacketsInfo = Utils.receiveMessage(socket);
+                        //posso ricevere SYNC_CLOCK_START (devo sincronizzare) o SYNC_CLOCK_STOP (sincronizzazione terminata)
+                        while (messageReceived == "SYNC_CLOCK_START//n") {
+                            Utils.syncClock(client.Client);
+                            messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+                        }
+                        //sincronizzo i timestamp ogni 5 interazioni
+                        countSyncTimestamp = 5;
+                    }
+
+                    //invio messaggio per indicare che può iniziare l'invio
+                    Utils.sendMessage(stream, remoteIpEndPoint, "START_SEND");
+
+                    messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
 
                     //deserializzazione del JSON ricevuto
-                    PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messagePacketsInfo);
+                    PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
 
-                    if (packetsInfo.listPacketInfo.Count > 0) {
+                    //controllo che ci siano messaggi e che il device sia tra quelli configurati
+                    if (packetsInfo.listPacketInfo.Count > 0 &&
+                        CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
                     }
-
-                    //invio un messaggio per dire che la ricezione è avvenuta con successo
-                    Utils.sendMessage(socket, "RICEVE_OK");
-
-                    do {
-                        //ricevo messaggio per la sincronizzazione
-                        syncMessage = Utils.receiveMessage(socket);
-
-                        //se ricevo la richiesta di SYNC invio il timestamp attuale
-                        if (syncMessage == "SYNC_CLOCK\n") {
-                            Utils.syncClock(socket);
-                        }
-                    } while (syncMessage == "SYNC_CLOCK\n");
+                    //decremento il contatore per la sincronizzazione dei timestamp
+                    countSyncTimestamp--;
                 }
             } catch (SnifferAppTimeoutSocketException e){
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, e.Message);
             } finally {
-                socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
+                client.Close();
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket chiuso");
             }         
         }
     }
 }
-

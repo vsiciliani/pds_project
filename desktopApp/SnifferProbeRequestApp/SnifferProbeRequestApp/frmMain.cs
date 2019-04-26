@@ -69,19 +69,20 @@ namespace SnifferProbeRequestApp
                 String ipAddress = lstBoxNoConfDevice.SelectedItem.ToString();
                 
                 //creo l'oggetto Device
-                Device device = new Device(lstBoxNoConfDevice.SelectedItem.ToString(), 1, xPosition, yPosition);
                 try {
                     //devo togliere il device dalla lista dei non configurati e aggiungerlo tra quelli configurati
+
+                    //elimino il device dalla lista dei device non configurati e lancio il delegato associato
+                    //semaforo per gestire la concorrenza con il thread che gestisce la connessione con il device
+                    ManualResetEvent deviceEvent = null;
+                    CommonData.lstNoConfDevices.TryRemove(ipAddress, out deviceEvent);
+
+                    Device device = new Device(ipAddress, 1, xPosition, yPosition, deviceEvent);
 
                     //aggiungo il device alla lista degi device configurati e lancio il delegato associato
                     CommonData.lstConfDevices.TryAdd(device.ipAddress, device);
                     CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
-                    //elimino il device dalla lista dei device non configurati e lancio il delegato associato
-                    //semaforo per gestire la concorrenza con il thread che gestisce la connessione con il device
-                    ManualResetEvent deviceEvent = null;
-                    CommonData.lstNoConfDevices.TryRemove(device.ipAddress, out deviceEvent);
-                    
                     deviceEvent.Set();
                     CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
@@ -127,7 +128,7 @@ namespace SnifferProbeRequestApp
                 CommonData.lstConfDevices.TryRemove(deviceIp, out device);
                 CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
-                CommonData.lstNoConfDevices.TryAdd(deviceIp, null);
+                CommonData.lstNoConfDevices.TryAdd(deviceIp, device.evento);
                 CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
             }
             catch (Exception)
@@ -164,6 +165,12 @@ namespace SnifferProbeRequestApp
             
             lblNumDeviceConf.BeginInvoke((Action)(() => {
                 lblNumDeviceConf.Text = "Numero device configurati: " + CommonData.lstConfDevices.Count;
+
+                if (CommonData.lstConfDevices.Count == 0) {
+                    lblNoDeviceConf.Visible = true;
+                    tabDeviceConf.Visible = false;
+                    return;
+                }
 
                 tabDeviceConf.TabPages.Clear();
 
