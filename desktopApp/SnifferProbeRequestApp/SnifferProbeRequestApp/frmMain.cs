@@ -35,8 +35,7 @@ namespace SnifferProbeRequestApp
             updateChartNumberDevice();
         }
 
-        private void btnIdentifica_Click(object sender, EventArgs e)
-        {
+        private void btnIdentificaDevice_Click(object sender, EventArgs e) {
             if (lstBoxNoConfDevice.SelectedItem == null) {
                 MessageBox.Show("Selezionare un device dall'elenco",
                     "Seleziona il device da configurare", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -50,14 +49,13 @@ namespace SnifferProbeRequestApp
             }
         }
 
-        private void btnConfigura_Click(object sender, EventArgs e)
-        {
+        private void btnSalvaDevice_Click(object sender, EventArgs e) {
             Int32 xPosition = 0, yPosition = 0;
             //check sui parametri (device selezionato e valore contenuto nella cella)
             if (lstBoxNoConfDevice.SelectedItem == null) {
-                MessageBox.Show("Selezionare un device dall'elenco", 
+                MessageBox.Show("Selezionare un device dall'elenco",
                     "Seleziona il device da configurare", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            } else if (! int.TryParse(txtXPosition.Text, out xPosition)) {
+            } else if (!int.TryParse(txtXPosition.Text, out xPosition)) {
                 MessageBox.Show("Posizione X non valida",
                     "Inserire un valore numerico per la posizione X ", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } else if (!int.TryParse(txtYPosition.Text, out yPosition)) {
@@ -67,7 +65,7 @@ namespace SnifferProbeRequestApp
 
                 //leggo l'IP del device selezionato
                 String ipAddress = lstBoxNoConfDevice.SelectedItem.ToString();
-                
+
                 //creo l'oggetto Device
                 try {
                     //devo togliere il device dalla lista dei non configurati e aggiungerlo tra quelli configurati
@@ -89,9 +87,8 @@ namespace SnifferProbeRequestApp
                     //ripulisco la textbox
                     txtXPosition.Clear();
                     txtYPosition.Clear();
-                } catch (Exception ex)
-                {
-                    MessageBox.Show("Errore", "Si è verificato un errore durante la configurazione del dispositivo", 
+                } catch (Exception ex) {
+                    MessageBox.Show("Errore", "Si è verificato un errore durante la configurazione del dispositivo",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Error, ex.ToString());
                 }
@@ -161,12 +158,36 @@ namespace SnifferProbeRequestApp
                 lblNumDeviceNonConf.Text = "Numero device non configurati: " + CommonData.lstNoConfDevices.Count;
 
                 lstBoxNoConfDevice.Items.Clear();
-                foreach (KeyValuePair<String, ManualResetEvent> device in CommonData.lstNoConfDevices) {
-                    lstBoxNoConfDevice.Items.Add(device.Key);
-
-                }
                 
+
+                if (CommonData.lstNoConfDevices.Count == 0) {
+                    lblNoDeviceNoConf.Visible = true;
+                    lstBoxNoConfDevice.Visible = false;
+                    lblXPosition.Visible = false;
+                    lblYPosition.Visible = false;
+                    txtXPosition.Visible = false;
+                    txtYPosition.Visible = false;
+                    btnIdentificaDevice.Visible = false;
+                    btnSalvaDevice.Visible = false;
+                } else {
+
+                    foreach (KeyValuePair<String, ManualResetEvent> device in CommonData.lstNoConfDevices) {
+                        lstBoxNoConfDevice.Items.Add(device.Key);
+
+                    }
+
+                    lblNoDeviceNoConf.Visible = false;
+                    lstBoxNoConfDevice.Visible = true;
+                    lblXPosition.Visible = true;
+                    lblYPosition.Visible = true;
+                    txtXPosition.Visible = true;
+                    txtYPosition.Visible = true;
+                    btnIdentificaDevice.Visible = true;
+                    btnSalvaDevice.Visible = true;
+                }
+
             }));
+            
         }
 
         private void updateConfDevice(object sender, EventArgs e) {
@@ -182,10 +203,12 @@ namespace SnifferProbeRequestApp
 
                 tabDeviceConf.TabPages.Clear();
 
+                //cancello tutti i punti ESP dal grafico delle posizioni
                 chartPositionDevice.Series["ESP"].Points.Clear();
 
                 foreach (KeyValuePair<String, Device> device in CommonData.lstConfDevices) {
 
+                    //aggiungo sul grafico delle posizioni il punto del device ESP
                     int point = chartPositionDevice.Series["ESP"].Points.AddXY(device.Value.x_position, device.Value.y_position);
                     chartPositionDevice.Series["ESP"].Points[point].ToolTip = device.Key;
 
@@ -196,85 +219,106 @@ namespace SnifferProbeRequestApp
                     lblIpDeviceConf.AutoSize = true;
                     lblIpDeviceConf.Location = new Point(7, 4);
                     lblIpDeviceConf.Size = new Size(80, 18);
-                    lblIpDeviceConf.Text = "Indirizzo IP: " + device.Value.ipAddress;
+                    lblIpDeviceConf.Text = "Indirizzo IP: ";
+                    // 
+                    // lblIndirizzoIpValue
+                    // 
+                    Label lblIndirizzoIpValue = new Label();
+                    lblIndirizzoIpValue.AutoSize = true;
+                    lblIndirizzoIpValue.Location = new Point(7, 27);
+                    lblIndirizzoIpValue.Font = new Font("Calibri", 11F, FontStyle.Bold);
+                    lblIndirizzoIpValue.Text = device.Value.ipAddress;
                     // 
                     // lblPosizioneDevice
                     // 
                     Label lblPosizioneDeviceConf = new Label();
                     lblPosizioneDeviceConf.AutoSize = true;
-                    lblPosizioneDeviceConf.Location = new Point(7, 26);
-                    lblPosizioneDeviceConf.Size = new Size(72, 18);
-                    lblPosizioneDeviceConf.Text = "Posizione: ("+device.Value.x_position +","+device.Value.y_position +")";
+                    lblPosizioneDeviceConf.Location = new Point(108, 4);
+                    lblPosizioneDeviceConf.Text = "Posizione attuale:";
                     // 
-                    // lblModificaCoordinate
+                    // lblPosizioneValue
                     // 
-                    Label lblModificaCoordinate = new Label();
-                    lblModificaCoordinate.AutoSize = true;
-                    lblModificaCoordinate.Location = new Point(7, 48);
-                    lblModificaCoordinate.Size = new Size(72, 18);
-                    lblModificaCoordinate.Text = "Modifica coordinate:";
+                    Label lblPosizioneValue = new Label();
+                    lblPosizioneValue.AutoSize = true;
+                    lblPosizioneValue.Location = new Point(108, 27);
+                    lblPosizioneValue.Font = new Font("Calibri", 11F, FontStyle.Bold);
+                    lblPosizioneValue.Text = "(" + device.Value.x_position + "," + device.Value.y_position + ")";
+                    // 
+                    // lblModificaPosizione
+                    // 
+                    Label lblModificaPosizione = new Label();
+                    lblModificaPosizione.AutoSize = true;
+                    lblModificaPosizione.Location = new Point(238, 4);
+                    lblModificaPosizione.Text = "Modifica posizione:";
                     // 
                     // lblModificaX
                     // 
                     Label lblModificaX = new Label();
                     lblModificaX.AutoSize = true;
-                    lblModificaX.Location = new Point(7, 70);
+                    lblModificaX.Location = new Point(238, 27);
                     lblModificaX.Size = new Size(72, 18);
                     lblModificaX.Text = "X:";
                     // 
                     // txtModificaX
                     // 
                     TextBox txtModificaX = new TextBox();
-                    txtModificaX.Location = new Point(30, 70);
+                    txtModificaX.Location = new Point(262, 27);
                     txtModificaX.Size = new Size(57, 25);
                     // 
                     // lblModificaY
                     // 
                     Label lblModificaY = new Label();
                     lblModificaY.AutoSize = true;
-                    lblModificaY.Location = new Point(93, 70);
+                    lblModificaY.Location = new Point(321, 27);
                     lblModificaY.Size = new Size(72, 18);
                     lblModificaY.Text = "Y:";
                     // 
                     // txtModificaY
                     // 
                     TextBox txtModificaY = new TextBox();
-                    txtModificaY.Location = new Point(117, 70);
+                    txtModificaY.Location = new Point(343, 27);
                     txtModificaY.Size = new Size(57, 25);
                     // 
-                    // btnModificaCoordinate
-                    // 
-                    Button btnModificaCoordinate = new Button();
-                    btnModificaCoordinate.Location = new Point(189, 70);
-                    btnModificaCoordinate.Size = new Size(75, 27);
-                    btnModificaCoordinate.Text = "Modifica";
-                    btnModificaCoordinate.UseVisualStyleBackColor = true;
-                    btnModificaCoordinate.Click += delegate { btnModificaCoordinate_Click(sender, e,
-                        device.Value, txtModificaX.Text, txtModificaY.Text);
+                    // btnSalvaModificaDevice
+                    //
+                    PictureBox btnSalvaModificaDevice = new PictureBox();
+                    btnSalvaModificaDevice.Image = Properties.Resources.success;
+                    btnSalvaModificaDevice.Location = new Point(405, 27);
+                    btnSalvaModificaDevice.Size = new Size(25, 25);
+                    btnSalvaModificaDevice.SizeMode = PictureBoxSizeMode.StretchImage;
+                    btnSalvaModificaDevice.TabStop = false;
+                    toolTipApp.SetToolTip(btnSalvaModificaDevice, "Salva la nuova popsizione");
+                    btnSalvaModificaDevice.Click += delegate {btnModificaCoordinate_Click(sender, e,
+                        device.Value, txtModificaX.Text, txtModificaY.Text); 
                     };
+                    
                     // 
-                    // btnEliminaConfDevice
+                    // btnEliminaDevice
                     // 
-                    Button btnEliminaConfDevice = new Button();
-                    btnEliminaConfDevice.Location = new Point(7, 97);
-                    btnEliminaConfDevice.Size = new Size(133, 27);
-                    btnEliminaConfDevice.Text = "Elimina device";
-                    btnEliminaConfDevice.UseVisualStyleBackColor = true;
-                    btnEliminaConfDevice.Click += delegate { btnEliminaConfDevice_Click(sender, e, device.Key); };
-
-
+                    PictureBox btnEliminaDevice = new PictureBox();
+                    btnEliminaDevice.Image = Properties.Resources.error;
+                    btnEliminaDevice.Location = new Point(436, 27);
+                    btnEliminaDevice.Size = new Size(25, 25);
+                    btnEliminaDevice.SizeMode = PictureBoxSizeMode.StretchImage;
+                    btnEliminaDevice.TabStop = false;
+                    toolTipApp.SetToolTip(btnEliminaDevice, "Elimina il device");
+                    btnEliminaDevice.Click += delegate { btnEliminaConfDevice_Click(sender, e, device.Key); };
+                    
+                    
                     //aggiorno elenco devices configurati
                     TabPage tabPage = new TabPage();
 
                     tabPage.Controls.Add(lblIpDeviceConf);
+                    tabPage.Controls.Add(lblIndirizzoIpValue);
                     tabPage.Controls.Add(lblPosizioneDeviceConf);
-                    tabPage.Controls.Add(lblModificaCoordinate);
+                    tabPage.Controls.Add(lblPosizioneValue);
+                    tabPage.Controls.Add(lblModificaPosizione);
                     tabPage.Controls.Add(lblModificaX);
                     tabPage.Controls.Add(txtModificaX);
                     tabPage.Controls.Add(lblModificaY);
                     tabPage.Controls.Add(txtModificaY);
-                    tabPage.Controls.Add(btnModificaCoordinate);
-                    tabPage.Controls.Add(btnEliminaConfDevice);
+                    tabPage.Controls.Add(btnSalvaModificaDevice);
+                    tabPage.Controls.Add(btnEliminaDevice);
                     tabPage.Location = new Point(4, 27);
                     tabPage.Padding = new Padding(3);
                     tabPage.Size = new Size(300, 59);
@@ -289,7 +333,6 @@ namespace SnifferProbeRequestApp
             tabDeviceConf.Visible = true;
 
         }
-
         
     }
 }
