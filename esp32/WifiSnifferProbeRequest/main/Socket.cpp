@@ -31,11 +31,7 @@ int Socket::connect(){
 }
 
 int Socket::send(std::string message){
-	char buffer[message.size() + 1];
-	strcpy(buffer, message.c_str());
-
-	size_t lunghezza= strlen(buffer);
-	return lwip_write(this->socket,buffer,lunghezza);
+	return lwip_write(this->socket,message.c_str(),message.size());
 }
 
 std::string Socket::receive(){

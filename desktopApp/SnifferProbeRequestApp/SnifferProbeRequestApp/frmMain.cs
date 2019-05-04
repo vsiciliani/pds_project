@@ -145,6 +145,14 @@ namespace SnifferProbeRequestApp
             KeyValuePair<DateTime, Int32> result = dbManager.countDevice();
 
             chartNumberDevice.Series[0].Points.AddXY(result.Key, result.Value);
+
+            Dictionary<String, Tuple<Double, Double>> points = dbManager.devicesPosition();
+
+            chartPositionDevice.Series["Device"].Points.Clear();
+            foreach (KeyValuePair<String, Tuple<Double, Double>> point in points) {
+                int p = chartPositionDevice.Series["Device"].Points.AddXY(point.Value.Item1, point.Value.Item2);
+                chartPositionDevice.Series["Device"].Points[p].ToolTip = point.Key;
+            }
         }
 
         private void updateNoConfDevice(object sender, EventArgs e) {
@@ -174,7 +182,13 @@ namespace SnifferProbeRequestApp
 
                 tabDeviceConf.TabPages.Clear();
 
+                chartPositionDevice.Series["ESP"].Points.Clear();
+
                 foreach (KeyValuePair<String, Device> device in CommonData.lstConfDevices) {
+
+                    int point = chartPositionDevice.Series["ESP"].Points.AddXY(device.Value.x_position, device.Value.y_position);
+                    chartPositionDevice.Series["ESP"].Points[point].ToolTip = device.Key;
+
                     // 
                     // lblIpDeviceConf
                     // 

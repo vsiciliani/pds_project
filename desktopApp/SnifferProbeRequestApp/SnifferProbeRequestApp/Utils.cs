@@ -85,9 +85,9 @@ namespace SnifferProbeRequestApp
 
         static public void sendMessage(NetworkStream stream, IPEndPoint endPoint, String message) {
             byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
-            
+
             try {
-                    stream.Write(messageToSend, 0, messageToSend.Length);
+                stream.Write(messageToSend, 0, messageToSend.Length);
                 logMessage("Utils.cs -- Send Message", LogCategory.Info,
                     "Receiver: " + endPoint.Address.ToString() + " Message: " + message);
             } catch (SocketException e) {
@@ -98,10 +98,10 @@ namespace SnifferProbeRequestApp
 
         static public String receiveMessage(NetworkStream stream, IPEndPoint endPoint) {
             String receivedMessage = String.Empty;
-            
+
             while (true) {
                 byte[] receivedBytes = new byte[MAXBUFFER];
-                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, 
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
                     "Device :" + endPoint.Address.ToString() + " In attesa di dati");
                 try {
                     int numBytes = stream.Read(receivedBytes, 0, receivedBytes.Length);
@@ -130,6 +130,47 @@ namespace SnifferProbeRequestApp
                 SnifferAppTimeoutSocketException exception = new SnifferAppTimeoutSocketException("Superato timeout di attesa per l'invio sul socket", e);
                 throw exception;
             }
+        }
+
+        static public Tuple<double, double> findPosition(Dictionary<string, int> signalStrength) {
+
+            int freqInMHz = 2412;
+
+            Dictionary<string, double> estimatedDistances = new Dictionary<string, double>();
+
+            foreach (KeyValuePair<string, int> signal in signalStrength) {
+                //free space loss data
+                double esponente = (27.55 - (20 * Math.Log10(freqInMHz)) + Math.Abs(signal.Value)) / 20.0;
+                double estimatedDistance = Math.Pow(10.0, esponente);
+                estimatedDistances.Add(signal.Key, estimatedDistance);
+            }
+
+            Dictionary<string, double> weightDevice = new Dictionary<string, double>();
+
+            double denominatoreWeight = 0;
+
+            foreach (double distance in estimatedDistances.Values) {
+                denominatoreWeight += (1 / distance);
+            }
+
+            foreach (KeyValuePair<string, double> device in estimatedDistances) {
+                double weight = (1 / device.Value) / denominatoreWeight;
+                weightDevice.Add(device.Key, weight);
+            }
+
+            //calcolo le coordinate
+            double x = 0;
+            double y = 0;
+
+            foreach (KeyValuePair<string, double> device in weightDevice) {
+                Device dev = null;
+                CommonData.lstConfDevices.TryGetValue(device.Key, out dev);
+
+                x += device.Value * dev.x_position;
+                y += device.Value * dev.y_position;
+            }
+
+            return new Tuple<double, double>(x, y);
         }
     }
 }

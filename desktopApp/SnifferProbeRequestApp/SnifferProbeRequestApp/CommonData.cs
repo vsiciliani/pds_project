@@ -10,6 +10,8 @@ namespace SnifferProbeRequestApp {
     //Questa classe wrappa i dati che devono essere visibili in tutte le parti del progetto
     public static class CommonData {
         //LISTA DEVICE CONFIGUARATI
+        // key = IPAddress device
+        // value = informazioni su device
         public static ConcurrentDictionary<String, Device> lstConfDevices = new ConcurrentDictionary<String, Device>();
 
         //delegato per lanciare gli eventi dopo la modifica della lstConfDevices
@@ -24,6 +26,8 @@ namespace SnifferProbeRequestApp {
         public static event EventHandler LstConfDevicesChanged;
 
         //LISTA DEVICE NON CONFIGUARATI
+        // key = IPAddress device
+        // value = evento associato per la sincronizzazione tra i thread di interfaccia grafica e di gestione del socket
         public static ConcurrentDictionary<String, ManualResetEvent> lstNoConfDevices = new ConcurrentDictionary<String, ManualResetEvent>();
         public static String paramConfDevice = null;
 

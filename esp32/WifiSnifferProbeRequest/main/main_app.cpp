@@ -22,7 +22,8 @@
 #include "PacketInfo.h"
 #include "Socket.h"
 #include "sdkconfig.h"
-#include "GPIO.h"
+//#include "GPIO.h"
+#include <driver/gpio.h>
 
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
 bool checkTimeoutThreadConnessionePc();
@@ -45,12 +46,16 @@ Socket *s;
 float memorySpace;
 
 //definizione costanti
-//std::string wifiSSID = "APAndroid2";
-//std::string wifiPassword = "pippopluto";
+//std::string wifiSSID = "Vodafone-50650385";
+//std::string wifiPassword = "pe7dt3793ae9t7b";
 
-std::string wifiSSID = "dlink-natale";
-std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
-int intervalloConnessionePc = 15;
+//std::string wifiSSID = "dlink-natale";
+//std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
+
+std::string wifiSSID = "APAndroid2";
+std::string wifiPassword = "pippopluto";
+
+int intervalloConnessionePc = 20;
 
 extern "C" {
    void app_main();
@@ -62,7 +67,8 @@ void app_main() {
 	nvs_flash_init();
 
 	//setto il led come output
-	ESP32CPP::GPIO::setOutput(GPIO_NUM_2); //GPIO_NUM_2BUILTIN LED
+	::gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+	//ESP32CPP::GPIO::setOutput(GPIO_NUM_2); //GPIO_NUM_2BUILTIN LED
 
 	//connetto il dispositivo alla rete Wifi
 	//wifi.connectAP("Vodafone-50650385", "pe7dt3793ae9t7b");
@@ -77,7 +83,7 @@ void app_main() {
 	ESP_LOGI(tag, "Connesso a %s con IP: %s Gateway: %s",wifi.getStaSSID().c_str(), wifi.getStaIp().c_str(), wifi.getStaGateway().c_str());
 
 	//creo il socket
-	s=new Socket("192.168.1.100",5010);
+	s=new Socket("192.168.43.213",5010);
 
 	//connetto il socket
 	connectSocket();
@@ -102,10 +108,6 @@ void app_main() {
 			//setto l'handler che gestisce la ricezione del pacchetto
 			ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
-			//abilito la modalità di attività promiscua
-			//ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
-			//ESP_LOGI(tag, "Modalita schema promiscua abilitata");
-
 			//salvo il timestamp per calcolare il tempo di flush verso il server
 			time(&startWaitTime);
 
@@ -118,10 +120,6 @@ void app_main() {
 			cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
 
 			ESP_LOGI(tag, "Invio dati dei pacchetti al server");
-
-			//disabilito la modalità di attività promiscua
-			//ESP_ERROR_CHECK(esp_wifi_set_promiscuous(false));
-			//ESP_LOGI(tag, "ThreadConnessionePc -- Modalita schema promiscua disabilitata");
 
 			//send dei dati verso il server
 			sendMessage(createJSONArray(listaRecord));
@@ -170,10 +168,10 @@ bool checkTimeoutThreadConnessionePc() {
 	float percMemoryAvailable =freeMemory/memorySpace;
 	ESP_LOGI(tag, "Percentuale memoria libera: %f", percMemoryAvailable);
 	//flusho il buffer verso il server è passato il tempo successivo o se la memoria libera e meno del 10 percento
-	if ((difftime(now,startWaitTime)>intervalloConnessionePc) || (percMemoryAvailable < 0.1)) {
+	if ((difftime(now,startWaitTime)>intervalloConnessionePc) || (percMemoryAvailable < 0.1))
 		return true;
-	}
-	else return false;
+	else
+		return false;
 }
 
 //preparo il messaggio JSON da inviare al server
@@ -187,6 +185,7 @@ std::string createJSONArray(std::list<std::string>){
 		}
 		buf+=it->c_str();
 	}
+
 	buf+="]}//n";
 	return buf;
 }
@@ -210,7 +209,7 @@ bool sendMessage(std::string message){
 	do {
 		numByteSent = s->send(message);
 	} while (numByteSent != message.length());
-	ESP_LOGI(tag, "Messaggio %s inviato con successo", message.c_str());
+	ESP_LOGI(tag, "Messaggio inviato al server con successo");
 	return true;
 }
 
@@ -258,9 +257,12 @@ void blinkLed(){
 	time(&blink_time_start);
 
 	do {
-		ESP32CPP::GPIO::high(GPIO_NUM_2);
+		//ESP32CPP::GPIO::high(GPIO_NUM_2);
+		//write(GPIO_NUM_2, false);
+		::gpio_set_level(GPIO_NUM_2, true);
 		sleep(1);
-		ESP32CPP::GPIO::low(GPIO_NUM_2);
+		//ESP32CPP::GPIO::low(GPIO_NUM_2);
+		::gpio_set_level(GPIO_NUM_2, false);
 		sleep(1);
 		time(&blink_time);
 	} while(difftime(blink_time,blink_time_start)<30); //lampeggia per 30 secondi

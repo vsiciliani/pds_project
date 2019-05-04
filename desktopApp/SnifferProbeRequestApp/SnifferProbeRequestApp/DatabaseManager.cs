@@ -88,12 +88,14 @@ namespace SnifferProbeRequestApp
             StringBuilder fromQuery = new StringBuilder("");
             StringBuilder whereQuery = new StringBuilder("");
 
-            selectQuery.Append("SELECT d1.SourceAddress, d1.SSID, d1.hashCode, d1.SSID, ");
+            //preparo lo statement della query sulla tabella Packets
+            //seleziono i campi comuni (MACAddress, SSID e hashCode del pacchetto"
+            selectQuery.Append("SELECT d1.SourceAddress, d1.SSID, d1.hashCode, ");
             fromQuery.Append(" FROM ");
             whereQuery.Append(" WHERE");
 
-            //per ogni device aggiungo i campi di select nella query,
-            //una lettura sulla tabella Packets e la condizione di join
+            //per ogni device aggiungo i campi di select nella query (potenzaSegnale, timestamp, idPacchetto)
+            //di lettura sulla tabella Packets e la condizione di join
             foreach (KeyValuePair<String, String> device in devices) {
                 String deviceName = device.Key;
                 selectQuery.Append(deviceName + ".signalStrength as " + deviceName + "_signalStrength, ");
@@ -110,13 +112,13 @@ namespace SnifferProbeRequestApp
             fromQuery.Remove(fromQuery.Length - 1, 1); //elimino l'ultima virgola
             whereQuery.Remove(whereQuery.Length - 3, 3); //elimino l'ultimo AND
 
-            String query = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
+            String queryPackets = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
             
-            DataTable table = new DataTable();
+            DataTable tablePackets = new DataTable();
             try {
-                SqlCommand cmd = new SqlCommand(query, connection);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(table);
+                SqlCommand cmd = new SqlCommand(queryPackets, connection);
+                SqlDataAdapter sqlAdapter = new SqlDataAdapter(cmd);
+                sqlAdapter.Fill(tablePackets);
             } catch (Exception e){
                 SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
@@ -124,33 +126,40 @@ namespace SnifferProbeRequestApp
             }
 
             //controllo se devo assemblare dei dati
-            if (table.Rows.Count == 0) return; 
+            if (tablePackets.Rows.Count == 0) return; 
 
             List<AssembledPacketInfo> lstAssembledInfo = new List<AssembledPacketInfo>();
 
-            //delete query dei processati dalla tabella "raw"
+            //delete query dei processati dalla tabella "raw" Packets utilizzzando gli id
             StringBuilder deleteQuery = new StringBuilder("DELETE FROM [dbo].[Packets] WHERE id IN (");
 
-            foreach (DataRow record in table.Rows) {
+            foreach (DataRow record in tablePackets.Rows) {
+                //leggo dalla tabella i campi comuni
                 String hashCode = (String) record["hashCode"];
                 String sourceAddress = (String) record["SourceAddress"];
                 String SSID = (String) record["SSID"];
+                //creo un dizionario per salvarmi le potenze di segnali dei vari dispositivi
                 Dictionary<String, Int32> signalStrength = new Dictionary<string, int>();
                 Int64 avgTimestamp = 0;
+
+                //ciclo sui device configurati
                 foreach (KeyValuePair<String, String> device in devices) {
-                    signalStrength[device.Key] = (Int32) record[device.Key + "_signalStrength"];
+                    //salvo nel dizionario la potenza del segnale
+                    signalStrength[device.Value] = (Int32) record[device.Key + "_signalStrength"];
                     avgTimestamp += (Int64)record[device.Key + "_timestamp"];
+
+                    //leggo l'id del pacchetto per inserirlo nella query di delete dalla tabella Packets
                     Int32 id_packet = (Int32)record[device.Key + "_id"];
                     deleteQuery.Append(id_packet.ToString()+",");
                 }
+                //calcolo il timestamp medio di ricezione del pacchetto dai vari devices
                 avgTimestamp = avgTimestamp / (Int64)devices.Count;
 
                 //calcolare la posizione
-                Int32 x_pos = 0;
-                Int32 y_pos = 0;
-
+                Tuple<Double, Double> position = Utils.findPosition(signalStrength);
+                
                 lstAssembledInfo.Add(new AssembledPacketInfo(sourceAddress,
-                    SSID, hashCode, avgTimestamp, x_pos, y_pos));
+                    SSID, hashCode, avgTimestamp, position.Item1, position.Item2));
             }
 
             //insert nella tabella AssembledPacketInfo le informazioni dei pacchetti
@@ -164,8 +173,8 @@ namespace SnifferProbeRequestApp
                 DateTime start = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                 DateTime date = start.AddMilliseconds(assembledInfo.timestamp);
                 insertQuery.Append("'" + date.ToString("MM/dd/yyyy HH:mm:ss") + "',");
-                insertQuery.Append(assembledInfo.x_position + ",");
-                insertQuery.Append(assembledInfo.y_position + "),");
+                insertQuery.Append(assembledInfo.x_position.ToString().Replace(",",".") + ",");
+                insertQuery.Append(assembledInfo.y_position.ToString().Replace(",", ".") + "),");
             }
             insertQuery.Remove(insertQuery.Length - 1, 1); //elimino l'ultima virgola
             
@@ -200,8 +209,14 @@ namespace SnifferProbeRequestApp
         //conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)
         public KeyValuePair<DateTime, Int32> countDevice() {
 
-            //String selectQuery = "SELECT Current_TimeStamp  AS date_time, COUNT(DISTINCT sourceAddress) AS countDevice FROM dbo.AssembledPacketInfo WHERE timestamp_packet > DateADD(mi, -5, Current_TimeStamp)";
-            String selectQuery = "SELECT Current_TimeStamp  AS date_time, COUNT(DISTINCT sourceAddress) AS countDevice FROM dbo.AssembledPacketInfo";
+            string selectQuery = @"SELECT Current_TimeStamp as date_time, count(*) as countDevice
+                                   FROM (
+                                     SELECT sourceAddress, MIN(timestamp_packet) as min_timestamp, MAX(timestamp_packet) as max_timestamp
+                                     FROM dbo.AssembledPacketInfo
+                                     WHERE timestamp_packet > DateADD(mi, -5, GETUTCDATE())
+                                     GROUP BY sourceAddress
+                                   ) sub_query
+                                   WHERE (DATEDIFF(SECOND , min_timestamp , max_timestamp) > 180)";
 
             DataTable resultCount = new DataTable();
             try {
@@ -222,9 +237,36 @@ namespace SnifferProbeRequestApp
             return result;
         }
 
-        //calcola la posizione del device
-        private void getPosition() {
+        //ritorna i punti dei device rilevati nell'ultimo minuto
+        public Dictionary<String, Tuple<Double, Double>> devicesPosition() {
 
+            Dictionary<String, Tuple<Double, Double>> points = new Dictionary<String, Tuple<Double, Double>>();
+
+            String selectQuery = @"SELECT sourceAddress, AVG(x_position) as x_position, AVG(y_position) as y_position
+                                   FROM dbo.AssembledPacketInfo
+                                   WHERE timestamp_packet > DateADD(mi, -1, GETUTCDATE())
+                                   GROUP BY sourceAddress";
+
+            DataTable resultQuery = new DataTable();
+            try {
+                SqlCommand cmd = new SqlCommand(selectQuery, connection);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(resultQuery);
+            } catch (Exception e) {
+                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
+            }
+
+            foreach (DataRow record in resultQuery.Rows) {
+
+                String sourceAddress = (String)record["sourceAddress"];
+                Double x_position = (Double)record["x_position"];
+                Double y_position = (Double)record["y_position"];
+
+                points.Add(sourceAddress, new Tuple<double, double>(x_position, y_position));
+            }
+            return points;
         }
 
         public void closeConnection() {

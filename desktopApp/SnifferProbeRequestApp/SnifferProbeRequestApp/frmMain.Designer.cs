@@ -30,6 +30,7 @@
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.groupBoxSettings = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnIdentifica = new System.Windows.Forms.Button();
@@ -372,6 +373,10 @@
             // 
             this.chartNumberDevice.BorderlineWidth = 0;
             this.chartNumberDevice.CausesValidation = false;
+            chartArea1.AxisX.MajorGrid.Enabled = false;
+            chartArea1.AxisY.MajorGrid.LineColor = System.Drawing.Color.Gray;
+            chartArea1.AxisY.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
+            chartArea1.AxisY.MajorGrid.LineWidth = 2;
             chartArea1.Name = "ChartArea1";
             this.chartNumberDevice.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
@@ -404,6 +409,14 @@
             // 
             // chartPositionDevice
             // 
+            chartArea2.AxisX.LabelStyle.Enabled = false;
+            chartArea2.AxisX.LineWidth = 0;
+            chartArea2.AxisX.MajorGrid.Enabled = false;
+            chartArea2.AxisX.MajorTickMark.LineWidth = 0;
+            chartArea2.AxisY.LabelStyle.Enabled = false;
+            chartArea2.AxisY.LineWidth = 0;
+            chartArea2.AxisY.MajorGrid.Enabled = false;
+            chartArea2.AxisY.MajorTickMark.LineWidth = 0;
             chartArea2.Name = "ChartArea1";
             this.chartPositionDevice.ChartAreas.Add(chartArea2);
             legend2.Name = "Legend1";
@@ -413,8 +426,18 @@
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
             series2.Legend = "Legend1";
-            series2.Name = "Series1";
+            series2.MarkerSize = 12;
+            series2.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Square;
+            series2.Name = "ESP";
+            series3.ChartArea = "ChartArea1";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series3.Legend = "Legend1";
+            series3.MarkerColor = System.Drawing.Color.Red;
+            series3.MarkerSize = 15;
+            series3.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Cross;
+            series3.Name = "Device";
             this.chartPositionDevice.Series.Add(series2);
+            this.chartPositionDevice.Series.Add(series3);
             this.chartPositionDevice.Size = new System.Drawing.Size(995, 279);
             this.chartPositionDevice.TabIndex = 0;
             this.chartPositionDevice.Text = "chart1";

@@ -8,7 +8,7 @@ namespace SnifferProbeRequestApp
 {
     class AssembledPacketInfo
     {
-        public AssembledPacketInfo(string sourceAddress, string SSID, string hashCode, Int64 timestamp, int x_position, int y_position)
+        public AssembledPacketInfo(string sourceAddress, string SSID, string hashCode, Int64 timestamp, Double x_position, Double y_position)
         {
             this.sourceAddress = sourceAddress;
             this.SSID = SSID;
@@ -22,7 +22,7 @@ namespace SnifferProbeRequestApp
         public string SSID { get; set; }
         public string hashCode { get; set; }
         public Int64 timestamp { get; set; }
-        public Int32 x_position { get; set; }
-        public Int32 y_position { get; set; }
+        public Double x_position { get; set; }
+        public Double y_position { get; set; }
     }
 }
