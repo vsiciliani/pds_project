@@ -32,9 +32,7 @@
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.groupBoxSettings = new System.Windows.Forms.GroupBox();
-            this.btnSalvaDevice = new System.Windows.Forms.PictureBox();
             this.separatoreSettingRigth = new System.Windows.Forms.Label();
-            this.btnIdentificaDevice = new System.Windows.Forms.PictureBox();
             this.separatorSettingLeft = new System.Windows.Forms.Label();
             this.txtYPosition = new System.Windows.Forms.TextBox();
             this.txtXPosition = new System.Windows.Forms.TextBox();
@@ -45,8 +43,6 @@
             this.lblConfiguraDevice = new System.Windows.Forms.Label();
             this.tabDeviceConf = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.btnEliminaDevice = new System.Windows.Forms.PictureBox();
-            this.btnSalvaModificaDevice = new System.Windows.Forms.PictureBox();
             this.lblModPosizione = new System.Windows.Forms.Label();
             this.lblPosizioneValue = new System.Windows.Forms.Label();
             this.lblIndirizzoIpValue = new System.Windows.Forms.Label();
@@ -71,30 +67,37 @@
             this.lblTitle = new System.Windows.Forms.Label();
             this.tabFeatures = new System.Windows.Forms.TabControl();
             this.tabConteggioDevice = new System.Windows.Forms.TabPage();
-            this.imgRefresh = new System.Windows.Forms.PictureBox();
             this.tabPosizioneDevice = new System.Windows.Forms.TabPage();
             this.toolTipApp = new System.Windows.Forms.ToolTip(this.components);
+            this.imgRefresh = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.imgPolito = new System.Windows.Forms.PictureBox();
+            this.btnSalvaDevice = new System.Windows.Forms.PictureBox();
+            this.btnIdentificaDevice = new System.Windows.Forms.PictureBox();
+            this.btnEliminaDevice = new System.Windows.Forms.PictureBox();
+            this.btnSalvaModificaDevice = new System.Windows.Forms.PictureBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBoxSettings.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnSalvaDevice)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnIdentificaDevice)).BeginInit();
             this.tabDeviceConf.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnEliminaDevice)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnSalvaModificaDevice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartNumberDevice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartPositionDevice)).BeginInit();
             this.tabFeatures.SuspendLayout();
             this.tabConteggioDevice.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.imgRefresh)).BeginInit();
             this.tabPosizioneDevice.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imgRefresh)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgPolito)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnSalvaDevice)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnIdentificaDevice)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnEliminaDevice)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnSalvaModificaDevice)).BeginInit();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBoxSettings
             // 
+            this.groupBoxSettings.BackColor = System.Drawing.SystemColors.GrayText;
             this.groupBoxSettings.Controls.Add(this.btnSalvaDevice);
             this.groupBoxSettings.Controls.Add(this.separatoreSettingRigth);
             this.groupBoxSettings.Controls.Add(this.btnIdentificaDevice);
@@ -112,25 +115,13 @@
             this.groupBoxSettings.Controls.Add(this.lblNumDeviceNonConf);
             this.groupBoxSettings.Controls.Add(this.lblNumDeviceConf);
             this.groupBoxSettings.Font = new System.Drawing.Font("Calibri", 11F);
+            this.groupBoxSettings.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.groupBoxSettings.Location = new System.Drawing.Point(12, 137);
             this.groupBoxSettings.Name = "groupBoxSettings";
             this.groupBoxSettings.Size = new System.Drawing.Size(1039, 133);
             this.groupBoxSettings.TabIndex = 0;
             this.groupBoxSettings.TabStop = false;
             this.groupBoxSettings.Text = "Settings";
-            // 
-            // btnSalvaDevice
-            // 
-            this.btnSalvaDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.plus;
-            this.btnSalvaDevice.Location = new System.Drawing.Point(921, 38);
-            this.btnSalvaDevice.Name = "btnSalvaDevice";
-            this.btnSalvaDevice.Size = new System.Drawing.Size(25, 25);
-            this.btnSalvaDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.btnSalvaDevice.TabIndex = 9;
-            this.btnSalvaDevice.TabStop = false;
-            this.toolTipApp.SetToolTip(this.btnSalvaDevice, "Salva configurazione device");
-            this.btnSalvaDevice.Visible = false;
-            this.btnSalvaDevice.Click += new System.EventHandler(this.btnSalvaDevice_Click);
             // 
             // separatoreSettingRigth
             // 
@@ -139,19 +130,6 @@
             this.separatoreSettingRigth.Name = "separatoreSettingRigth";
             this.separatoreSettingRigth.Size = new System.Drawing.Size(2, 115);
             this.separatoreSettingRigth.TabIndex = 13;
-            // 
-            // btnIdentificaDevice
-            // 
-            this.btnIdentificaDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.placeholder;
-            this.btnIdentificaDevice.Location = new System.Drawing.Point(885, 38);
-            this.btnIdentificaDevice.Name = "btnIdentificaDevice";
-            this.btnIdentificaDevice.Size = new System.Drawing.Size(25, 25);
-            this.btnIdentificaDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.btnIdentificaDevice.TabIndex = 12;
-            this.btnIdentificaDevice.TabStop = false;
-            this.toolTipApp.SetToolTip(this.btnIdentificaDevice, "Identifica device\r\n(il device selezionato inizierà a lampeggiare per 30 secondi)");
-            this.btnIdentificaDevice.Visible = false;
-            this.btnIdentificaDevice.Click += new System.EventHandler(this.btnIdentificaDevice_Click);
             // 
             // separatorSettingLeft
             // 
@@ -261,31 +239,10 @@
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // btnEliminaDevice
-            // 
-            this.btnEliminaDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.error;
-            this.btnEliminaDevice.Location = new System.Drawing.Point(436, 23);
-            this.btnEliminaDevice.Name = "btnEliminaDevice";
-            this.btnEliminaDevice.Size = new System.Drawing.Size(25, 25);
-            this.btnEliminaDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.btnEliminaDevice.TabIndex = 10;
-            this.btnEliminaDevice.TabStop = false;
-            this.toolTipApp.SetToolTip(this.btnEliminaDevice, "Salva configurazione device");
-            // 
-            // btnSalvaModificaDevice
-            // 
-            this.btnSalvaModificaDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.success;
-            this.btnSalvaModificaDevice.Location = new System.Drawing.Point(405, 23);
-            this.btnSalvaModificaDevice.Name = "btnSalvaModificaDevice";
-            this.btnSalvaModificaDevice.Size = new System.Drawing.Size(25, 25);
-            this.btnSalvaModificaDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.btnSalvaModificaDevice.TabIndex = 13;
-            this.btnSalvaModificaDevice.TabStop = false;
-            this.toolTipApp.SetToolTip(this.btnSalvaModificaDevice, "Identifica device\r\n(il device selezionato inizierà a lampeggiare per 30 secondi)");
-            // 
             // lblModPosizione
             // 
             this.lblModPosizione.AutoSize = true;
+            this.lblModPosizione.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblModPosizione.Location = new System.Drawing.Point(238, 4);
             this.lblModPosizione.Name = "lblModPosizione";
             this.lblModPosizione.Size = new System.Drawing.Size(128, 18);
@@ -295,6 +252,7 @@
             // lblPosizioneValue
             // 
             this.lblPosizioneValue.AutoSize = true;
+            this.lblPosizioneValue.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblPosizioneValue.Location = new System.Drawing.Point(108, 27);
             this.lblPosizioneValue.Name = "lblPosizioneValue";
             this.lblPosizioneValue.Size = new System.Drawing.Size(46, 18);
@@ -305,6 +263,7 @@
             // 
             this.lblIndirizzoIpValue.AutoSize = true;
             this.lblIndirizzoIpValue.Font = new System.Drawing.Font("Calibri", 11F);
+            this.lblIndirizzoIpValue.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblIndirizzoIpValue.Location = new System.Drawing.Point(7, 27);
             this.lblIndirizzoIpValue.Name = "lblIndirizzoIpValue";
             this.lblIndirizzoIpValue.Size = new System.Drawing.Size(46, 18);
@@ -321,6 +280,7 @@
             // lblPosizioneDevice
             // 
             this.lblPosizioneDevice.AutoSize = true;
+            this.lblPosizioneDevice.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblPosizioneDevice.Location = new System.Drawing.Point(108, 4);
             this.lblPosizioneDevice.Name = "lblPosizioneDevice";
             this.lblPosizioneDevice.Size = new System.Drawing.Size(119, 18);
@@ -330,6 +290,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
+            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label3.Location = new System.Drawing.Point(321, 27);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(18, 18);
@@ -339,6 +300,7 @@
             // lblIpDeviceConf
             // 
             this.lblIpDeviceConf.AutoSize = true;
+            this.lblIpDeviceConf.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblIpDeviceConf.Location = new System.Drawing.Point(7, 4);
             this.lblIpDeviceConf.Name = "lblIpDeviceConf";
             this.lblIpDeviceConf.Size = new System.Drawing.Size(80, 18);
@@ -356,6 +318,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label2.Location = new System.Drawing.Point(238, 27);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(20, 18);
@@ -432,7 +395,7 @@
             this.chartNumberDevice.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.chartNumberDevice.Legends.Add(legend1);
-            this.chartNumberDevice.Location = new System.Drawing.Point(12, 38);
+            this.chartNumberDevice.Location = new System.Drawing.Point(6, 6);
             this.chartNumberDevice.Name = "chartNumberDevice";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
@@ -443,7 +406,7 @@
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
             this.chartNumberDevice.Series.Add(series1);
-            this.chartNumberDevice.Size = new System.Drawing.Size(1013, 277);
+            this.chartNumberDevice.Size = new System.Drawing.Size(1007, 358);
             this.chartNumberDevice.TabIndex = 0;
             this.chartNumberDevice.Text = "chartNumberDevice";
             // 
@@ -461,7 +424,7 @@
             this.chartPositionDevice.ChartAreas.Add(chartArea2);
             legend2.Name = "Legend1";
             this.chartPositionDevice.Legends.Add(legend2);
-            this.chartPositionDevice.Location = new System.Drawing.Point(13, 6);
+            this.chartPositionDevice.Location = new System.Drawing.Point(6, 6);
             this.chartPositionDevice.Name = "chartPositionDevice";
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
@@ -478,7 +441,7 @@
             series3.Name = "Device";
             this.chartPositionDevice.Series.Add(series2);
             this.chartPositionDevice.Series.Add(series3);
-            this.chartPositionDevice.Size = new System.Drawing.Size(984, 345);
+            this.chartPositionDevice.Size = new System.Drawing.Size(1004, 358);
             this.chartPositionDevice.TabIndex = 0;
             this.chartPositionDevice.Text = "chart1";
             // 
@@ -532,45 +495,44 @@
             // 
             this.tabFeatures.Controls.Add(this.tabConteggioDevice);
             this.tabFeatures.Controls.Add(this.tabPosizioneDevice);
-            this.tabFeatures.Location = new System.Drawing.Point(12, 284);
+            this.tabFeatures.Location = new System.Drawing.Point(9, 54);
             this.tabFeatures.Name = "tabFeatures";
             this.tabFeatures.SelectedIndex = 0;
-            this.tabFeatures.Size = new System.Drawing.Size(1039, 362);
+            this.tabFeatures.Size = new System.Drawing.Size(1024, 401);
             this.tabFeatures.TabIndex = 8;
             // 
             // tabConteggioDevice
             // 
             this.tabConteggioDevice.Controls.Add(this.chartNumberDevice);
-            this.tabConteggioDevice.Controls.Add(this.imgRefresh);
-            this.tabConteggioDevice.Location = new System.Drawing.Point(4, 22);
+            this.tabConteggioDevice.Location = new System.Drawing.Point(4, 27);
             this.tabConteggioDevice.Name = "tabConteggioDevice";
             this.tabConteggioDevice.Padding = new System.Windows.Forms.Padding(3);
-            this.tabConteggioDevice.Size = new System.Drawing.Size(1031, 336);
+            this.tabConteggioDevice.Size = new System.Drawing.Size(1016, 370);
             this.tabConteggioDevice.TabIndex = 0;
             this.tabConteggioDevice.Text = "Conteggio Device";
             this.tabConteggioDevice.UseVisualStyleBackColor = true;
             // 
+            // tabPosizioneDevice
+            // 
+            this.tabPosizioneDevice.Controls.Add(this.chartPositionDevice);
+            this.tabPosizioneDevice.Location = new System.Drawing.Point(4, 27);
+            this.tabPosizioneDevice.Name = "tabPosizioneDevice";
+            this.tabPosizioneDevice.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPosizioneDevice.Size = new System.Drawing.Size(1016, 370);
+            this.tabPosizioneDevice.TabIndex = 1;
+            this.tabPosizioneDevice.Text = "Posizione Device";
+            this.tabPosizioneDevice.UseVisualStyleBackColor = true;
+            // 
             // imgRefresh
             // 
-            this.imgRefresh.Image = global::SnifferProbeRequestApp.Properties.Resources.refresh;
-            this.imgRefresh.Location = new System.Drawing.Point(6, 6);
+            this.imgRefresh.Image = global::SnifferProbeRequestApp.Properties.Resources.repeat;
+            this.imgRefresh.Location = new System.Drawing.Point(9, 22);
             this.imgRefresh.Name = "imgRefresh";
             this.imgRefresh.Size = new System.Drawing.Size(25, 26);
             this.imgRefresh.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.imgRefresh.TabIndex = 1;
             this.imgRefresh.TabStop = false;
             this.imgRefresh.Click += new System.EventHandler(this.imgRefresh_Click);
-            // 
-            // tabPosizioneDevice
-            // 
-            this.tabPosizioneDevice.Controls.Add(this.chartPositionDevice);
-            this.tabPosizioneDevice.Location = new System.Drawing.Point(4, 22);
-            this.tabPosizioneDevice.Name = "tabPosizioneDevice";
-            this.tabPosizioneDevice.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPosizioneDevice.Size = new System.Drawing.Size(1031, 336);
-            this.tabPosizioneDevice.TabIndex = 1;
-            this.tabPosizioneDevice.Text = "Posizione Device";
-            this.tabPosizioneDevice.UseVisualStyleBackColor = true;
             // 
             // pictureBox1
             // 
@@ -593,13 +555,75 @@
             this.imgPolito.TabIndex = 6;
             this.imgPolito.TabStop = false;
             // 
+            // btnSalvaDevice
+            // 
+            this.btnSalvaDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.plus;
+            this.btnSalvaDevice.Location = new System.Drawing.Point(921, 38);
+            this.btnSalvaDevice.Name = "btnSalvaDevice";
+            this.btnSalvaDevice.Size = new System.Drawing.Size(25, 25);
+            this.btnSalvaDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnSalvaDevice.TabIndex = 9;
+            this.btnSalvaDevice.TabStop = false;
+            this.toolTipApp.SetToolTip(this.btnSalvaDevice, "Salva configurazione device");
+            this.btnSalvaDevice.Visible = false;
+            this.btnSalvaDevice.Click += new System.EventHandler(this.btnSalvaDevice_Click);
+            // 
+            // btnIdentificaDevice
+            // 
+            this.btnIdentificaDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.placeholder;
+            this.btnIdentificaDevice.Location = new System.Drawing.Point(885, 38);
+            this.btnIdentificaDevice.Name = "btnIdentificaDevice";
+            this.btnIdentificaDevice.Size = new System.Drawing.Size(25, 25);
+            this.btnIdentificaDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnIdentificaDevice.TabIndex = 12;
+            this.btnIdentificaDevice.TabStop = false;
+            this.toolTipApp.SetToolTip(this.btnIdentificaDevice, "Identifica device\r\n(il device selezionato inizierà a lampeggiare per 30 secondi)");
+            this.btnIdentificaDevice.Visible = false;
+            this.btnIdentificaDevice.Click += new System.EventHandler(this.btnIdentificaDevice_Click);
+            // 
+            // btnEliminaDevice
+            // 
+            this.btnEliminaDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.error;
+            this.btnEliminaDevice.Location = new System.Drawing.Point(436, 23);
+            this.btnEliminaDevice.Name = "btnEliminaDevice";
+            this.btnEliminaDevice.Size = new System.Drawing.Size(25, 25);
+            this.btnEliminaDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnEliminaDevice.TabIndex = 10;
+            this.btnEliminaDevice.TabStop = false;
+            this.toolTipApp.SetToolTip(this.btnEliminaDevice, "Salva configurazione device");
+            // 
+            // btnSalvaModificaDevice
+            // 
+            this.btnSalvaModificaDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.success;
+            this.btnSalvaModificaDevice.Location = new System.Drawing.Point(405, 23);
+            this.btnSalvaModificaDevice.Name = "btnSalvaModificaDevice";
+            this.btnSalvaModificaDevice.Size = new System.Drawing.Size(25, 25);
+            this.btnSalvaModificaDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnSalvaModificaDevice.TabIndex = 13;
+            this.btnSalvaModificaDevice.TabStop = false;
+            this.toolTipApp.SetToolTip(this.btnSalvaModificaDevice, "Identifica device\r\n(il device selezionato inizierà a lampeggiare per 30 secondi)");
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.BackColor = System.Drawing.SystemColors.GrayText;
+            this.groupBox2.Controls.Add(this.imgRefresh);
+            this.groupBox2.Controls.Add(this.tabFeatures);
+            this.groupBox2.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox2.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.groupBox2.Location = new System.Drawing.Point(12, 276);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(1039, 461);
+            this.groupBox2.TabIndex = 9;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Rilevazioni";
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.AppWorkspace;
-            this.ClientSize = new System.Drawing.Size(1060, 658);
-            this.Controls.Add(this.tabFeatures);
+            this.ClientSize = new System.Drawing.Size(1058, 749);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.imgPolito);
@@ -611,21 +635,22 @@
             this.Text = "Sistema rilevazione presenze";
             this.groupBoxSettings.ResumeLayout(false);
             this.groupBoxSettings.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnSalvaDevice)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnIdentificaDevice)).EndInit();
             this.tabDeviceConf.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnEliminaDevice)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.btnSalvaModificaDevice)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartNumberDevice)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartPositionDevice)).EndInit();
             this.tabFeatures.ResumeLayout(false);
             this.tabConteggioDevice.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.imgRefresh)).EndInit();
             this.tabPosizioneDevice.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.imgRefresh)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgPolito)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnSalvaDevice)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnIdentificaDevice)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnEliminaDevice)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnSalvaModificaDevice)).EndInit();
+            this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -678,6 +703,7 @@
         private System.Windows.Forms.Label lblIndirizzoIpValue;
         private System.Windows.Forms.PictureBox btnEliminaDevice;
         private System.Windows.Forms.PictureBox btnSalvaModificaDevice;
+        private System.Windows.Forms.GroupBox groupBox2;
     }
 }
 

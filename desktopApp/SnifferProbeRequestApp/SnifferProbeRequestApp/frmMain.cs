@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SnifferProbeRequestApp
@@ -135,8 +130,6 @@ namespace SnifferProbeRequestApp
             }
         }
 
-        
-
         //CUSTOM PROCEDURE
         public void updateChartNumberDevice() {
             KeyValuePair<DateTime, Int32> result = dbManager.countDevice();
@@ -220,6 +213,7 @@ namespace SnifferProbeRequestApp
                     lblIpDeviceConf.Location = new Point(7, 4);
                     lblIpDeviceConf.Size = new Size(80, 18);
                     lblIpDeviceConf.Text = "Indirizzo IP: ";
+                    lblIpDeviceConf.ForeColor = SystemColors.WindowText;
                     // 
                     // lblIndirizzoIpValue
                     // 
@@ -228,6 +222,7 @@ namespace SnifferProbeRequestApp
                     lblIndirizzoIpValue.Location = new Point(7, 27);
                     lblIndirizzoIpValue.Font = new Font("Calibri", 11F, FontStyle.Bold);
                     lblIndirizzoIpValue.Text = device.Value.ipAddress;
+                    lblIndirizzoIpValue.ForeColor = SystemColors.WindowText;
                     // 
                     // lblPosizioneDevice
                     // 
@@ -235,6 +230,7 @@ namespace SnifferProbeRequestApp
                     lblPosizioneDeviceConf.AutoSize = true;
                     lblPosizioneDeviceConf.Location = new Point(108, 4);
                     lblPosizioneDeviceConf.Text = "Posizione attuale:";
+                    lblPosizioneDeviceConf.ForeColor = SystemColors.WindowText;
                     // 
                     // lblPosizioneValue
                     // 
@@ -243,6 +239,7 @@ namespace SnifferProbeRequestApp
                     lblPosizioneValue.Location = new Point(108, 27);
                     lblPosizioneValue.Font = new Font("Calibri", 11F, FontStyle.Bold);
                     lblPosizioneValue.Text = "(" + device.Value.x_position + "," + device.Value.y_position + ")";
+                    lblPosizioneValue.ForeColor = SystemColors.WindowText;
                     // 
                     // lblModificaPosizione
                     // 
@@ -250,6 +247,7 @@ namespace SnifferProbeRequestApp
                     lblModificaPosizione.AutoSize = true;
                     lblModificaPosizione.Location = new Point(238, 4);
                     lblModificaPosizione.Text = "Modifica posizione:";
+                    lblModificaPosizione.ForeColor = SystemColors.WindowText;
                     // 
                     // lblModificaX
                     // 
@@ -258,6 +256,7 @@ namespace SnifferProbeRequestApp
                     lblModificaX.Location = new Point(238, 27);
                     lblModificaX.Size = new Size(72, 18);
                     lblModificaX.Text = "X:";
+                    lblModificaX.ForeColor = SystemColors.WindowText;
                     // 
                     // txtModificaX
                     // 
@@ -272,6 +271,7 @@ namespace SnifferProbeRequestApp
                     lblModificaY.Location = new Point(321, 27);
                     lblModificaY.Size = new Size(72, 18);
                     lblModificaY.Text = "Y:";
+                    lblModificaY.ForeColor = SystemColors.WindowText;
                     // 
                     // txtModificaY
                     // 
