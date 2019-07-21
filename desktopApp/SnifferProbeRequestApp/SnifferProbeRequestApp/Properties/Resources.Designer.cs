@@ -63,6 +63,46 @@ namespace SnifferProbeRequestApp.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap error {
+            get {
+                object obj = ResourceManager.GetObject("error", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icon {
+            get {
+                object obj = ResourceManager.GetObject("icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap placeholder {
+            get {
+                object obj = ResourceManager.GetObject("placeholder", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap plus {
+            get {
+                object obj = ResourceManager.GetObject("plus", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap polito_logo {
             get {
                 object obj = ResourceManager.GetObject("polito_logo", resourceCulture);
@@ -76,6 +116,26 @@ namespace SnifferProbeRequestApp.Properties {
         internal static System.Drawing.Bitmap refresh {
             get {
                 object obj = ResourceManager.GetObject("refresh", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap repeat {
+            get {
+                object obj = ResourceManager.GetObject("repeat", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap success {
+            get {
+                object obj = ResourceManager.GetObject("success", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
