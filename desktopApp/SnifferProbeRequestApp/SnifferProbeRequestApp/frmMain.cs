@@ -16,6 +16,7 @@ namespace SnifferProbeRequestApp
 
             //mi iscrivo agli handler
             CommonData.LstConfDevicesChanged += updateConfDevice;
+            CommonData.LstConfDevicesChanged += checkTwoESP;
             CommonData.LstNoConfDevicesChanged += updateNoConfDevice;
         }
        
@@ -88,6 +89,7 @@ namespace SnifferProbeRequestApp
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Error, ex.ToString());
                 }
             }
+            
         }
 
         private void btnModificaCoordinate_Click(object sender, EventArgs e, Device device, String newX, String newY)
@@ -181,6 +183,18 @@ namespace SnifferProbeRequestApp
 
             }));
             
+        }
+
+        private void checkTwoESP(object sender, EventArgs e){
+            if (CommonData.lstConfDevices.Count >= 2){
+                this.tabFeatures.Visible = true;
+                this.btnRefresh.Visible = true;
+                this.lblMin2device.Visible = false;
+            } else {
+                this.tabFeatures.Visible = false;
+                this.btnRefresh.Visible = false;
+                this.lblMin2device.Visible = true;
+            }
         }
 
         private void updateConfDevice(object sender, EventArgs e) {
