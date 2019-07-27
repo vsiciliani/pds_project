@@ -68,10 +68,8 @@ void app_main() {
 
 	//setto il led come output
 	::gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-	//ESP32CPP::GPIO::setOutput(GPIO_NUM_2); //GPIO_NUM_2BUILTIN LED
-
+	
 	//connetto il dispositivo alla rete Wifi
-	//wifi.connectAP("Vodafone-50650385", "pe7dt3793ae9t7b");
 	int result = wifi.connectAP(wifiSSID, wifiPassword);
 
 	while (result != 0){

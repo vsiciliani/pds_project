@@ -9,25 +9,29 @@
 
 Socket::Socket(const char* serverAddress, int serverPort){
 
-	int result=0;
-
 	if (this->socket!=-1) return;
 
 	server.sin_family = AF_INET;
 	inet_pton(AF_INET, serverAddress, &server.sin_addr.s_addr);
 	server.sin_port = lwip_htons(serverPort);
-
-	result = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	if (result<0) {
-		ESP_LOGE("Socket.cpp", "Apertura socket fallita");
-	} else {
-		this->socket = result;
-	}
 }
 
 int Socket::connect(){
-	return lwip_connect(this->socket, (struct sockaddr *)&server, sizeof(struct sockaddr_in));
+
+	int result = 0;
+	result = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	if (result < 0) {
+		ESP_LOGE("Socket.cpp", "Apertura socket fallita");
+		return -1;
+	}
+	else {
+		this->socket = result;
+		return lwip_connect(this->socket, (struct sockaddr*) & server, sizeof(struct sockaddr_in));
+	}
+
+	//this->socket = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	//return lwip_connect(this->socket, (struct sockaddr *)&server, sizeof(struct sockaddr_in));
 }
 
 int Socket::send(std::string message){
