@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace SnifferProbeRequestApp
 {
@@ -191,9 +192,9 @@ namespace SnifferProbeRequestApp
                 this.btnRefresh.Visible = true;
                 this.lblMin2device.Visible = false;
             } else {
-                this.tabFeatures.Visible = false;
-                this.btnRefresh.Visible = false;
-                this.lblMin2device.Visible = true;
+                this.tabFeatures.Visible = true; //TODO: change
+                this.btnRefresh.Visible = true; //TODO: change
+                this.lblMin2device.Visible = false; //TODO: change
             }
         }
 
@@ -347,6 +348,77 @@ namespace SnifferProbeRequestApp
             tabDeviceConf.Visible = true;
 
         }
-        
+
+        private void BtnCercaStatisticheLungoPeriodo_Click(object sender, EventArgs e)
+        {
+            chartStatisticaLungoPeriodo.Series.Clear();
+
+            String numDevice = upDownNumDevice.Value.ToString();
+            DateTime filter = dateTimePickerLimite.Value.ToUniversalTime();
+            String date = filter.ToString("yyyy-MM-dd HH:mm:ss");
+
+            Dictionary<Int32, Tuple<String, DateTime, DateTime>> devicePeriod = dbManager.longTermStatistic(numDevice, date);
+
+            Dictionary<String, Int32> device = new Dictionary<String, Int32>();
+
+            foreach (KeyValuePair<Int32, Tuple<String, DateTime, DateTime>> period in devicePeriod) {
+
+                Series series = new Series();
+                series.YValuesPerPoint = 2;
+                series.XValueType = ChartValueType.String;
+                series.YValueType = ChartValueType.DateTime;
+                series.ChartType = SeriesChartType.RangeBar;
+                series.CustomProperties = "DrawSideBySide=False";
+                series.Color = Color.Blue;
+                series.IsVisibleInLegend = false;
+
+                int id;
+
+                if (device.ContainsKey(period.Value.Item1)) {
+                    id = device[period.Value.Item1];
+                } else {
+                    id = device.Count;
+                    device.Add(period.Value.Item1, id);
+                }
+
+                int idPoint = series.Points.AddXY(id, period.Value.Item2.ToLocalTime(), period.Value.Item3.ToLocalTime());
+                series.Points[idPoint].AxisLabel = period.Value.Item1;
+                series.ToolTip = "Device " + period.Value.Item1 + " connesso dalle: " + period.Value.Item2.ToLocalTime().ToString() + " alle "+ period.Value.Item3.ToLocalTime().ToString();
+                chartStatisticaLungoPeriodo.Series.Add(series);
+
+            }
+
+            chartStatisticaLungoPeriodo.ChartAreas[0].AxisY.LabelStyle.Format = "dd/MM/yyyy HH:mm";
+        }
+
+        private void BtnOra_Click(object sender, EventArgs e)
+        {
+            dateTimePickerLimite.Value = DateTime.Now;
+        }
+
+        private void Btn1Ora_Click(object sender, EventArgs e)
+        {
+            dateTimePickerLimite.Value = DateTime.Now.AddHours(-1);
+        }
+
+        private void Btn6Ore_Click(object sender, EventArgs e)
+        {
+            dateTimePickerLimite.Value = DateTime.Now.AddHours(-6);
+        }
+
+        private void Btn12Ore_Click(object sender, EventArgs e)
+        {
+            dateTimePickerLimite.Value = DateTime.Now.AddHours(-12);
+        }
+
+        private void Btn1giorno_Click(object sender, EventArgs e)
+        {
+            dateTimePickerLimite.Value = DateTime.Now.AddDays(-1);
+        }
+
+        private void Btn7giorni_Click(object sender, EventArgs e)
+        {
+            dateTimePickerLimite.Value = DateTime.Now.AddDays(-7);
+        }
     }
 }

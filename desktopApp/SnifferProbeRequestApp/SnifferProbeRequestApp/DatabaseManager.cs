@@ -177,7 +177,9 @@ namespace SnifferProbeRequestApp
                 insertQuery.Append(assembledInfo.y_position.ToString().Replace(",", ".") + "),");
             }
             insertQuery.Remove(insertQuery.Length - 1, 1); //elimino l'ultima virgola
-            
+
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, insertQuery.ToString());
+
             SqlCommand command = new SqlCommand(insertQuery.ToString(), connection);
             try {
                 if (command.ExecuteNonQuery() == lstAssembledInfo.Count) {
@@ -268,6 +270,83 @@ namespace SnifferProbeRequestApp
             }
             return points;
         }
+
+        //ritorna i periodi in cui sono rilevati i dispositivi piu frequenti
+        public Dictionary<Int32, Tuple<String, DateTime, DateTime>> longTermStatistic(String numDevice, String dateLimit) {
+
+            Dictionary<Int32, Tuple<String, DateTime, DateTime>> devicePeriod = new Dictionary<Int32, Tuple<String, DateTime, DateTime>>();
+
+            String selectQuery = @"WITH ConnectionPeriod (sourceAddress, startTimestamp, stopTimestamp)  
+                                    AS  
+                                    (  
+	                                    SELECT sourceAddress,
+	                                    startTimestamp,
+	                                    stopTimestamp
+                                    FROM (
+	                                    SELECT sourceAddress,
+		                                    timestamp_packet as startTimestamp,
+		                                    CASE WHEN flag = 1 THEN LAG(timestamp_packet, 1,0) OVER (PARTITION BY sourceAddress ORDER BY timestamp_packet desc) ELSE null END stopTimestamp
+	                                    FROM (
+		                                    SELECT sourceAddress,
+			                                    timestamp_packet,
+			                                    prev,
+			                                    succ,
+			                                    CASE WHEN (DATEDIFF(MINUTE,prev,timestamp_packet) > 5) THEN 1
+					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) > 5) THEN 2
+					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) < 0) THEN 2
+					                                    ELSE 0 END flag
+		                                    FROM (
+			                                    SELECT sourceAddress, 
+				                                    timestamp_packet,
+				                                    LAG(timestamp_packet, 1,0) OVER (PARTITION BY sourceAddress ORDER BY timestamp_packet asc) as prev,
+				                                    LAG(timestamp_packet, 1,0) OVER (PARTITION BY sourceAddress ORDER BY timestamp_packet desc) as succ
+			                                    FROM [dbo].[AssembledPacketInfo]
+			                                    WHERE timestamp_packet > '" + dateLimit + @"'
+		                                    ) a
+	                                    ) b
+	                                    WHERE flag <> 0
+                                    ) c
+                                    WHERE startTimestamp < stopTimestamp
+                                    )
+                                    SELECT conn.sourceAddress, conn.startTimestamp, conn.stopTimestamp
+                                    FROM ConnectionPeriod conn, (
+                                    SELECT TOP " + numDevice + @" sourceAddress, SUM(DATEDIFF(second,startTimestamp,stopTimestamp)) as NumSecond
+	                                    FROM ConnectionPeriod
+	                                    GROUP BY sourceAddress
+	                                    ORDER BY NumSecond desc) topDev
+                                    WHERE conn.sourceAddress = topDev.sourceAddress";
+
+            DataTable resultQuery = new DataTable();
+            try
+            {
+                SqlCommand cmd = new SqlCommand(selectQuery, connection);
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);             
+                da.Fill(resultQuery);
+            }
+            catch (Exception e)
+            {
+                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+                throw exception;
+            }
+
+            Int32 i = 0;
+
+            foreach (DataRow record in resultQuery.Rows)
+            {
+
+                String sourceAddress = (String)record["sourceAddress"];
+                DateTime startTimestamp = (DateTime)record["startTimestamp"];
+                DateTime stopTimestamp = (DateTime)record["stopTimestamp"];
+
+                devicePeriod.Add(i, new Tuple<String, DateTime, DateTime>(sourceAddress, startTimestamp, stopTimestamp));
+                i++;
+            }
+            return devicePeriod;
+        }
+
+       
 
         public void closeConnection() {
             connection.Close();

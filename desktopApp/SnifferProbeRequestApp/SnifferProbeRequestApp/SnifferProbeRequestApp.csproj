@@ -138,6 +138,7 @@
     <None Include="resource\img\placeholder.png" />
     <None Include="resource\img\success.png" />
     <None Include="resource\img\repeat.png" />
+    <Content Include="resource\img\search.png" />
     <Content Include="resource\polito_logo.png" />
     <None Include="resource\refresh.png" />
   </ItemGroup>

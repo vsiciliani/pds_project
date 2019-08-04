@@ -81,7 +81,7 @@ void app_main() {
 	ESP_LOGI(tag, "Connesso a %s con IP: %s Gateway: %s",wifi.getStaSSID().c_str(), wifi.getStaIp().c_str(), wifi.getStaGateway().c_str());
 
 	//creo il socket
-	s=new Socket("192.168.1.4",5010);
+	s=new Socket("192.168.1.9",5010);
 
 	//connetto il socket
 	connectSocket();
