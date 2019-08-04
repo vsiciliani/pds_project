@@ -86,6 +86,7 @@
     <Compile Include="ThreadGestioneWifi.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="valueClass\ConnectionPeriod.cs" />
+    <Compile Include="valueClass\DevicePosition.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>

@@ -241,9 +241,9 @@ namespace SnifferProbeRequestApp
         }
 
         //ritorna i punti dei device rilevati nell'ultimo minuto
-        public Dictionary<String, Tuple<Double, Double>> devicesPosition() {
+        public List<DevicePosition> devicesPosition() {
 
-            Dictionary<String, Tuple<Double, Double>> points = new Dictionary<String, Tuple<Double, Double>>();
+            List<DevicePosition> points = new List<DevicePosition>();
 
             String selectQuery = @"SELECT sourceAddress, AVG(x_position) as x_position, AVG(y_position) as y_position
                                    FROM dbo.AssembledPacketInfo
@@ -267,7 +267,11 @@ namespace SnifferProbeRequestApp
                 Double x_position = (Double)record["x_position"];
                 Double y_position = (Double)record["y_position"];
 
-                points.Add(sourceAddress, new Tuple<double, double>(x_position, y_position));
+                points.Add(
+                    new DevicePosition((String)record["sourceAddress"],
+                        (Double)record["x_position"],
+                        (Double)record["y_position"])
+                    );
             }
             return points;
         }

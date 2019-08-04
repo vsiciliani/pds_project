@@ -140,12 +140,12 @@ namespace SnifferProbeRequestApp
 
             chartNumberDevice.Series[0].Points.AddXY(result.Key, result.Value);
 
-            Dictionary<String, Tuple<Double, Double>> points = dbManager.devicesPosition();
+            List<DevicePosition> points = dbManager.devicesPosition();
 
             chartPositionDevice.Series["Device"].Points.Clear();
-            foreach (KeyValuePair<String, Tuple<Double, Double>> point in points) {
-                int p = chartPositionDevice.Series["Device"].Points.AddXY(point.Value.Item1, point.Value.Item2);
-                chartPositionDevice.Series["Device"].Points[p].ToolTip = point.Key;
+            foreach (DevicePosition point in points) {
+                int p = chartPositionDevice.Series["Device"].Points.AddXY(point.xPosition, point.yPosition);
+                chartPositionDevice.Series["Device"].Points[p].ToolTip = point.sourceAddress;
             }
         }
 
