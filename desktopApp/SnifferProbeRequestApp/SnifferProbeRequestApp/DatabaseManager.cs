@@ -318,8 +318,7 @@ namespace SnifferProbeRequestApp
                                     WHERE conn.sourceAddress = topDev.sourceAddress";
 
             DataTable resultQuery = new DataTable();
-            try
-            {
+            try {
                 SqlCommand cmd = new SqlCommand(selectQuery, connection);
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);             
@@ -332,13 +331,12 @@ namespace SnifferProbeRequestApp
                 throw exception;
             }
 
-            foreach (DataRow record in resultQuery.Rows)
-            {
-                String sourceAddress = (String)record["sourceAddress"];
-                DateTime startTimestamp = (DateTime)record["startTimestamp"];
-                DateTime stopTimestamp = (DateTime)record["stopTimestamp"];
-
-                devicePeriod.Add(new ConnectionPeriod(sourceAddress, startTimestamp, stopTimestamp));
+            foreach (DataRow record in resultQuery.Rows) {
+                devicePeriod.Add(
+                    new ConnectionPeriod((String)record["sourceAddress"],
+                        (DateTime)record["startTimestamp"],
+                        (DateTime)record["stopTimestamp"])
+                    );
             }
             return devicePeriod;
         }
