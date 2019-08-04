@@ -136,9 +136,9 @@ namespace SnifferProbeRequestApp
 
         //CUSTOM PROCEDURE
         public void updateChartNumberDevice() {
-            KeyValuePair<DateTime, Int32> result = dbManager.countDevice();
+            CountDevice result = dbManager.countDevice();
 
-            chartNumberDevice.Series[0].Points.AddXY(result.Key, result.Value);
+            chartNumberDevice.Series[0].Points.AddXY(result.timestamp, result.count);
 
             List<DevicePosition> points = dbManager.devicesPosition();
 

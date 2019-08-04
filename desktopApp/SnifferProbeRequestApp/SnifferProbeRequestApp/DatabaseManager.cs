@@ -210,7 +210,7 @@ namespace SnifferProbeRequestApp
         }
 
         //conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)
-        public KeyValuePair<DateTime, Int32> countDevice() {
+        public CountDevice countDevice() {
 
             string selectQuery = @"SELECT Current_TimeStamp as date_time, count(*) as countDevice
                                    FROM (
@@ -233,11 +233,8 @@ namespace SnifferProbeRequestApp
                 throw exception;
             }
 
-            DateTime time = (DateTime)resultCount.Rows[0]["date_time"];
-            Int32 count = (Int32)resultCount.Rows[0]["countDevice"];
-            KeyValuePair<DateTime, Int32> result = new KeyValuePair<DateTime, Int32>(time, count);
-
-            return result;
+            return new CountDevice((DateTime)resultCount.Rows[0]["date_time"],
+                (int)resultCount.Rows[0]["countDevice"]);
         }
 
         //ritorna i punti dei device rilevati nell'ultimo minuto
@@ -262,10 +259,6 @@ namespace SnifferProbeRequestApp
             }
 
             foreach (DataRow record in resultQuery.Rows) {
-
-                String sourceAddress = (String)record["sourceAddress"];
-                Double x_position = (Double)record["x_position"];
-                Double y_position = (Double)record["y_position"];
 
                 points.Add(
                     new DevicePosition((String)record["sourceAddress"],
