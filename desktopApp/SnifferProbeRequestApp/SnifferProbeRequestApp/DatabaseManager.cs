@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnifferProbeRequestApp.valueClass;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -272,9 +273,9 @@ namespace SnifferProbeRequestApp
         }
 
         //ritorna i periodi in cui sono rilevati i dispositivi piu frequenti
-        public Dictionary<Int32, Tuple<String, DateTime, DateTime>> longTermStatistic(String numDevice, String dateLimit) {
+        public List<ConnectionPeriod> longTermStatistic(String numDevice, String dateLimit) {
 
-            Dictionary<Int32, Tuple<String, DateTime, DateTime>> devicePeriod = new Dictionary<Int32, Tuple<String, DateTime, DateTime>>();
+            List<ConnectionPeriod> devicePeriod = new List<ConnectionPeriod>();
 
             String selectQuery = @"WITH ConnectionPeriod (sourceAddress, startTimestamp, stopTimestamp)  
                                     AS  
@@ -331,17 +332,13 @@ namespace SnifferProbeRequestApp
                 throw exception;
             }
 
-            Int32 i = 0;
-
             foreach (DataRow record in resultQuery.Rows)
             {
-
                 String sourceAddress = (String)record["sourceAddress"];
                 DateTime startTimestamp = (DateTime)record["startTimestamp"];
                 DateTime stopTimestamp = (DateTime)record["stopTimestamp"];
 
-                devicePeriod.Add(i, new Tuple<String, DateTime, DateTime>(sourceAddress, startTimestamp, stopTimestamp));
-                i++;
+                devicePeriod.Add(new ConnectionPeriod(sourceAddress, startTimestamp, stopTimestamp));
             }
             return devicePeriod;
         }

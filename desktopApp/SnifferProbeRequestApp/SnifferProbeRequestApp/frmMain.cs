@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnifferProbeRequestApp.valueClass;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
@@ -357,11 +358,11 @@ namespace SnifferProbeRequestApp
             DateTime filter = dateTimePickerLimite.Value.ToUniversalTime();
             String date = filter.ToString("yyyy-MM-dd HH:mm:ss");
 
-            Dictionary<Int32, Tuple<String, DateTime, DateTime>> devicePeriod = dbManager.longTermStatistic(numDevice, date);
+            List<ConnectionPeriod> devicePeriod = dbManager.longTermStatistic(numDevice, date);
 
             Dictionary<String, Int32> device = new Dictionary<String, Int32>();
 
-            foreach (KeyValuePair<Int32, Tuple<String, DateTime, DateTime>> period in devicePeriod) {
+            foreach (ConnectionPeriod period in devicePeriod) {
 
                 Series series = new Series();
                 series.YValuesPerPoint = 2;
@@ -374,16 +375,16 @@ namespace SnifferProbeRequestApp
 
                 int id;
 
-                if (device.ContainsKey(period.Value.Item1)) {
-                    id = device[period.Value.Item1];
+                if (device.ContainsKey(period.sourceAddress)) {
+                    id = device[period.sourceAddress];
                 } else {
                     id = device.Count;
-                    device.Add(period.Value.Item1, id);
+                    device.Add(period.sourceAddress, id);
                 }
 
-                int idPoint = series.Points.AddXY(id, period.Value.Item2.ToLocalTime(), period.Value.Item3.ToLocalTime());
-                series.Points[idPoint].AxisLabel = period.Value.Item1;
-                series.ToolTip = "Device " + period.Value.Item1 + " connesso dalle: " + period.Value.Item2.ToLocalTime().ToString() + " alle "+ period.Value.Item3.ToLocalTime().ToString();
+                int idPoint = series.Points.AddXY(id, period.startTimestamp.ToLocalTime(), period.stopTimestamp.ToLocalTime());
+                series.Points[idPoint].AxisLabel = period.sourceAddress;
+                series.ToolTip = "Device " + period.sourceAddress + " connesso dalle: " + period.startTimestamp.ToLocalTime().ToString() + " alle "+ period.stopTimestamp.ToLocalTime().ToString();
                 chartStatisticaLungoPeriodo.Series.Add(series);
 
             }
