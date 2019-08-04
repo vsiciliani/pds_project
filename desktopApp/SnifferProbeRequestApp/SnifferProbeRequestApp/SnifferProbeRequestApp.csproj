@@ -85,6 +85,9 @@
     <Compile Include="SnifferAppException.cs" />
     <Compile Include="ThreadGestioneWifi.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="valueClass\ConnectionPeriod.cs" />
+    <Compile Include="valueClass\CountDevice.cs" />
+    <Compile Include="valueClass\DevicePosition.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -142,5 +145,6 @@
     <Content Include="resource\polito_logo.png" />
     <None Include="resource\refresh.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

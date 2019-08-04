@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnifferProbeRequestApp.valueClass;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -209,7 +210,7 @@ namespace SnifferProbeRequestApp
         }
 
         //conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)
-        public KeyValuePair<DateTime, Int32> countDevice() {
+        public CountDevice countDevice() {
 
             string selectQuery = @"SELECT Current_TimeStamp as date_time, count(*) as countDevice
                                    FROM (
@@ -232,17 +233,14 @@ namespace SnifferProbeRequestApp
                 throw exception;
             }
 
-            DateTime time = (DateTime)resultCount.Rows[0]["date_time"];
-            Int32 count = (Int32)resultCount.Rows[0]["countDevice"];
-            KeyValuePair<DateTime, Int32> result = new KeyValuePair<DateTime, Int32>(time, count);
-
-            return result;
+            return new CountDevice((DateTime)resultCount.Rows[0]["date_time"],
+                (int)resultCount.Rows[0]["countDevice"]);
         }
 
         //ritorna i punti dei device rilevati nell'ultimo minuto
-        public Dictionary<String, Tuple<Double, Double>> devicesPosition() {
+        public List<DevicePosition> devicesPosition() {
 
-            Dictionary<String, Tuple<Double, Double>> points = new Dictionary<String, Tuple<Double, Double>>();
+            List<DevicePosition> points = new List<DevicePosition>();
 
             String selectQuery = @"SELECT sourceAddress, AVG(x_position) as x_position, AVG(y_position) as y_position
                                    FROM dbo.AssembledPacketInfo
@@ -262,19 +260,19 @@ namespace SnifferProbeRequestApp
 
             foreach (DataRow record in resultQuery.Rows) {
 
-                String sourceAddress = (String)record["sourceAddress"];
-                Double x_position = (Double)record["x_position"];
-                Double y_position = (Double)record["y_position"];
-
-                points.Add(sourceAddress, new Tuple<double, double>(x_position, y_position));
+                points.Add(
+                    new DevicePosition((String)record["sourceAddress"],
+                        (Double)record["x_position"],
+                        (Double)record["y_position"])
+                    );
             }
             return points;
         }
 
         //ritorna i periodi in cui sono rilevati i dispositivi piu frequenti
-        public Dictionary<Int32, Tuple<String, DateTime, DateTime>> longTermStatistic(String numDevice, String dateLimit) {
+        public List<ConnectionPeriod> longTermStatistic(String numDevice, String dateLimit) {
 
-            Dictionary<Int32, Tuple<String, DateTime, DateTime>> devicePeriod = new Dictionary<Int32, Tuple<String, DateTime, DateTime>>();
+            List<ConnectionPeriod> devicePeriod = new List<ConnectionPeriod>();
 
             String selectQuery = @"WITH ConnectionPeriod (sourceAddress, startTimestamp, stopTimestamp)  
                                     AS  
@@ -317,8 +315,7 @@ namespace SnifferProbeRequestApp
                                     WHERE conn.sourceAddress = topDev.sourceAddress";
 
             DataTable resultQuery = new DataTable();
-            try
-            {
+            try {
                 SqlCommand cmd = new SqlCommand(selectQuery, connection);
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);             
@@ -331,17 +328,12 @@ namespace SnifferProbeRequestApp
                 throw exception;
             }
 
-            Int32 i = 0;
-
-            foreach (DataRow record in resultQuery.Rows)
-            {
-
-                String sourceAddress = (String)record["sourceAddress"];
-                DateTime startTimestamp = (DateTime)record["startTimestamp"];
-                DateTime stopTimestamp = (DateTime)record["stopTimestamp"];
-
-                devicePeriod.Add(i, new Tuple<String, DateTime, DateTime>(sourceAddress, startTimestamp, stopTimestamp));
-                i++;
+            foreach (DataRow record in resultQuery.Rows) {
+                devicePeriod.Add(
+                    new ConnectionPeriod((String)record["sourceAddress"],
+                        (DateTime)record["startTimestamp"],
+                        (DateTime)record["stopTimestamp"])
+                    );
             }
             return devicePeriod;
         }
