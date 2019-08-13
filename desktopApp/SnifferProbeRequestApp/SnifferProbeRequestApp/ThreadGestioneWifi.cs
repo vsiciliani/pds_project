@@ -161,16 +161,17 @@ namespace SnifferProbeRequestApp
                     Utils.sendMessage(stream, remoteIpEndPoint, "START_SEND");
 
                     messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+                    try {  
+                        //deserializzazione del JSON ricevuto
+                        PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
 
-                    //deserializzazione del JSON ricevuto
-                    PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
-
-                    //controllo che ci siano messaggi e che il device sia tra quelli configurati
-                    if (packetsInfo.listPacketInfo.Count > 0 &&
-                        CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
-                        //salvo i dati nella tabella raw del DB
-                        dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
-                    }
+                        //controllo che ci siano messaggi e che il device sia tra quelli configurati
+                        if (packetsInfo.listPacketInfo.Count > 0 &&
+                            CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
+                            //salvo i dati nella tabella raw del DB
+                            dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
+                        }
+                    } catch (Exception e) { }
                     //decremento il contatore per la sincronizzazione dei timestamp
                     countSyncTimestamp--;
                 }

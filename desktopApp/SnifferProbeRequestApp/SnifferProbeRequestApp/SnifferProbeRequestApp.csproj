@@ -69,7 +69,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssembledPacketInfo.cs" />
+    <Compile Include="valueClass\AssembledPacketInfo.cs" />
     <Compile Include="CommonData.cs" />
     <Compile Include="DatabaseManager.cs" />
     <Compile Include="Device.cs" />
@@ -79,7 +79,7 @@
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="PacketInfo.cs" />
+    <Compile Include="valueClass\PacketInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SnifferAppException.cs" />

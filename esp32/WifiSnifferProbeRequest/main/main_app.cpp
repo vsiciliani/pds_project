@@ -46,14 +46,14 @@ Socket *s;
 float memorySpace;
 
 //definizione costanti
-std::string wifiSSID = "Vodafone-50650385";
-std::string wifiPassword = "pe7dt3793ae9t7b";
+//std::string wifiSSID = "Vodafone-50650385";
+//std::string wifiPassword = "pe7dt3793ae9t7b";
 
 //std::string wifiSSID = "dlink-natale";
 //std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
 
-//std::string wifiSSID = "APAndroid2";
-//std::string wifiPassword = "pippopluto";
+std::string wifiSSID = "APAndroid2";
+std::string wifiPassword = "pippopluto";
 
 int intervalloConnessionePc = 20;
 
@@ -81,7 +81,7 @@ void app_main() {
 	ESP_LOGI(tag, "Connesso a %s con IP: %s Gateway: %s",wifi.getStaSSID().c_str(), wifi.getStaIp().c_str(), wifi.getStaGateway().c_str());
 
 	//creo il socket
-	s=new Socket("192.168.1.9",5010);
+	s=new Socket("192.168.43.3",5010);
 
 	//connetto il socket
 	connectSocket();

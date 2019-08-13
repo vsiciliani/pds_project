@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading;
 
-namespace SnifferProbeRequestApp
-{
-    public class Device
-    {
+namespace SnifferProbeRequestApp {
+    public class Device {
         public string ipAddress { get; set; }
-        public Int32 codDevice { get; set; }
-        public Int32 x_position { get; set; }
-        public Int32 y_position { get; set; }
+        public int codDevice { get; set; }
+        public int x_position { get; set; }
+        public int y_position { get; set; }
         public ManualResetEvent evento { get; set; }
 
-        public Device(string ipAddress, Int32 codDevice, Int32 x_position, Int32 y_position, ManualResetEvent evento)
+        public Device(string ipAddress, int codDevice, int x_position, int y_position, ManualResetEvent evento)
         {
             this.ipAddress = ipAddress;
             this.codDevice = codDevice;
@@ -23,7 +16,5 @@ namespace SnifferProbeRequestApp
             this.y_position = y_position;
             this.evento = evento;
         }
-
-        
     }
 }

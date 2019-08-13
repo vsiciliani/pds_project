@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SnifferProbeRequestApp
 {
     static class Utils {
-
-        static int MAXBUFFER = 4096;
 
         static public bool IsAdmin() {
             WindowsIdentity id = WindowsIdentity.GetCurrent();
@@ -78,12 +73,12 @@ namespace SnifferProbeRequestApp
             public static LogCategory Error { get { return new LogCategory("Error"); } }
         }
 
-        static public void logMessage(String classe, LogCategory category, String message) {
-            String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        static public void logMessage(string classe, LogCategory category, string message) {
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
         }
 
-        static public void sendMessage(NetworkStream stream, IPEndPoint endPoint, String message) {
+        static public void sendMessage(NetworkStream stream, IPEndPoint endPoint, string message) {
             byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
 
             try {
@@ -96,8 +91,9 @@ namespace SnifferProbeRequestApp
             }
         }
 
-        static public String receiveMessage(NetworkStream stream, IPEndPoint endPoint) {
-            String receivedMessage = String.Empty;
+        static public string receiveMessage(NetworkStream stream, IPEndPoint endPoint) {
+            string receivedMessage = string.Empty;
+            int MAXBUFFER = 4096;
 
             while (true) {
                 byte[] receivedBytes = new byte[MAXBUFFER];
@@ -118,7 +114,6 @@ namespace SnifferProbeRequestApp
                 "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("//n", ""));
             return receivedMessage;
         }
-
 
         static public void syncClock(Socket socket) {
             //invio i secondi del timestamp
@@ -169,7 +164,6 @@ namespace SnifferProbeRequestApp
                 x += device.Value * dev.x_position;
                 y += device.Value * dev.y_position;
             }
-
             return new Tuple<double, double>(x, y);
         }
     }

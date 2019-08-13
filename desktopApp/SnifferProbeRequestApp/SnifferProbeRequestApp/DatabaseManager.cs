@@ -3,18 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace SnifferProbeRequestApp
-{
+namespace SnifferProbeRequestApp {
     class DatabaseManager
     {
         private static DatabaseManager instance = null;
-        private String connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True;MultipleActiveResultSets=True;";
+        private string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True;MultipleActiveResultSets=True;";
         private SqlConnection connection;
         
         private DatabaseManager() {
@@ -34,8 +30,7 @@ namespace SnifferProbeRequestApp
             }
         }
 
-        static public DatabaseManager getInstance()
-        {
+        static public DatabaseManager getInstance() {
             if (instance == null)
             {
                 instance = new DatabaseManager();
@@ -45,8 +40,7 @@ namespace SnifferProbeRequestApp
 
         //TODO: gestire eccezione insert errata
         //salva i dati ricevuti nella tabella dei dati "raw"
-        public void saveReceivedData(PacketsInfo packets, IPAddress ipAddress)
-        {
+        public void saveReceivedData(PacketsInfo packets, IPAddress ipAddress) {
             if (packets.listPacketInfo.Count == 0) return;
 
             StringBuilder query = new StringBuilder("");
@@ -75,11 +69,11 @@ namespace SnifferProbeRequestApp
         //e pulisce i dati "raw"
         private void updateAssembled() {
             //trovo i device che sto utilizzando
-            Dictionary<String, String> devices = new Dictionary<String, String>();
+            Dictionary<string, string> devices = new Dictionary<string, string>();
 
             int id = 1;
 
-            foreach (String device in CommonData.lstConfDevices.Keys) {
+            foreach (string device in CommonData.lstConfDevices.Keys) {
                 devices.Add("d"+id.ToString(), device);
                 id++;
             }
@@ -97,8 +91,8 @@ namespace SnifferProbeRequestApp
 
             //per ogni device aggiungo i campi di select nella query (potenzaSegnale, timestamp, idPacchetto)
             //di lettura sulla tabella Packets e la condizione di join
-            foreach (KeyValuePair<String, String> device in devices) {
-                String deviceName = device.Key;
+            foreach (KeyValuePair<string, string> device in devices) {
+                string deviceName = device.Key;
                 selectQuery.Append(deviceName + ".signalStrength as " + deviceName + "_signalStrength, ");
                 selectQuery.Append(deviceName + ".timestamp_packet as " + deviceName + "_timestamp,");
                 selectQuery.Append(deviceName + ".id as " + deviceName + "_id,");
@@ -113,7 +107,7 @@ namespace SnifferProbeRequestApp
             fromQuery.Remove(fromQuery.Length - 1, 1); //elimino l'ultima virgola
             whereQuery.Remove(whereQuery.Length - 3, 3); //elimino l'ultimo AND
 
-            String queryPackets = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
+            string queryPackets = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
             
             DataTable tablePackets = new DataTable();
             try {
@@ -136,28 +130,28 @@ namespace SnifferProbeRequestApp
 
             foreach (DataRow record in tablePackets.Rows) {
                 //leggo dalla tabella i campi comuni
-                String hashCode = (String) record["hashCode"];
-                String sourceAddress = (String) record["SourceAddress"];
-                String SSID = (String) record["SSID"];
+                string hashCode = (string) record["hashCode"];
+                string sourceAddress = (string) record["SourceAddress"];
+                string SSID = (string) record["SSID"];
                 //creo un dizionario per salvarmi le potenze di segnali dei vari dispositivi
-                Dictionary<String, Int32> signalStrength = new Dictionary<string, int>();
-                Int64 avgTimestamp = 0;
+                Dictionary<string, int> signalStrength = new Dictionary<string, int>();
+                long avgTimestamp = 0;
 
                 //ciclo sui device configurati
-                foreach (KeyValuePair<String, String> device in devices) {
+                foreach (KeyValuePair<string, string> device in devices) {
                     //salvo nel dizionario la potenza del segnale
-                    signalStrength[device.Value] = (Int32) record[device.Key + "_signalStrength"];
-                    avgTimestamp += (Int64)record[device.Key + "_timestamp"];
+                    signalStrength[device.Value] = (int) record[device.Key + "_signalStrength"];
+                    avgTimestamp += (long)record[device.Key + "_timestamp"];
 
                     //leggo l'id del pacchetto per inserirlo nella query di delete dalla tabella Packets
-                    Int32 id_packet = (Int32)record[device.Key + "_id"];
+                    int id_packet = (int)record[device.Key + "_id"];
                     deleteQuery.Append(id_packet.ToString()+",");
                 }
                 //calcolo il timestamp medio di ricezione del pacchetto dai vari devices
-                avgTimestamp = avgTimestamp / (Int64)devices.Count;
+                avgTimestamp /= devices.Count;
 
                 //calcolare la posizione
-                Tuple<Double, Double> position = Utils.findPosition(signalStrength);
+                Tuple<double, double> position = Utils.findPosition(signalStrength);
                 
                 lstAssembledInfo.Add(new AssembledPacketInfo(sourceAddress,
                     SSID, hashCode, avgTimestamp, position.Item1, position.Item2));
@@ -242,7 +236,7 @@ namespace SnifferProbeRequestApp
 
             List<DevicePosition> points = new List<DevicePosition>();
 
-            String selectQuery = @"SELECT sourceAddress, AVG(x_position) as x_position, AVG(y_position) as y_position
+            string selectQuery = @"SELECT sourceAddress, AVG(x_position) as x_position, AVG(y_position) as y_position
                                    FROM dbo.AssembledPacketInfo
                                    WHERE timestamp_packet > DateADD(mi, -1, GETUTCDATE())
                                    GROUP BY sourceAddress";
@@ -270,11 +264,11 @@ namespace SnifferProbeRequestApp
         }
 
         //ritorna i periodi in cui sono rilevati i dispositivi piu frequenti
-        public List<ConnectionPeriod> longTermStatistic(String numDevice, String dateLimit) {
+        public List<ConnectionPeriod> longTermStatistic(string numDevice, string dateLimit) {
 
             List<ConnectionPeriod> devicePeriod = new List<ConnectionPeriod>();
 
-            String selectQuery = @"WITH ConnectionPeriod (sourceAddress, startTimestamp, stopTimestamp)  
+            string selectQuery = @"WITH ConnectionPeriod (sourceAddress, startTimestamp, stopTimestamp)  
                                     AS  
                                     (  
 	                                    SELECT sourceAddress,
@@ -320,9 +314,7 @@ namespace SnifferProbeRequestApp
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);             
                 da.Fill(resultQuery);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
                 throw exception;
@@ -330,7 +322,7 @@ namespace SnifferProbeRequestApp
 
             foreach (DataRow record in resultQuery.Rows) {
                 devicePeriod.Add(
-                    new ConnectionPeriod((String)record["sourceAddress"],
+                    new ConnectionPeriod((string)record["sourceAddress"],
                         (DateTime)record["startTimestamp"],
                         (DateTime)record["stopTimestamp"])
                     );
@@ -338,11 +330,8 @@ namespace SnifferProbeRequestApp
             return devicePeriod;
         }
 
-       
-
         public void closeConnection() {
             connection.Close();
         }
-
     }
 }
