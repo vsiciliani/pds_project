@@ -5,17 +5,14 @@ using System.Net;
 using System.Net.Sockets;
 
 //Classe Singleton che wrappa il thread per la gestione del Wifi e dell'interfaccia verso le ESP
-namespace SnifferProbeRequestApp
-{
-    class ThreadGestioneWifi
-    {
+namespace SnifferProbeRequestApp {
+    class ThreadGestioneWifi {
         private volatile bool stopThreadElaboration;
         private ThreadStart delegateThreadElaboration;
         private Thread threadElaboration;
 
         private static ThreadGestioneWifi istance = null;
         private TcpListener listener = null;
-        //private Socket listener = null;
         private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DatabaseManager dbManager = null;
 
@@ -55,7 +52,7 @@ namespace SnifferProbeRequestApp
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
             
             // setto il listener sulla porta 5010.
-            Int32 port = 5010;
+            int port = 5010;
             IPAddress localAddr = IPAddress.Any;
             listener = new TcpListener(localAddr, port);
             
@@ -139,8 +136,8 @@ namespace SnifferProbeRequestApp
                     } while (true);
                 }
 
-                String messageReceived;
-                Int16 countSyncTimestamp = 0;
+                string messageReceived;
+                int countSyncTimestamp = 0;
 
                 while (!stopThreadElaboration) {
 
