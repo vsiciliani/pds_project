@@ -11,7 +11,7 @@ namespace SnifferProbeRequestApp {
         private ThreadStart delegateThreadElaboration;
         private Thread threadElaboration;
 
-        private static ThreadGestioneWifi istance = null;
+        private static ThreadGestioneWifi istance = new ThreadGestioneWifi();
         private TcpListener listener = null;
         private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DatabaseManager dbManager = null;
@@ -22,9 +22,6 @@ namespace SnifferProbeRequestApp {
         }
 
         static public ThreadGestioneWifi getIstance() {
-            if (istance == null) {
-                istance = new ThreadGestioneWifi();
-            }
             return istance;
         }
 
@@ -60,8 +57,7 @@ namespace SnifferProbeRequestApp {
             listener.Start();
 
             List<Thread> listaThreadSocket = new List<Thread>();
-            try {
-                
+            try {   
                 while (!stopThreadElaboration) {
                     allDone.Reset();
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
@@ -83,7 +79,6 @@ namespace SnifferProbeRequestApp {
             } finally {
                 listaThreadSocket.ForEach(thread => thread.Join());
             }
-            
             //stopHotspot();
         }
 
@@ -168,7 +163,8 @@ namespace SnifferProbeRequestApp {
                             //salvo i dati nella tabella raw del DB
                             dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
                         }
-                    } catch (Exception e) { }
+                    } catch (Exception e) { //TODO: gestire eccezione sull'errore della deserializzazione
+                    }
                     //decremento il contatore per la sincronizzazione dei timestamp
                     countSyncTimestamp--;
                 }
