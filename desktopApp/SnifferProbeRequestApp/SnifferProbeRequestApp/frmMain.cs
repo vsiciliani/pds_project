@@ -41,7 +41,7 @@ namespace SnifferProbeRequestApp
 
                 //leggo l'IP del device selezionato
                 String ipAddress = lstBoxNoConfDevice.SelectedItem.ToString();
-                ManualResetEvent deviceEvent = null;
+                ManualResetEvent deviceEvent;
                 CommonData.lstNoConfDevices.TryGetValue(ipAddress, out deviceEvent);
                 deviceEvent.Set();
             }
@@ -70,7 +70,7 @@ namespace SnifferProbeRequestApp
 
                     //elimino il device dalla lista dei device non configurati e lancio il delegato associato
                     //semaforo per gestire la concorrenza con il thread che gestisce la connessione con il device
-                    ManualResetEvent deviceEvent = null;
+                    ManualResetEvent deviceEvent;
                     CommonData.lstNoConfDevices.TryRemove(ipAddress, out deviceEvent);
 
                     Device device = new Device(ipAddress, 1, xPosition, yPosition, deviceEvent);
@@ -86,29 +86,19 @@ namespace SnifferProbeRequestApp
                     txtXPosition.Clear();
                     txtYPosition.Clear();
                 } catch (Exception ex) {
-                    MessageBox.Show("Errore", "Si è verificato un errore durante la configurazione del dispositivo",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Errore", "Si è verificato un errore durante la configurazione del dispositivo", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Error, ex.ToString());
                 }
-            }
-            
+            }         
         }
 
-        private void btnModificaCoordinate_Click(object sender, EventArgs e, Device device, String newX, String newY)
-        {
+        private void btnModificaCoordinate_Click(object sender, EventArgs e, Device device, String newX, String newY) {
             Int32 xPosition = 0, yPosition = 0 ;
-            if (!int.TryParse(newX, out xPosition))
-            {
-                MessageBox.Show("Posizione X non valida",
-                    "Inserire un valore numerico per la posizione X ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else if (!int.TryParse(newY, out yPosition))
-            {
-                MessageBox.Show("Posizione Y non valida",
-                    "Inserire un valore numerico per la posizione Y", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else
-            {
+            if (!int.TryParse(newX, out xPosition)) {
+                MessageBox.Show("Posizione X non valida", "Inserire un valore numerico per la posizione X ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }  else if (!int.TryParse(newY, out yPosition)) {
+                MessageBox.Show("Posizione Y non valida", "Inserire un valore numerico per la posizione Y", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } else {
                 device.x_position = xPosition;
                 device.y_position = yPosition;
                 CommonData.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
@@ -117,7 +107,7 @@ namespace SnifferProbeRequestApp
         }
 
         private void btnEliminaConfDevice_Click(object sender, EventArgs e, String deviceIp) {
-            Device device = null;
+            Device device;
             try
             {
                 //devo togliere il device dalla lista dei configurati e aggiungerlo tra quelli non configurati
@@ -129,18 +119,26 @@ namespace SnifferProbeRequestApp
             }
             catch (Exception)
             {
-                MessageBox.Show("Errore", "Si è verificato un errore durante la cancellazione del dispositivo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Errore", "Si è verificato un errore durante la cancellazione del dispositivo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         //CUSTOM PROCEDURE
+
         public void updateChartNumberDevice() {
-            CountDevice result = dbManager.countDevice();
+            CountDevice count;
+            List<DevicePosition> points;
 
-            chartNumberDevice.Series[0].Points.AddXY(result.timestamp, result.count);
+            try {
+                count = dbManager.countDevice();
+                points = dbManager.devicesPosition();
+            } catch (SnifferAppSqlException e) {
+                MessageBox.Show("Errore", e.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            List<DevicePosition> points = dbManager.devicesPosition();
+
+            chartNumberDevice.Series[0].Points.AddXY(count.timestamp, count.count);
 
             chartPositionDevice.Series["Device"].Points.Clear();
             foreach (DevicePosition point in points) {
@@ -156,7 +154,6 @@ namespace SnifferProbeRequestApp
 
                 lstBoxNoConfDevice.Items.Clear();
                 
-
                 if (CommonData.lstNoConfDevices.Count == 0) {
                     lblNoDeviceNoConf.Visible = true;
                     lstBoxNoConfDevice.Visible = false;
@@ -170,7 +167,6 @@ namespace SnifferProbeRequestApp
 
                     foreach (KeyValuePair<String, ManualResetEvent> device in CommonData.lstNoConfDevices) {
                         lstBoxNoConfDevice.Items.Add(device.Key);
-
                     }
 
                     lblNoDeviceNoConf.Visible = false;
@@ -182,20 +178,19 @@ namespace SnifferProbeRequestApp
                     btnIdentificaDevice.Visible = true;
                     btnSalvaDevice.Visible = true;
                 }
-
             }));
             
         }
 
         private void checkTwoESP(object sender, EventArgs e){
             if (CommonData.lstConfDevices.Count >= 2){
-                this.tabFeatures.Visible = true;
-                this.btnRefresh.Visible = true;
-                this.lblMin2device.Visible = false;
+                tabFeatures.Visible = true;
+                btnRefresh.Visible = true;
+                lblMin2device.Visible = false;
             } else {
-                this.tabFeatures.Visible = true; //TODO: change
-                this.btnRefresh.Visible = true; //TODO: change
-                this.lblMin2device.Visible = false; //TODO: change
+                tabFeatures.Visible = true; //TODO: change
+                btnRefresh.Visible = true; //TODO: change
+                lblMin2device.Visible = false; //TODO: change
             }
         }
 
@@ -354,13 +349,19 @@ namespace SnifferProbeRequestApp
         {
             chartStatisticaLungoPeriodo.Series.Clear();
 
-            String numDevice = upDownNumDevice.Value.ToString();
+            string numDevice = upDownNumDevice.Value.ToString();
             DateTime filter = dateTimePickerLimite.Value.ToUniversalTime();
-            String date = filter.ToString("yyyy-MM-dd HH:mm:ss");
+            string date = filter.ToString("yyyy-MM-dd HH:mm:ss");
 
-            List<ConnectionPeriod> devicePeriod = dbManager.longTermStatistic(numDevice, date);
+            List<ConnectionPeriod> devicePeriod;
+            try {
+                devicePeriod = dbManager.longTermStatistic(numDevice, date);
+            } catch (SnifferAppSqlException ex) {
+                MessageBox.Show("Errore", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            Dictionary<String, Int32> device = new Dictionary<String, Int32>();
+            Dictionary<string, int> device = new Dictionary<string, int>();
 
             foreach (ConnectionPeriod period in devicePeriod) {
 

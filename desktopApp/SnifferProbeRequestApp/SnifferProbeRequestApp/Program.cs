@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 
 namespace SnifferProbeRequestApp
@@ -19,13 +20,29 @@ namespace SnifferProbeRequestApp
                 //return;
             }
 
-            ThreadGestioneWifi threadGestioneWifi = ThreadGestioneWifi.getIstance();
+            ThreadGestioneWifi threadGestioneWifi;
 
+            try {
+                threadGestioneWifi = ThreadGestioneWifi.getInstance();
+            } catch (SnifferAppException e) {
+                MessageBox.Show(e.Message, "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return; 
+            } catch (Exception) {
+                MessageBox.Show("Si è verificato un errore generico nell'esecuzione del programma", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain());
+            try {
+                threadGestioneWifi.stop();
+            } catch (SnifferAppException e) {
+                MessageBox.Show(e.Message, "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            threadGestioneWifi.stop();
+
         }
     }
 }

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
 
-namespace SnifferProbeRequestApp
-{
+namespace SnifferProbeRequestApp {
     static class Utils {
 
         static public bool IsAdmin() {
@@ -75,55 +75,73 @@ namespace SnifferProbeRequestApp
 
         static public void logMessage(string classe, LogCategory category, string message) {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
+            try {
+                Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
+            } catch (IOException) {
+                return;
+            }
+            
         }
 
+        ///<exception cref = "SnifferAppSocketException">Eccezione lanciata in caso di errore nell'invio dei dati sul socket</exception>
         static public void sendMessage(NetworkStream stream, IPEndPoint endPoint, string message) {
-            byte[] messageToSend = messageToSend = Encoding.ASCII.GetBytes(message);
+            byte[] messageToSend = Encoding.ASCII.GetBytes(message);
 
             try {
                 stream.Write(messageToSend, 0, messageToSend.Length);
-                logMessage("Utils.cs -- Send Message", LogCategory.Info,
-                    "Receiver: " + endPoint.Address.ToString() + " Message: " + message);
-            } catch (SocketException e) {
-                SnifferAppTimeoutSocketException exception = new SnifferAppTimeoutSocketException("Superato timeout di attesa per l'invio sul socket", e);
-                throw exception;
+                logMessage("Utils.cs -- Send Message", LogCategory.Info, "Receiver: " + endPoint.Address.ToString() + " Message: " + message);
+            } catch (IOException e) {
+                string errorMessage = "Errore nell'invio dei dati sul socket";
+                Utils.logMessage("Utils.cs -- SendMessage", Utils.LogCategory.Error, errorMessage);
+                throw new SnifferAppSocketException(errorMessage, e);
             }
         }
 
+        ///<exception cref = "SnifferAppSocketException">Eccezione lanciata in caso di errore nella ricezione dei dati sul socket</exception>
         static public string receiveMessage(NetworkStream stream, IPEndPoint endPoint) {
             string receivedMessage = string.Empty;
             int MAXBUFFER = 4096;
 
             while (true) {
                 byte[] receivedBytes = new byte[MAXBUFFER];
-                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
-                    "Device :" + endPoint.Address.ToString() + " In attesa di dati");
+                try {
+                    Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Device :" + endPoint.Address.ToString() + " In attesa di dati");
+                } catch(SocketException)  {
+                    Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Device : (errore nella lettura dell'IP del device) In attesa di dati");
+                }
+               
                 try {
                     int numBytes = stream.Read(receivedBytes, 0, receivedBytes.Length);
                     receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
                     if (receivedMessage.IndexOf("//n") > -1) {
                         break;
                     }
-                } catch (System.IO.IOException e) {
-                    SnifferAppTimeoutSocketException exception = new SnifferAppTimeoutSocketException("Superato timeout di attesa per la ricezione sul socket", e);
-                    throw exception;
+                } catch (IOException e) {
+                    string errorMessage = "Errore nella ricezione dei dati sul socket";
+                    Utils.logMessage("Utils.cs -- ReceiveMessage", Utils.LogCategory.Error, errorMessage);
+                    throw new SnifferAppSocketException(errorMessage, e);
                 }
             }
-            Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info,
-                "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("//n", ""));
+
+            try {
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("//n", ""));
+            } catch (SocketException) {
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: (errore nella lettura dell'IP del device) Ricevuto: " + receivedMessage.Replace("//n", ""));
+            }
             return receivedMessage;
         }
 
+        ///<exception cref = "SnifferAppSocketException">Eccezione lanciata in caso di errore nell'invio dei dati sul socket</exception>
         static public void syncClock(Socket socket) {
             //invio i secondi del timestamp
             DateTime dt1970 = new DateTime(1970, 1, 1);
-            long secToSend = (long)((DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds);
+            long secToSend = (long)(DateTime.Now.ToUniversalTime() - dt1970).TotalSeconds;
             try {
                 socket.Send(BitConverter.GetBytes(secToSend));
             } catch (SocketException e) {
-                SnifferAppTimeoutSocketException exception = new SnifferAppTimeoutSocketException("Superato timeout di attesa per l'invio sul socket", e);
-                throw exception;
+                string errorMessage = "Errore nell'invio dei dati sul socket";
+                Utils.logMessage("Utils.cs -- syncClock", Utils.LogCategory.Error, errorMessage);
+                throw new SnifferAppSocketException(errorMessage, e);
             }
         }
 
@@ -158,7 +176,7 @@ namespace SnifferProbeRequestApp
             double y = 0;
 
             foreach (KeyValuePair<string, double> device in weightDevice) {
-                Device dev = null;
+                Device dev;
                 CommonData.lstConfDevices.TryGetValue(device.Key, out dev);
 
                 x += device.Value * dev.x_position;

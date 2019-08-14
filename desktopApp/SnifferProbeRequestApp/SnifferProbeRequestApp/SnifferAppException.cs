@@ -10,12 +10,37 @@ namespace SnifferProbeRequestApp
         public SnifferAppException(string message, Exception inner): base(message, inner) { }
     }
 
-    class SnifferAppTimeoutSocketException : SnifferAppException {
+    class SnifferAppSocketException : SnifferAppException {
         //costruttore con il solo messaggio di errore
-        public SnifferAppTimeoutSocketException(string message) : base(message) { }
+        public SnifferAppSocketException(string message) : base(message) { }
 
         //costruttore con il messaggio di errore e lo stackTrace
-        public SnifferAppTimeoutSocketException(string message, Exception inner) : base(message, inner) { }
+        public SnifferAppSocketException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    class SnifferAppDBConnectionException : SnifferAppException
+    {
+        //costruttore con il solo messaggio di errore
+        public SnifferAppDBConnectionException(string message) : base(message) { }
+
+        //costruttore con il messaggio di errore e lo stackTrace
+        public SnifferAppDBConnectionException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    class SnifferAppSqlException : SnifferAppException {
+        //costruttore con il solo messaggio di errore
+        public SnifferAppSqlException(string message) : base(message) { }
+
+        //costruttore con il messaggio di errore e lo stackTrace
+        public SnifferAppSqlException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    class SnifferAppThreadException : SnifferAppException {
+        //costruttore con il solo messaggio di errore
+        public SnifferAppThreadException(string message) : base(message) { }
+
+        //costruttore con il messaggio di errore e lo stackTrace
+        public SnifferAppThreadException(string message, Exception inner) : base(message, inner) { }
     }
 
 }

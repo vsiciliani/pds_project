@@ -11,35 +11,58 @@ namespace SnifferProbeRequestApp {
         private ThreadStart delegateThreadElaboration;
         private Thread threadElaboration;
 
-        private static ThreadGestioneWifi istance = new ThreadGestioneWifi();
-        private TcpListener listener = null;
+        private static ThreadGestioneWifi instance = null;
+        private TcpListener listener;
         private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DatabaseManager dbManager = null;
 
+        ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
+        ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         private ThreadGestioneWifi() {
             stopThreadElaboration = false;
             start();
         }
 
-        static public ThreadGestioneWifi getIstance() {
-            return istance;
+        ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
+        ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
+        static public ThreadGestioneWifi getInstance() {
+            if (instance == null) {
+                instance = new ThreadGestioneWifi();
+            }
+            return instance;
         }
 
+        ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
+        ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         public void start() {
             //instanzio il db manager
             dbManager = DatabaseManager.getInstance();
 
-            //starto il thread in background che gestisce le connessioni con i devices
-            delegateThreadElaboration = new ThreadStart(elaboration);
-            threadElaboration = new Thread(delegateThreadElaboration);
-            threadElaboration.IsBackground = true;
-            threadElaboration.Start();   
+            try {
+                //starto il thread in background che gestisce le connessioni con i devices
+                delegateThreadElaboration = new ThreadStart(elaboration);
+                threadElaboration = new Thread(delegateThreadElaboration);
+                threadElaboration.IsBackground = true;
+                threadElaboration.Start();
+            } catch (Exception e) {
+                string message = "Errore durante l'apertura di un nuovo thread";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppThreadException(message, e);
+            }
         }
 
+        ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nella chiusura della connessione al DB</exception>
+        ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore sulla join di un nuovo thread</exception>
         public void stop() {
             stopThreadElaboration = true;
             dbManager.closeConnection();
-            threadElaboration.Join();       
+            try {
+                threadElaboration.Join();
+            } catch (Exception e) {
+                string message = "Errore durante la join su un thread";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppThreadException(message, e);
+            }
         }
 
         private void elaboration() {
@@ -52,9 +75,13 @@ namespace SnifferProbeRequestApp {
             int port = 5010;
             IPAddress localAddr = IPAddress.Any;
             listener = new TcpListener(localAddr, port);
+            try {
+                // starto il listener in attesa di connessione dei client
+                listener.Start();
+            } catch (SocketException) {
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante l'apertura del socket");
+            } 
             
-            // starto il listener in attesa di connessione dei client
-            listener.Start();
 
             List<Thread> listaThreadSocket = new List<Thread>();
             try {   
@@ -71,11 +98,8 @@ namespace SnifferProbeRequestApp {
                     
                     allDone.WaitOne();
                 }
-            } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante il binding del socket", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                listener.Stop();
-                throw exception;
+            } catch (Exception) {
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante il binding del socket");
             } finally {
                 listaThreadSocket.ForEach(thread => thread.Join());
             }
@@ -84,14 +108,14 @@ namespace SnifferProbeRequestApp {
 
         public void gestioneDevice(TcpClient client) {
 
-            IPEndPoint remoteIpEndPoint = null;
+            IPEndPoint remoteIpEndPoint;
             NetworkStream stream = client.GetStream();
             try {
                 remoteIpEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
-            } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore nel riconoscere il socket remoto", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
+            } catch (Exception) {
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore nel riconoscere il socket remoto");
+                client.Close();
+                return;
             }
             
             allDone.Set();
@@ -153,22 +177,26 @@ namespace SnifferProbeRequestApp {
                     Utils.sendMessage(stream, remoteIpEndPoint, "START_SEND");
 
                     messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+                    PacketsInfo packetsInfo;
+
                     try {  
                         //deserializzazione del JSON ricevuto
-                        PacketsInfo packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
-
-                        //controllo che ci siano messaggi e che il device sia tra quelli configurati
-                        if (packetsInfo.listPacketInfo.Count > 0 &&
+                        packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
+                    } catch (Exception) { 
+                        Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Errore nella deserializzazione del messaggio JSON. Il messaggio verrà scartato");
+                        break;
+                    }
+                    //controllo che ci siano messaggi e che il device sia tra quelli configurati
+                    if (packetsInfo.listPacketInfo.Count > 0 &&
                             CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
                             //salvo i dati nella tabella raw del DB
                             dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
                         }
-                    } catch (Exception e) { //TODO: gestire eccezione sull'errore della deserializzazione
-                    }
+                    
                     //decremento il contatore per la sincronizzazione dei timestamp
                     countSyncTimestamp--;
                 }
-            } catch (SnifferAppTimeoutSocketException e){
+            } catch (SnifferAppSocketException e){
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, e.Message);
             } finally {
                 client.Close();
