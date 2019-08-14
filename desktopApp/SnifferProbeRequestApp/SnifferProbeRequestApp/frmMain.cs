@@ -108,17 +108,15 @@ namespace SnifferProbeRequestApp
 
         private void btnEliminaConfDevice_Click(object sender, EventArgs e, String deviceIp) {
             Device device;
-            try
-            {
+            try {
                 //devo togliere il device dalla lista dei configurati e aggiungerlo tra quelli non configurati
+                //questo codice è duplicato in ThreadGestioneWifi (valutare se fare una funzione)
                 CommonData.lstConfDevices.TryRemove(deviceIp, out device);
                 CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
                 CommonData.lstNoConfDevices.TryAdd(deviceIp, device.evento);
                 CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 MessageBox.Show("Errore", "Si è verificato un errore durante la cancellazione del dispositivo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

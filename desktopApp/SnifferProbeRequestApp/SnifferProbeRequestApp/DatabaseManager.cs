@@ -19,10 +19,10 @@ namespace SnifferProbeRequestApp {
             connection = new SqlConnection(connectionString);
             try {
                 connection.Open();
-            } catch (SqlException) {
+            } catch (SqlException e) {
                 string message = "Errore durante l'apertura della connessione con il database";
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
-                throw new SnifferAppDBConnectionException(message);
+                throw new SnifferAppDBConnectionException(message, e);
             }
         }
 
