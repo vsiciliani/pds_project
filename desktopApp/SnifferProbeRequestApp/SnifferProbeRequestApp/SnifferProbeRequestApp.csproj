@@ -72,7 +72,7 @@
     <Compile Include="valueClass\AssembledPacketInfo.cs" />
     <Compile Include="CommonData.cs" />
     <Compile Include="DatabaseManager.cs" />
-    <Compile Include="Device.cs" />
+    <Compile Include="valueClass\Device.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>

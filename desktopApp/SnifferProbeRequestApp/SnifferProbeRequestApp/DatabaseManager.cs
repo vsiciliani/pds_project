@@ -7,32 +7,28 @@ using System.Net;
 using System.Text;
 
 namespace SnifferProbeRequestApp {
-    class DatabaseManager
-    {
+    class DatabaseManager {
         private static DatabaseManager instance = null;
         private string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True;MultipleActiveResultSets=True;";
         private SqlConnection connection;
-        
+
+        ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
         private DatabaseManager() {
             
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Connection String: " + connectionString);
             connection = new SqlConnection(connectionString);
             try {
                 connection.Open();
-            } catch (SqlException sqle) {
-                SnifferAppException exception = new SnifferAppException("Errore di connessione durante l'apertura della stessa", sqle);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
-            } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore generico durante l'apertura della connessione", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
+            } catch (SqlException e) {
+                string message = "Errore durante l'apertura della connessione con il database";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppDBConnectionException(message, e);
             }
         }
 
+        ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
         static public DatabaseManager getInstance() {
-            if (instance == null)
-            {
+            if (instance == null) {
                 instance = new DatabaseManager();
             }
             return instance;
@@ -57,11 +53,18 @@ namespace SnifferProbeRequestApp {
             query.Remove(query.Length - 1, 1); //elimino l'ultima virgola
 
             SqlCommand command = new SqlCommand(query.ToString(), connection);
-            
-            if (command.ExecuteNonQuery() == packets.listPacketInfo.Count)  {
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in Packets effettuata con successo");
-            }
 
+            try
+            {
+                if (command.ExecuteNonQuery() == packets.listPacketInfo.Count) {
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in Packets effettuata con successo");
+                } else {
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "INSERT in Packets fallita");
+                }
+            } catch (Exception e) {
+                SnifferAppException exception = new SnifferAppException("Errore durante la INSERT dei dati in Packets", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+            }
             updateAssembled();
         }
 
@@ -114,10 +117,9 @@ namespace SnifferProbeRequestApp {
                 SqlCommand cmd = new SqlCommand(queryPackets, connection);
                 SqlDataAdapter sqlAdapter = new SqlDataAdapter(cmd);
                 sqlAdapter.Fill(tablePackets);
-            } catch (Exception e){
-                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
+            } catch (Exception e) {
+                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati della tabella Packets", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
             }
 
             //controllo se devo assemblare dei dati
@@ -179,13 +181,14 @@ namespace SnifferProbeRequestApp {
             try {
                 if (command.ExecuteNonQuery() == lstAssembledInfo.Count) {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in AssembledPacketInfo effettuata con successo");
+                } else {
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "INSERT in AssembledPacketInfo fallita");
                 }
             } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante la INSERT dei dati nel DB", e);
+                SnifferAppException exception = new SnifferAppException("Errore durante la INSERT dei dati in AssembledPacketInfo", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
             }
-            
+
             //elimino gli id dalla tabella "raw"
             deleteQuery.Remove(deleteQuery.Length - 1, 1); //elimino l'ultima virgola nalla IN
             deleteQuery.Append(")"); //chiudo la parentesi della IN
@@ -199,11 +202,11 @@ namespace SnifferProbeRequestApp {
             catch (Exception e) {
                 SnifferAppException exception = new SnifferAppException("Errore durante la DELETE dei dati dalla tabella Packets", e);
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
             }
         }
 
         //conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)
+        ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
         public CountDevice countDevice() {
 
             string selectQuery = @"SELECT Current_TimeStamp as date_time, count(*) as countDevice
@@ -222,9 +225,9 @@ namespace SnifferProbeRequestApp {
                 da.Fill(resultCount);
             }
             catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
+                string message = "Errore durante la lettura dei dati dal DB";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppSqlException(message, e);
             }
 
             return new CountDevice((DateTime)resultCount.Rows[0]["date_time"],
@@ -232,6 +235,7 @@ namespace SnifferProbeRequestApp {
         }
 
         //ritorna i punti dei device rilevati nell'ultimo minuto
+        ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
         public List<DevicePosition> devicesPosition() {
 
             List<DevicePosition> points = new List<DevicePosition>();
@@ -247,9 +251,9 @@ namespace SnifferProbeRequestApp {
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(resultQuery);
             } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
+                string message = "Errore durante la lettura dei dati dal DB";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppSqlException(message, e);
             }
 
             foreach (DataRow record in resultQuery.Rows) {
@@ -264,6 +268,7 @@ namespace SnifferProbeRequestApp {
         }
 
         //ritorna i periodi in cui sono rilevati i dispositivi piu frequenti
+        ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
         public List<ConnectionPeriod> longTermStatistic(string numDevice, string dateLimit) {
 
             List<ConnectionPeriod> devicePeriod = new List<ConnectionPeriod>();
@@ -315,9 +320,9 @@ namespace SnifferProbeRequestApp {
                 SqlDataAdapter da = new SqlDataAdapter(cmd);             
                 da.Fill(resultQuery);
             } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati dal DB", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-                throw exception;
+                string message = "Errore durante la lettura dei dati dal DB";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppSqlException(message, e);
             }
 
             foreach (DataRow record in resultQuery.Rows) {
@@ -330,8 +335,15 @@ namespace SnifferProbeRequestApp {
             return devicePeriod;
         }
 
+        ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nella chiusura della connessione al DB</exception>
         public void closeConnection() {
-            connection.Close();
+            try {
+                connection.Close();
+            } catch (Exception) {
+                string message = "Errore durante la chiusura della connessione al DB";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppDBConnectionException(message);
+            }   
         }
     }
 }
