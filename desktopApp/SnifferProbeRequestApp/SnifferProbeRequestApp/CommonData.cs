@@ -3,7 +3,9 @@ using System.Collections.Concurrent;
 using System.Threading;
 
 namespace SnifferProbeRequestApp {
-    //Questa classe wrappa i dati che devono essere visibili in tutte le parti del progetto
+    /// <summary>
+    /// Classe wrappa i dati che devono essere visibili in tutte le parti del progetto
+    /// </summary>
     public static class CommonData {
         //LISTA DEVICE CONFIGUARATI
         // key = IPAddress device

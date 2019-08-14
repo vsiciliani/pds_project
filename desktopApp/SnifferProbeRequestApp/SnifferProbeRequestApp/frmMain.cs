@@ -186,9 +186,9 @@ namespace SnifferProbeRequestApp
                 btnRefresh.Visible = true;
                 lblMin2device.Visible = false;
             } else {
-                tabFeatures.Visible = true; //TODO: change
-                btnRefresh.Visible = true; //TODO: change
-                lblMin2device.Visible = false; //TODO: change
+                tabFeatures.Visible = false;
+                btnRefresh.Visible = false;
+                lblMin2device.Visible = true;
             }
         }
 

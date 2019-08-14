@@ -8,6 +8,8 @@ using System.Security.Principal;
 using System.Text;
 
 namespace SnifferProbeRequestApp {
+
+    ///<summary>Classe statica che contiene funzioni di utilità</summary>
     static class Utils {
 
         static public bool IsAdmin() {
@@ -63,6 +65,7 @@ namespace SnifferProbeRequestApp {
             Console.WriteLine("Wifi network closed");
         }
 
+        ///<summary>Classe statica che permette di definire il livello di log</summary>
         public class LogCategory {
             private LogCategory(string value) { Value = value; }
 
@@ -73,6 +76,10 @@ namespace SnifferProbeRequestApp {
             public static LogCategory Error { get { return new LogCategory("Error"); } }
         }
 
+        ///<summary>Scrive un messaggio di log</summary>
+        ///<param name="classe">Nome della classe che genera il log</param>
+        ///<param name="category">Livello del messaggio di errore</param>
+        ///<param name="message">Messaggio da scrivere nel log</param>
         static public void logMessage(string classe, LogCategory category, string message) {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             try {
@@ -83,6 +90,10 @@ namespace SnifferProbeRequestApp {
             
         }
 
+        ///<summary>Invia un messaggio su un socket</summary>
+        ///<param name="stream">NetworkStream su cui inviare il messaggio</param>
+        ///<param name="endPoint">EndPoint della connessione</param>
+        ///<param name="message">Messaggio in formato stringa da inviare</param>
         ///<exception cref = "SnifferAppSocketException">Eccezione lanciata in caso di errore nell'invio dei dati sul socket</exception>
         static public void sendMessage(NetworkStream stream, IPEndPoint endPoint, string message) {
             byte[] messageToSend = Encoding.ASCII.GetBytes(message);
@@ -97,6 +108,10 @@ namespace SnifferProbeRequestApp {
             }
         }
 
+        ///<summary>Riceve un messagio da un socket in formato stringa</summary>
+        ///<param name="stream">NetworkStream da cui ricevere il messaggio</param>
+        ///<param name="endPoint">EndPoint della connessione</param>
+        ///<returns>Il messaggio ricevuto in formato Stringa</returns>
         ///<exception cref = "SnifferAppSocketException">Eccezione lanciata in caso di errore nella ricezione dei dati sul socket</exception>
         static public string receiveMessage(NetworkStream stream, IPEndPoint endPoint) {
             string receivedMessage = string.Empty;
@@ -131,6 +146,8 @@ namespace SnifferProbeRequestApp {
             return receivedMessage;
         }
 
+        ///<summary>Invia un messaggio su un socket contentente il current timestamp in secondi per permette la sincronizzazione del clock</summary>
+        ///<param name="socket">Socket su cui inviare il messaggio</param>
         ///<exception cref = "SnifferAppSocketException">Eccezione lanciata in caso di errore nell'invio dei dati sul socket</exception>
         static public void syncClock(Socket socket) {
             //invio i secondi del timestamp
@@ -145,6 +162,9 @@ namespace SnifferProbeRequestApp {
             }
         }
 
+        ///<summary>Calcola la posizione di un dispositivo wifi rilevato rispetto ai ricevitori registrati</summary>
+        ///<param name="signalStrength">Dizionario con le potenze registrate dai vari dispositivi</param>
+        ///<returns>Le coordinate x e y del dispositivo rilevato</returns>
         static public Tuple<double, double> findPosition(Dictionary<string, int> signalStrength) {
 
             int freqInMHz = 2412;

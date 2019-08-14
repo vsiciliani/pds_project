@@ -165,7 +165,7 @@ namespace SnifferProbeRequestApp {
                     } else {
                         //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
                         Utils.sendMessage(stream, remoteIpEndPoint, "IDENTIFICA");
-                        //pulisco il buffer del messaggio da inviare
+                        
                         deviceConfEvent.Reset();
                         deviceConfEvent.WaitOne();
                     }
@@ -202,8 +202,8 @@ namespace SnifferProbeRequestApp {
                 } catch (Exception) { 
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Errore nella deserializzazione del messaggio JSON. Il messaggio verrà scartato");           
                 }
-                //controllo che ci siano messaggi e che il device sia tra quelli configurati
-                if (packetsInfo != null) {
+                //controllo che ci siano messaggi, che il device sia tra quelli configurati e che ci siano almeno 2 device configurati
+                if (packetsInfo != null && CommonData.lstConfDevices.Count>=2) {
                     if (packetsInfo.listPacketInfo.Count > 0 && CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);

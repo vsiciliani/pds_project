@@ -34,7 +34,6 @@ namespace SnifferProbeRequestApp {
             return instance;
         }
 
-        //TODO: gestire eccezione insert errata
         //salva i dati ricevuti nella tabella dei dati "raw"
         public void saveReceivedData(PacketsInfo packets, IPAddress ipAddress) {
             if (packets.listPacketInfo.Count == 0) return;
@@ -209,14 +208,33 @@ namespace SnifferProbeRequestApp {
         ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
         public CountDevice countDevice() {
 
-            string selectQuery = @"SELECT Current_TimeStamp as date_time, count(*) as countDevice
-                                   FROM (
-                                     SELECT sourceAddress, MIN(timestamp_packet) as min_timestamp, MAX(timestamp_packet) as max_timestamp
-                                     FROM dbo.AssembledPacketInfo
-                                     WHERE timestamp_packet > DateADD(mi, -5, GETUTCDATE())
-                                     GROUP BY sourceAddress
-                                   ) sub_query
-                                   WHERE (DATEDIFF(SECOND , min_timestamp , max_timestamp) > 180)";
+            string selectQuery = @"SELECT Current_TimeStamp as date_time, COUNT(DISTINCT sourceAddress) as countDevice
+                                    FROM (
+	                                    SELECT sourceAddress,
+		                                    timestamp_packet as startTimestamp,
+		                                    CASE WHEN flag = 1 THEN LAG(timestamp_packet, 1,0) OVER (PARTITION BY sourceAddress ORDER BY timestamp_packet desc) ELSE null END stopTimestamp
+	                                    FROM (
+		                                    SELECT sourceAddress,
+			                                    timestamp_packet,
+			                                    prev,
+			                                    succ,
+			                                    CASE WHEN (DATEDIFF(MINUTE,prev,timestamp_packet) >= 2) THEN 1
+					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) >= 2) THEN 2
+					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) < 0) THEN 2
+					                                    ELSE 0 END flag
+		                                    FROM (
+			                                    SELECT sourceAddress, 
+				                                    timestamp_packet,
+				                                    LAG(timestamp_packet, 1,0) OVER (PARTITION BY sourceAddress ORDER BY timestamp_packet asc) as prev,
+				                                    LAG(timestamp_packet, 1,0) OVER (PARTITION BY sourceAddress ORDER BY timestamp_packet desc) as succ
+			                                    FROM [dbo].[AssembledPacketInfo]
+		                                    ) a
+	                                    ) b
+	                                    WHERE flag <> 0
+                                    ) c
+                                    WHERE startTimestamp < stopTimestamp
+                                    AND startTimestamp < DATEADD(SECOND, -300, GETUTCDATE())
+                                    AND stopTimestamp > DATEADD(SECOND, -120, GETUTCDATE())";
 
             DataTable resultCount = new DataTable();
             try {
@@ -288,8 +306,8 @@ namespace SnifferProbeRequestApp {
 			                                    timestamp_packet,
 			                                    prev,
 			                                    succ,
-			                                    CASE WHEN (DATEDIFF(MINUTE,prev,timestamp_packet) > 5) THEN 1
-					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) > 5) THEN 2
+			                                    CASE WHEN (DATEDIFF(MINUTE,prev,timestamp_packet) >= 2) THEN 1
+					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) >= 2) THEN 2
 					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) < 0) THEN 2
 					                                    ELSE 0 END flag
 		                                    FROM (
