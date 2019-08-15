@@ -7,6 +7,9 @@ using System.Net;
 using System.Text;
 
 namespace SnifferProbeRequestApp {
+    /// <summary>
+    /// Classe Singleton per la gestione della connessione e delle query verso il DB
+    /// </summary>
     class DatabaseManager {
         private static DatabaseManager instance = null;
         private string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True;MultipleActiveResultSets=True;";
@@ -25,8 +28,9 @@ namespace SnifferProbeRequestApp {
                 throw new SnifferAppDBConnectionException(message, e);
             }
         }
-
+        ///<summary>Ritorna l'istanza della classe DatabaseManager se già creata, oppure la istanzia</summary>
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
+        ///<returns>L'istanza della classe DatabaseManager</returns>
         static public DatabaseManager getInstance() {
             if (instance == null) {
                 instance = new DatabaseManager();
@@ -34,7 +38,11 @@ namespace SnifferProbeRequestApp {
             return instance;
         }
 
-        //salva i dati ricevuti nella tabella dei dati "raw"
+        /// <summary>
+        /// Salva i dati ricevuti nella tabella dei dati "raw"
+        /// </summary>
+        /// <param name="packets">Lista dei pacchetti da salvare</param>
+        /// <param name="ipAddress">Ip del dispositivo che ha catturato i pacchetti</param>
         public void saveReceivedData(PacketsInfo packets, IPAddress ipAddress) {
             if (packets.listPacketInfo.Count == 0) return;
 
@@ -67,8 +75,10 @@ namespace SnifferProbeRequestApp {
             updateAssembled();
         }
 
-        //aggrega i dati "raw", calcola la posizione, salva i dati nella tabella assembled
-        //e pulisce i dati "raw"
+        /// <summary>
+        /// Aggrega i dati "raw" (Packets), calcola la posizione e salva i dati nella tabella "assembled".
+        /// Elimina dalla tabella "raw" (Packets) i dati elaborati
+        /// </summary>
         private void updateAssembled() {
             //trovo i device che sto utilizzando
             Dictionary<string, string> devices = new Dictionary<string, string>();
@@ -126,7 +136,7 @@ namespace SnifferProbeRequestApp {
 
             List<AssembledPacketInfo> lstAssembledInfo = new List<AssembledPacketInfo>();
 
-            //delete query dei processati dalla tabella "raw" Packets utilizzzando gli id
+            //delete query dei dati processati dalla tabella "raw" (Packets) utilizzzando gli id
             StringBuilder deleteQuery = new StringBuilder("DELETE FROM [dbo].[Packets] WHERE id IN (");
 
             foreach (DataRow record in tablePackets.Rows) {
@@ -204,8 +214,9 @@ namespace SnifferProbeRequestApp {
             }
         }
 
-        //conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)
+        ///<summary>Conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)</summary>
         ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
+        ///<returns>Istanza delle oggetto CountDevice con il timestamp di esecuzione della query e il numero di dispositvi</returns>
         public CountDevice countDevice() {
 
             string selectQuery = @"SELECT Current_TimeStamp as date_time, COUNT(DISTINCT sourceAddress) as countDevice
@@ -252,8 +263,9 @@ namespace SnifferProbeRequestApp {
                 (int)resultCount.Rows[0]["countDevice"]);
         }
 
-        //ritorna i punti dei device rilevati nell'ultimo minuto
+        ///<summary>Ritorna i punti dei device rilevati nell'ultimo minuto</summary>
         ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
+        ///<returns>Lista delle posizioni dei device rilevati nell'ultimo minuto</returns>
         public List<DevicePosition> devicesPosition() {
 
             List<DevicePosition> points = new List<DevicePosition>();
@@ -275,7 +287,6 @@ namespace SnifferProbeRequestApp {
             }
 
             foreach (DataRow record in resultQuery.Rows) {
-
                 points.Add(
                     new DevicePosition((String)record["sourceAddress"],
                         (Double)record["x_position"],
@@ -285,7 +296,10 @@ namespace SnifferProbeRequestApp {
             return points;
         }
 
-        //ritorna i periodi in cui sono rilevati i dispositivi piu frequenti
+        ///<summary>Calcola i periodi in cui sono rilevati i dispositivi piu frequenti (TOP N) a partire da un timestamp</summary>
+        ///<param name="numDevice">Numero dei dispositivi da analizzare (TOP N)</param>
+        ///<param name="dateLimit">Datetome da cui eseguire l'analisi</param>
+        ///<returns>Lista dei periodi di connessione dei TOP N devices</returns>
         ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
         public List<ConnectionPeriod> longTermStatistic(string numDevice, string dateLimit) {
 
@@ -353,6 +367,7 @@ namespace SnifferProbeRequestApp {
             return devicePeriod;
         }
 
+        ///<summary>Chiude la connessione con il DB</summary>
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nella chiusura della connessione al DB</exception>
         public void closeConnection() {
             try {

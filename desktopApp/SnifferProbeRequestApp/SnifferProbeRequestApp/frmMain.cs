@@ -35,30 +35,27 @@ namespace SnifferProbeRequestApp
 
         private void btnIdentificaDevice_Click(object sender, EventArgs e) {
             if (lstBoxNoConfDevice.SelectedItem == null) {
-                MessageBox.Show("Selezionare un device dall'elenco",
-                    "Seleziona il device da configurare", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Selezionare un device dall'elenco", "Seleziona il device da configurare", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } else { //i parametri sono validi
 
                 //leggo l'IP del device selezionato
                 String ipAddress = lstBoxNoConfDevice.SelectedItem.ToString();
                 ManualResetEvent deviceEvent;
                 CommonData.lstNoConfDevices.TryGetValue(ipAddress, out deviceEvent);
+                //risveglio il thread che gestisce la connessione del dispositivo per inviare il segnale di "IDENTIFICA"
                 deviceEvent.Set();
             }
         }
 
         private void btnSalvaDevice_Click(object sender, EventArgs e) {
-            Int32 xPosition = 0, yPosition = 0;
+            int xPosition, yPosition;
             //check sui parametri (device selezionato e valore contenuto nella cella)
             if (lstBoxNoConfDevice.SelectedItem == null) {
-                MessageBox.Show("Selezionare un device dall'elenco",
-                    "Seleziona il device da configurare", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Selezionare un device dall'elenco", "Seleziona il device da configurare", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } else if (!int.TryParse(txtXPosition.Text, out xPosition)) {
-                MessageBox.Show("Posizione X non valida",
-                    "Inserire un valore numerico per la posizione X ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Posizione X non valida", "Inserire un valore numerico per la posizione X ", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } else if (!int.TryParse(txtYPosition.Text, out yPosition)) {
-                MessageBox.Show("Posizione Y non valida",
-                    "Inserire un valore numerico per la posizione Y", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Posizione Y non valida", "Inserire un valore numerico per la posizione Y", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } else { //i parametri sono validi
 
                 //leggo l'IP del device selezionato
@@ -79,6 +76,7 @@ namespace SnifferProbeRequestApp
                     CommonData.lstConfDevices.TryAdd(device.ipAddress, device);
                     CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
+                    //risveglio il thread che gestisce la connessione del dispositivo in quanto la configurazione è completata
                     deviceEvent.Set();
                     CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
@@ -92,8 +90,8 @@ namespace SnifferProbeRequestApp
             }         
         }
 
-        private void btnModificaCoordinate_Click(object sender, EventArgs e, Device device, String newX, String newY) {
-            Int32 xPosition = 0, yPosition = 0 ;
+        private void btnModificaCoordinate_Click(object sender, EventArgs e, Device device, string newX, string newY) {
+            int xPosition, yPosition;
             if (!int.TryParse(newX, out xPosition)) {
                 MessageBox.Show("Posizione X non valida", "Inserire un valore numerico per la posizione X ", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }  else if (!int.TryParse(newY, out yPosition)) {
@@ -121,6 +119,77 @@ namespace SnifferProbeRequestApp
             }
         }
 
+        private void BtnCercaStatisticheLungoPeriodo_Click(object sender, EventArgs e) {
+            chartStatisticaLungoPeriodo.Series.Clear();
+
+            string numDevice = upDownNumDevice.Value.ToString();
+            DateTime filter = dateTimePickerLimite.Value.ToUniversalTime();
+            string date = filter.ToString("yyyy-MM-dd HH:mm:ss");
+
+            List<ConnectionPeriod> devicePeriod;
+            try {
+                devicePeriod = dbManager.longTermStatistic(numDevice, date);
+            } catch (SnifferAppSqlException ex) {
+                MessageBox.Show("Errore", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            Dictionary<string, int> device = new Dictionary<string, int>();
+
+            foreach (ConnectionPeriod period in devicePeriod) {
+
+                Series series = new Series();
+                series.YValuesPerPoint = 2;
+                series.XValueType = ChartValueType.String;
+                series.YValueType = ChartValueType.DateTime;
+                series.ChartType = SeriesChartType.RangeBar;
+                series.CustomProperties = "DrawSideBySide=False";
+                series.Color = Color.Blue;
+                series.IsVisibleInLegend = false;
+
+                int id;
+
+                if (device.ContainsKey(period.sourceAddress)) {
+                    id = device[period.sourceAddress];
+                } else {
+                    id = device.Count;
+                    device.Add(period.sourceAddress, id);
+                }
+
+                int idPoint = series.Points.AddXY(id, period.startTimestamp.ToLocalTime(), period.stopTimestamp.ToLocalTime());
+                series.Points[idPoint].AxisLabel = period.sourceAddress;
+                series.ToolTip = "Device " + period.sourceAddress + " connesso dalle: " + period.startTimestamp.ToLocalTime().ToString() + " alle " + period.stopTimestamp.ToLocalTime().ToString();
+                chartStatisticaLungoPeriodo.Series.Add(series);
+
+            }
+
+            chartStatisticaLungoPeriodo.ChartAreas[0].AxisY.LabelStyle.Format = "dd/MM/yyyy HH:mm";
+        }
+
+        private void Btn30min_Click(object sender, EventArgs e) {
+            dateTimePickerLimite.Value = DateTime.Now.AddMinutes(-30);
+        }
+
+        private void Btn1Ora_Click(object sender, EventArgs e) {
+            dateTimePickerLimite.Value = DateTime.Now.AddHours(-1);
+        }
+
+        private void Btn6Ore_Click(object sender, EventArgs e) {
+            dateTimePickerLimite.Value = DateTime.Now.AddHours(-6);
+        }
+
+        private void Btn12Ore_Click(object sender, EventArgs e) {
+            dateTimePickerLimite.Value = DateTime.Now.AddHours(-12);
+        }
+
+        private void Btn1giorno_Click(object sender, EventArgs e) {
+            dateTimePickerLimite.Value = DateTime.Now.AddDays(-1);
+        }
+
+        private void Btn7giorni_Click(object sender, EventArgs e) {
+            dateTimePickerLimite.Value = DateTime.Now.AddDays(-7);
+        }
+
         //CUSTOM PROCEDURE
 
         public void updateChartNumberDevice() {
@@ -136,7 +205,8 @@ namespace SnifferProbeRequestApp
             }
 
 
-            chartNumberDevice.Series[0].Points.AddXY(count.timestamp, count.count);
+            int po = chartNumberDevice.Series[0].Points.AddXY(count.timestamp, count.count);
+            chartNumberDevice.Series[0].Points[po].ToolTip = "Timestamp: "+count.timestamp +"\nNumero device connessi: "+count.count;
 
             chartPositionDevice.Series["Device"].Points.Clear();
             foreach (DevicePosition point in points) {
@@ -341,84 +411,6 @@ namespace SnifferProbeRequestApp
             lblNoDeviceConf.Visible = false;
             tabDeviceConf.Visible = true;
 
-        }
-
-        private void BtnCercaStatisticheLungoPeriodo_Click(object sender, EventArgs e)
-        {
-            chartStatisticaLungoPeriodo.Series.Clear();
-
-            string numDevice = upDownNumDevice.Value.ToString();
-            DateTime filter = dateTimePickerLimite.Value.ToUniversalTime();
-            string date = filter.ToString("yyyy-MM-dd HH:mm:ss");
-
-            List<ConnectionPeriod> devicePeriod;
-            try {
-                devicePeriod = dbManager.longTermStatistic(numDevice, date);
-            } catch (SnifferAppSqlException ex) {
-                MessageBox.Show("Errore", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            Dictionary<string, int> device = new Dictionary<string, int>();
-
-            foreach (ConnectionPeriod period in devicePeriod) {
-
-                Series series = new Series();
-                series.YValuesPerPoint = 2;
-                series.XValueType = ChartValueType.String;
-                series.YValueType = ChartValueType.DateTime;
-                series.ChartType = SeriesChartType.RangeBar;
-                series.CustomProperties = "DrawSideBySide=False";
-                series.Color = Color.Blue;
-                series.IsVisibleInLegend = false;
-
-                int id;
-
-                if (device.ContainsKey(period.sourceAddress)) {
-                    id = device[period.sourceAddress];
-                } else {
-                    id = device.Count;
-                    device.Add(period.sourceAddress, id);
-                }
-
-                int idPoint = series.Points.AddXY(id, period.startTimestamp.ToLocalTime(), period.stopTimestamp.ToLocalTime());
-                series.Points[idPoint].AxisLabel = period.sourceAddress;
-                series.ToolTip = "Device " + period.sourceAddress + " connesso dalle: " + period.startTimestamp.ToLocalTime().ToString() + " alle "+ period.stopTimestamp.ToLocalTime().ToString();
-                chartStatisticaLungoPeriodo.Series.Add(series);
-
-            }
-
-            chartStatisticaLungoPeriodo.ChartAreas[0].AxisY.LabelStyle.Format = "dd/MM/yyyy HH:mm";
-        }
-
-        private void BtnOra_Click(object sender, EventArgs e)
-        {
-            dateTimePickerLimite.Value = DateTime.Now;
-        }
-
-        private void Btn1Ora_Click(object sender, EventArgs e)
-        {
-            dateTimePickerLimite.Value = DateTime.Now.AddHours(-1);
-        }
-
-        private void Btn6Ore_Click(object sender, EventArgs e)
-        {
-            dateTimePickerLimite.Value = DateTime.Now.AddHours(-6);
-        }
-
-        private void Btn12Ore_Click(object sender, EventArgs e)
-        {
-            dateTimePickerLimite.Value = DateTime.Now.AddHours(-12);
-        }
-
-        private void Btn1giorno_Click(object sender, EventArgs e)
-        {
-            dateTimePickerLimite.Value = DateTime.Now.AddDays(-1);
-        }
-
-        private void Btn7giorni_Click(object sender, EventArgs e)
-        {
-            dateTimePickerLimite.Value = DateTime.Now.AddDays(-7);
         }
     }
 }

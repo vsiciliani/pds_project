@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
-//Classe Singleton che wrappa il thread per la gestione del Wifi e dell'interfaccia verso le ESP
 namespace SnifferProbeRequestApp {
+    /// <summary>
+    /// Classe Singleton che wrappa il thread per la gestione del Wifi e dell'interfaccia verso le ESP
+    /// </summary>
     class ThreadGestioneWifi {
         private volatile bool stopThreadElaboration;
         private ThreadStart delegateThreadElaboration;
@@ -20,11 +22,15 @@ namespace SnifferProbeRequestApp {
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         private ThreadGestioneWifi() {
             stopThreadElaboration = false;
+            //instanzio il db manager
+            dbManager = DatabaseManager.getInstance();
             start();
         }
 
+        ///<summary>Ritorna l'istanza della classe ThreadGestioneWifi se già creata, oppure la istanzia</summary>
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
+        ///<returns>L'istanza della classe ThreadGestioneWifi</returns>
         static public ThreadGestioneWifi getInstance() {
             if (instance == null) {
                 instance = new ThreadGestioneWifi();
@@ -32,11 +38,11 @@ namespace SnifferProbeRequestApp {
             return instance;
         }
 
-        ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
+        ///<summary>Stacca un nuovo thread per la gestione delle connessioni con i rilevatori Wifi</summary>
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         public void start() {
-            //instanzio il db manager
-            dbManager = DatabaseManager.getInstance();
+            //TODO: decommentare se non lavoro su PC aziendale
+            //startHotspot("prova4", "pippopluto");
 
             try {
                 //starto il thread in background che gestisce le connessioni con i devices
@@ -51,11 +57,13 @@ namespace SnifferProbeRequestApp {
             }
         }
 
+        ///<summary>Chiude le risorse aperte e attende la chiusura del thread di gestione dei rilevatori</summary>
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nella chiusura della connessione al DB</exception>
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore sul kill di un thread</exception>
         public void stop() {
             stopThreadElaboration = true;
             dbManager.closeConnection();
+            //stopHotspot();
             try {
                 listener.Stop();
                 threadElaboration.Join();
@@ -66,11 +74,10 @@ namespace SnifferProbeRequestApp {
             }
         }
 
+        /// <summary>
+        /// Metodo che viene elaborato nel thread per la gestione dei rilevatori
+        /// </summary>
         private void elaboration() {
-            
-            //TODO: decommentare se non lavoro su PC aziendale
-            //startHotspot("prova4", "pippopluto");
-            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket started");
             
             // setto il listener sulla porta 5010.
             int port = 5010;
@@ -83,15 +90,16 @@ namespace SnifferProbeRequestApp {
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante l'apertura del socket");
             } 
             
-
+            //lista che contiene i puntamenti ai threads per la gestione dei singoli rilevatori
             List<Thread> listaThreadSocket = new List<Thread>();
             
-              
+            //ciclo fin quando non viene invocato il metodo stop in attesa di nuovi rilevatori 
             while (!stopThreadElaboration) {
-                allDone.Reset();
+                //allDone.Reset();
                 TcpClient client = null;
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
                 try {
+                    //aspetto una connessione da parte di un rilevatore
                     client = listener.AcceptTcpClient();
                 } catch (SocketException) {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante il binding del socket");
@@ -102,7 +110,9 @@ namespace SnifferProbeRequestApp {
                     //thread per gestire il socket connesso con il device
                     Thread threadGestioneDevice = new Thread(() => gestioneDevice(client));
                     threadGestioneDevice.IsBackground = false;
+                    //starto il thread
                     threadGestioneDevice.Start();
+                    //aggiungo il thread alla lista dei thread
                     listaThreadSocket.Add(threadGestioneDevice);
                 } catch (Exception) {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante il binding del socket");
@@ -118,12 +128,13 @@ namespace SnifferProbeRequestApp {
                     break;
                 }
 
-                allDone.WaitOne();
+                //allDone.WaitOne();
             }
+            //attendo la fine di tutti i thread
             listaThreadSocket.ForEach(thread => thread.Join());
-            //stopHotspot();
         }
 
+        ///<summary>metodo che gestisce la connessione socket con un rilevatore</summary>
         ///<exception cref = "SnifferAppSocketException">Eccezione lanciata in caso di errore su una operazione sul socket</exception>
         public void gestioneDevice(TcpClient client) {
 
@@ -137,10 +148,10 @@ namespace SnifferProbeRequestApp {
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
                 throw new SnifferAppSocketException(message, e);
             }
-            
-            allDone.Set();
 
-            //verifico se il dispositivo con quell'IP era già connesso
+            //allDone.Set();
+
+            //verifico se il dispositivo con quell'IP era già connesso (l'IP del dispositivo era contentuto già nella lstConfDevices)
             if (CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
                 //il dispositivo era gia configurato
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
@@ -149,16 +160,18 @@ namespace SnifferProbeRequestApp {
                 //se non era già configurato aspetto l'evento di Configurazione dall'interfaccia grafica
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
-                //event per gestire la sincronizzazione con il thread dell'interfaccia grafica
+                //event per gestire la sincronizzazione con il thread della GUI
                 ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
+                //aggiungo il dispositivo (con il rispettivo Event) nella lista dei dispositivi non configurati
                 CommonData.lstNoConfDevices.TryAdd(remoteIpEndPoint.Address.ToString(), deviceConfEvent);
-                //delegato per gestire la variazione della lista dei device da configurare
+                //delegato per gestire la variazione della lista dei device da configurare 
                 CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
+                //mi risveglio quando dalla GUI è richiesta la configurazione del dispositivo o si vuole inviare al rilevatore il segnale "IDENTIFICA"
                 deviceConfEvent.WaitOne();
 
-                //controllo se il device è stato eliminato dalla lista dei device non configurati
                 do {
+                    //controllo se il device è stato eliminato dalla lista dei device non configurati
                     if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
                         //il device è stato configurato
                         break;
@@ -173,26 +186,31 @@ namespace SnifferProbeRequestApp {
             }
 
             string messageReceived;
+            //count per triggerare la sincronizzazione dei clock tra il server e il rilevatore
             int countSyncTimestamp = 0;
 
+            //ciclo fin quando non viene invocato il metodo stop in attesa di messaggi da parte dei rilevatori
             while (!stopThreadElaboration) {
-
+                //se il count è a 0 eseguo la sincronizzazione
                 if (countSyncTimestamp == 0) {
+                    //invio il messaggio per iniziare la sincronizzazione
                     Utils.sendMessage(stream, remoteIpEndPoint, "SYNC_CLOCK");
                     messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
 
                     //posso ricevere SYNC_CLOCK_START (devo sincronizzare) o SYNC_CLOCK_STOP (sincronizzazione terminata)
                     while (messageReceived == "SYNC_CLOCK_START//n") {
+                        //invio il segnale di sincronizzazione
                         Utils.syncClock(client.Client);
                         messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
                     }
-                    //sincronizzo i timestamp ogni 5 interazioni
+                    //resetto il count; sincronizzo i timestamp ogni 5 interazioni
                     countSyncTimestamp = 5;
                 }
 
-                //invio messaggio per indicare che può iniziare l'invio
+                //invio messaggio per indicare che può iniziare l'invio dei dati
                 Utils.sendMessage(stream, remoteIpEndPoint, "START_SEND");
 
+                //attendo il JSON dal rilevatore con i pacchetti catturati dall'ultima interazione
                 messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
                 PacketsInfo packetsInfo = null;
 
@@ -214,6 +232,7 @@ namespace SnifferProbeRequestApp {
                 countSyncTimestamp--;
             }
             
+            //chiudo il client TCP
             client.Close();
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket chiuso");
                

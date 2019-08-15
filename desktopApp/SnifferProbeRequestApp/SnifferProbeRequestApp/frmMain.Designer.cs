@@ -85,7 +85,7 @@ namespace SnifferProbeRequestApp   {
             this.btn12Ore = new System.Windows.Forms.Button();
             this.btn6Ore = new System.Windows.Forms.Button();
             this.btn1Ora = new System.Windows.Forms.Button();
-            this.btnOra = new System.Windows.Forms.Button();
+            this.btn30minuti = new System.Windows.Forms.Button();
             this.btnCercaStatisticheLungoPeriodo = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -629,7 +629,7 @@ namespace SnifferProbeRequestApp   {
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn12Ore);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn6Ore);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn1Ora);
-            this.tabStatisticaLungoPeriodo.Controls.Add(this.btnOra);
+            this.tabStatisticaLungoPeriodo.Controls.Add(this.btn30minuti);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btnCercaStatisticheLungoPeriodo);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.label4);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.label1);
@@ -698,16 +698,17 @@ namespace SnifferProbeRequestApp   {
             this.btn1Ora.UseVisualStyleBackColor = true;
             this.btn1Ora.Click += new System.EventHandler(this.Btn1Ora_Click);
             // 
-            // btnOra
+            // btn30minuti
             // 
-            this.btnOra.ForeColor = System.Drawing.Color.Black;
-            this.btnOra.Location = new System.Drawing.Point(249, 35);
-            this.btnOra.Name = "btnOra";
-            this.btnOra.Size = new System.Drawing.Size(56, 25);
-            this.btnOra.TabIndex = 7;
-            this.btnOra.Text = "Ora";
-            this.btnOra.UseVisualStyleBackColor = true;
-            this.btnOra.Click += new System.EventHandler(this.BtnOra_Click);
+            this.btn30minuti.Font = new System.Drawing.Font("Calibri", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn30minuti.ForeColor = System.Drawing.Color.Black;
+            this.btn30minuti.Location = new System.Drawing.Point(249, 35);
+            this.btn30minuti.Name = "btn30minuti";
+            this.btn30minuti.Size = new System.Drawing.Size(56, 25);
+            this.btn30minuti.TabIndex = 7;
+            this.btn30minuti.Text = "30 min";
+            this.btn30minuti.UseVisualStyleBackColor = true;
+            this.btn30minuti.Click += new System.EventHandler(this.Btn30min_Click);
             // 
             // btnCercaStatisticheLungoPeriodo
             // 
@@ -798,6 +799,7 @@ namespace SnifferProbeRequestApp   {
             this.toolTipApp.SetToolTip(this.btnRefresh, "Aggiorna i grafici delle rilevazioni");
             this.btnRefresh.Visible = false;
             this.btnRefresh.Click += new System.EventHandler(this.imgRefresh_Click);
+            this.btnRefresh.Click += new System.EventHandler(this.BtnCercaStatisticheLungoPeriodo_Click);
             // 
             // groupBox2
             // 
@@ -888,7 +890,6 @@ namespace SnifferProbeRequestApp   {
             ((System.ComponentModel.ISupportInitialize)(this.imgPolito)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -954,7 +955,7 @@ namespace SnifferProbeRequestApp   {
         private Button btn12Ore;
         private Button btn6Ore;
         private Button btn1Ora;
-        private Button btnOra;
+        private Button btn30minuti;
     }
 }
 
