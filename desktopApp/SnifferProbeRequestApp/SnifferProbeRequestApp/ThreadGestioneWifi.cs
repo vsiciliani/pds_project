@@ -3,6 +3,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using SnifferProbeRequestApp.valueClass;
 
 namespace SnifferProbeRequestApp {
     /// <summary>
@@ -123,8 +124,8 @@ namespace SnifferProbeRequestApp {
                     CommonData.lstConfDevices.TryRemove((client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), out device);
                     CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
-                    CommonData.lstNoConfDevices.TryAdd((client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), device.evento);
-                    CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
+                    NoConfDevice.lstNoConfDevices.TryAdd((client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), device.evento);
+                    NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
                     break;
                 }
 
@@ -163,16 +164,16 @@ namespace SnifferProbeRequestApp {
                 //event per gestire la sincronizzazione con il thread della GUI
                 ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
                 //aggiungo il dispositivo (con il rispettivo Event) nella lista dei dispositivi non configurati
-                CommonData.lstNoConfDevices.TryAdd(remoteIpEndPoint.Address.ToString(), deviceConfEvent);
+                NoConfDevice.lstNoConfDevices.TryAdd(remoteIpEndPoint.Address.ToString(), deviceConfEvent);
                 //delegato per gestire la variazione della lista dei device da configurare 
-                CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
+                NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
                 //mi risveglio quando dalla GUI è richiesta la configurazione del dispositivo o si vuole inviare al rilevatore il segnale "IDENTIFICA"
                 deviceConfEvent.WaitOne();
 
                 do {
                     //controllo se il device è stato eliminato dalla lista dei device non configurati
-                    if (!CommonData.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
+                    if (!NoConfDevice.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
                         //il device è stato configurato
                         break;
                     } else {

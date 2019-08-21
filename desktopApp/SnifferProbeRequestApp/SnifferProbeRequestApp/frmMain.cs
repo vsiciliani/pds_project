@@ -19,7 +19,7 @@ namespace SnifferProbeRequestApp
             //mi iscrivo agli handler
             CommonData.LstConfDevicesChanged += updateConfDevice;
             CommonData.LstConfDevicesChanged += checkTwoESP;
-            CommonData.LstNoConfDevicesChanged += updateNoConfDevice;
+            NoConfDevice.LstNoConfDevicesChanged += updateNoConfDevice;
         }
        
         //EVENTI
@@ -41,7 +41,7 @@ namespace SnifferProbeRequestApp
                 //leggo l'IP del device selezionato
                 String ipAddress = lstBoxNoConfDevice.SelectedItem.ToString();
                 ManualResetEvent deviceEvent;
-                CommonData.lstNoConfDevices.TryGetValue(ipAddress, out deviceEvent);
+                NoConfDevice.lstNoConfDevices.TryGetValue(ipAddress, out deviceEvent);
                 //risveglio il thread che gestisce la connessione del dispositivo per inviare il segnale di "IDENTIFICA"
                 deviceEvent.Set();
             }
@@ -68,7 +68,7 @@ namespace SnifferProbeRequestApp
                     //elimino il device dalla lista dei device non configurati e lancio il delegato associato
                     //semaforo per gestire la concorrenza con il thread che gestisce la connessione con il device
                     ManualResetEvent deviceEvent;
-                    CommonData.lstNoConfDevices.TryRemove(ipAddress, out deviceEvent);
+                    NoConfDevice.lstNoConfDevices.TryRemove(ipAddress, out deviceEvent);
 
                     Device device = new Device(ipAddress, 1, xPosition, yPosition, deviceEvent);
 
@@ -78,7 +78,7 @@ namespace SnifferProbeRequestApp
 
                     //risveglio il thread che gestisce la connessione del dispositivo in quanto la configurazione è completata
                     deviceEvent.Set();
-                    CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
+                    NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
                     //ripulisco la textbox
                     txtXPosition.Clear();
@@ -112,8 +112,8 @@ namespace SnifferProbeRequestApp
                 CommonData.lstConfDevices.TryRemove(deviceIp, out device);
                 CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
-                CommonData.lstNoConfDevices.TryAdd(deviceIp, device.evento);
-                CommonData.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
+                NoConfDevice.lstNoConfDevices.TryAdd(deviceIp, device.evento);
+                NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
             } catch (Exception) {
                 MessageBox.Show("Errore", "Si è verificato un errore durante la cancellazione del dispositivo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -253,11 +253,11 @@ namespace SnifferProbeRequestApp
 
         private void updateNoConfDevice(object sender, EventArgs e) {
             BeginInvoke((Action)(() => {
-                lblNumDeviceNonConf.Text = "Numero device non configurati: " + CommonData.lstNoConfDevices.Count;
+                lblNumDeviceNonConf.Text = "Numero device non configurati: " + NoConfDevice.lstNoConfDevices.Count;
 
                 lstBoxNoConfDevice.Items.Clear();
                 
-                if (CommonData.lstNoConfDevices.Count == 0) {
+                if (NoConfDevice.lstNoConfDevices.Count == 0) {
                     lblNoDeviceNoConf.Visible = true;
                     lstBoxNoConfDevice.Visible = false;
                     lblXPosition.Visible = false;
@@ -268,7 +268,7 @@ namespace SnifferProbeRequestApp
                     btnSalvaDevice.Visible = false;
                 } else {
 
-                    foreach (KeyValuePair<String, ManualResetEvent> device in CommonData.lstNoConfDevices) {
+                    foreach (KeyValuePair<String, ManualResetEvent> device in NoConfDevice.lstNoConfDevices) {
                         lstBoxNoConfDevice.Items.Add(device.Key);
                     }
 
