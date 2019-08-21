@@ -7,13 +7,14 @@ E' composto da più **thread**:
 * Thread per la **gestione della connessione con un rilevatore** (viene staccato un thread per ogni rilevatore). Questo thread mantiene attiva la connessione e si occupa di inviare/ricevere messaggi con il rilevatore associato.
 
 La sincronizzazione tra i vari thread è gestita (dove necessario) con l'utilizzo di *Event*. 
-Per la gestione dei dati comuni si è utilizzato la struttura dati dei *ConcurrentDictionary* e le proprietà *ACID* del DB relazionale in cui sono salvati i dati.
+Per la gestione dei dati comuni si è utilizzato la struttura dati *ConcurrentDictionary* e le proprietà *ACID* del DB relazionale in cui sono salvati i dati.
 
 Il modulo permette di **accettare** la connessione con *N* rilevatori in qualsiasi momento e di **configurarli** indicando la posizione che occupano nello spazio. Permette anche di **modificare** la configurazione dei dispositivi in qualsiasi momento.
 Dopo aver configurato almeno due rilevatori WiFi il modulo inizierà a **salvare** in dati ricevuti dai rilevatori nel DB ed a **elaborarli**. Le rilevazioni che vengono mostrate dall'applicativo sono le seguenti:
 1. **Numero** di dispositivi connessi continuamente negli ultimi 5 minuti;
 2. **Posizione** (media) dei dispositivi rilevati nell'ultimo minuto;
-3. **Periodi temporali** in cui i TOP N (per tempo rilevato) sono stati rilevati.
+3. **Periodi temporali** in cui i TOP N (per tempo rilevato) sono stati rilevati;
+4. **Movimento dei device** rilevati all'interno di un periodo temporale specificato.
 
 Il modello dati si basa su *due tabelle* all'interno del DB:
 1. **Packets**: è la tabella che contiene i dati così come sono ricevuti dai rilevatori;
