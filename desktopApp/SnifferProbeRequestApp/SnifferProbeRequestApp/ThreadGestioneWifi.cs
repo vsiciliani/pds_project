@@ -15,7 +15,7 @@ namespace SnifferProbeRequestApp {
 
         private static ThreadGestioneWifi instance = null;
         private TcpListener listener;
-        private static ManualResetEvent allDone = new ManualResetEvent(false);
+        //private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DatabaseManager dbManager = null;
 
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>

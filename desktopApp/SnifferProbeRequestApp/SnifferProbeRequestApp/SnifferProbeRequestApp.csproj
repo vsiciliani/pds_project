@@ -54,6 +54,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Messaging" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -72,6 +73,7 @@
     <Compile Include="valueClass\AssembledPacketInfo.cs" />
     <Compile Include="CommonData.cs" />
     <Compile Include="DatabaseManager.cs" />
+    <Compile Include="valueClass\CachedDevicePosition.cs" />
     <Compile Include="valueClass\Device.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>

@@ -26,16 +26,20 @@ namespace SnifferProbeRequestApp   {
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea9 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend9 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series13 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea10 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend10 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series14 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series15 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea11 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend11 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series16 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea12 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend12 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series17 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series18 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.groupBoxSettings = new System.Windows.Forms.GroupBox();
             this.btnSalvaDevice = new System.Windows.Forms.PictureBox();
             this.separatoreSettingRigth = new System.Windows.Forms.Label();
@@ -87,11 +91,32 @@ namespace SnifferProbeRequestApp   {
             this.btn1Ora = new System.Windows.Forms.Button();
             this.btn30minuti = new System.Windows.Forms.Button();
             this.btnCercaStatisticheLungoPeriodo = new System.Windows.Forms.PictureBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.lblFiltro = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.dateTimePickerLimite = new System.Windows.Forms.DateTimePicker();
             this.upDownNumDevice = new System.Windows.Forms.NumericUpDown();
             this.chartStatisticaLungoPeriodo = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.tabMovimentoDevice = new System.Windows.Forms.TabPage();
+            this.btnCercaMovimentoDevice = new System.Windows.Forms.PictureBox();
+            this.boxDevice = new System.Windows.Forms.ComboBox();
+            this.lblDevice = new System.Windows.Forms.Label();
+            this.chartMovimentoDevice = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.btn12oreMax = new System.Windows.Forms.Button();
+            this.btn6oreMax = new System.Windows.Forms.Button();
+            this.btn1oraMax = new System.Windows.Forms.Button();
+            this.btnNowMax = new System.Windows.Forms.Button();
+            this.lblDateMax = new System.Windows.Forms.Label();
+            this.dateTimePickerDateMax = new System.Windows.Forms.DateTimePicker();
+            this.btn12oreMin = new System.Windows.Forms.Button();
+            this.btn6oreMIn = new System.Windows.Forms.Button();
+            this.btn1oraMin = new System.Windows.Forms.Button();
+            this.btn30minMin = new System.Windows.Forms.Button();
+            this.lblDateMin = new System.Windows.Forms.Label();
+            this.dateTimePickerDateMin = new System.Windows.Forms.DateTimePicker();
+            this.lblValoreSelezionatoTrackBar = new System.Windows.Forms.Label();
+            this.lblValoreMassimoTrackbar = new System.Windows.Forms.Label();
+            this.lblValoreMinimoTrackbar = new System.Windows.Forms.Label();
+            this.trackBarTempo = new System.Windows.Forms.TrackBar();
             this.toolTipApp = new System.Windows.Forms.ToolTip(this.components);
             this.btnRefresh = new System.Windows.Forms.PictureBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -114,6 +139,10 @@ namespace SnifferProbeRequestApp   {
             ((System.ComponentModel.ISupportInitialize)(this.btnCercaStatisticheLungoPeriodo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.upDownNumDevice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartStatisticaLungoPeriodo)).BeginInit();
+            this.tabMovimentoDevice.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.btnCercaMovimentoDevice)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartMovimentoDevice)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarTempo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnRefresh)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -460,60 +489,60 @@ namespace SnifferProbeRequestApp   {
             // 
             this.chartNumberDevice.BorderlineWidth = 0;
             this.chartNumberDevice.CausesValidation = false;
-            chartArea1.AxisX.MajorGrid.Enabled = false;
-            chartArea1.AxisY.MajorGrid.LineColor = System.Drawing.Color.Gray;
-            chartArea1.AxisY.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
-            chartArea1.AxisY.MajorGrid.LineWidth = 2;
-            chartArea1.Name = "ChartArea1";
-            this.chartNumberDevice.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chartNumberDevice.Legends.Add(legend1);
+            chartArea9.AxisX.MajorGrid.Enabled = false;
+            chartArea9.AxisY.MajorGrid.LineColor = System.Drawing.Color.Gray;
+            chartArea9.AxisY.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
+            chartArea9.AxisY.MajorGrid.LineWidth = 2;
+            chartArea9.Name = "ChartArea1";
+            this.chartNumberDevice.ChartAreas.Add(chartArea9);
+            legend9.Name = "Legend1";
+            this.chartNumberDevice.Legends.Add(legend9);
             this.chartNumberDevice.Location = new System.Drawing.Point(6, 24);
             this.chartNumberDevice.Name = "chartNumberDevice";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-            series1.IsVisibleInLegend = false;
-            series1.IsXValueIndexed = true;
-            series1.Legend = "Legend1";
-            series1.Name = "N. dispositivi univoci";
-            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
-            series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
-            this.chartNumberDevice.Series.Add(series1);
+            series13.ChartArea = "ChartArea1";
+            series13.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+            series13.IsVisibleInLegend = false;
+            series13.IsXValueIndexed = true;
+            series13.Legend = "Legend1";
+            series13.Name = "N. dispositivi univoci";
+            series13.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
+            series13.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
+            this.chartNumberDevice.Series.Add(series13);
             this.chartNumberDevice.Size = new System.Drawing.Size(1017, 366);
             this.chartNumberDevice.TabIndex = 0;
             this.chartNumberDevice.Text = "chartNumberDevice";
             // 
             // chartPositionDevice
             // 
-            chartArea2.AxisX.LabelStyle.Enabled = false;
-            chartArea2.AxisX.LineWidth = 0;
-            chartArea2.AxisX.MajorGrid.Enabled = false;
-            chartArea2.AxisX.MajorTickMark.LineWidth = 0;
-            chartArea2.AxisY.LabelStyle.Enabled = false;
-            chartArea2.AxisY.LineWidth = 0;
-            chartArea2.AxisY.MajorGrid.Enabled = false;
-            chartArea2.AxisY.MajorTickMark.LineWidth = 0;
-            chartArea2.Name = "ChartArea1";
-            this.chartPositionDevice.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chartPositionDevice.Legends.Add(legend2);
+            chartArea10.AxisX.LabelStyle.Enabled = false;
+            chartArea10.AxisX.LineWidth = 0;
+            chartArea10.AxisX.MajorGrid.Enabled = false;
+            chartArea10.AxisX.MajorTickMark.LineWidth = 0;
+            chartArea10.AxisY.LabelStyle.Enabled = false;
+            chartArea10.AxisY.LineWidth = 0;
+            chartArea10.AxisY.MajorGrid.Enabled = false;
+            chartArea10.AxisY.MajorTickMark.LineWidth = 0;
+            chartArea10.Name = "ChartArea1";
+            this.chartPositionDevice.ChartAreas.Add(chartArea10);
+            legend10.Name = "Legend1";
+            this.chartPositionDevice.Legends.Add(legend10);
             this.chartPositionDevice.Location = new System.Drawing.Point(6, 32);
             this.chartPositionDevice.Name = "chartPositionDevice";
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series2.Legend = "Legend1";
-            series2.MarkerSize = 12;
-            series2.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Square;
-            series2.Name = "ESP";
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series3.Legend = "Legend1";
-            series3.MarkerColor = System.Drawing.Color.Red;
-            series3.MarkerSize = 15;
-            series3.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Cross;
-            series3.Name = "Device";
-            this.chartPositionDevice.Series.Add(series2);
-            this.chartPositionDevice.Series.Add(series3);
+            series14.ChartArea = "ChartArea1";
+            series14.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series14.Legend = "Legend1";
+            series14.MarkerSize = 12;
+            series14.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Square;
+            series14.Name = "ESP";
+            series15.ChartArea = "ChartArea1";
+            series15.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series15.Legend = "Legend1";
+            series15.MarkerColor = System.Drawing.Color.Red;
+            series15.MarkerSize = 15;
+            series15.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Cross;
+            series15.Name = "Device";
+            this.chartPositionDevice.Series.Add(series14);
+            this.chartPositionDevice.Series.Add(series15);
             this.chartPositionDevice.Size = new System.Drawing.Size(1004, 358);
             this.chartPositionDevice.TabIndex = 0;
             this.chartPositionDevice.Text = "chart1";
@@ -569,12 +598,12 @@ namespace SnifferProbeRequestApp   {
             this.tabFeatures.Controls.Add(this.tabConteggioDevice);
             this.tabFeatures.Controls.Add(this.tabPosizioneDevice);
             this.tabFeatures.Controls.Add(this.tabStatisticaLungoPeriodo);
+            this.tabFeatures.Controls.Add(this.tabMovimentoDevice);
             this.tabFeatures.Location = new System.Drawing.Point(9, 54);
             this.tabFeatures.Name = "tabFeatures";
             this.tabFeatures.SelectedIndex = 0;
             this.tabFeatures.Size = new System.Drawing.Size(1040, 427);
             this.tabFeatures.TabIndex = 8;
-            this.tabFeatures.Visible = false;
             // 
             // tabConteggioDevice
             // 
@@ -631,7 +660,7 @@ namespace SnifferProbeRequestApp   {
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn1Ora);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn30minuti);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btnCercaStatisticheLungoPeriodo);
-            this.tabStatisticaLungoPeriodo.Controls.Add(this.label4);
+            this.tabStatisticaLungoPeriodo.Controls.Add(this.lblFiltro);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.label1);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.dateTimePickerLimite);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.upDownNumDevice);
@@ -721,15 +750,15 @@ namespace SnifferProbeRequestApp   {
             this.btnCercaStatisticheLungoPeriodo.TabStop = false;
             this.btnCercaStatisticheLungoPeriodo.Click += new System.EventHandler(this.BtnCercaStatisticheLungoPeriodo_Click);
             // 
-            // label4
+            // lblFiltro
             // 
-            this.label4.AutoSize = true;
-            this.label4.ForeColor = System.Drawing.Color.Black;
-            this.label4.Location = new System.Drawing.Point(181, 13);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(62, 18);
-            this.label4.TabIndex = 5;
-            this.label4.Text = "Filtra da:";
+            this.lblFiltro.AutoSize = true;
+            this.lblFiltro.ForeColor = System.Drawing.Color.Black;
+            this.lblFiltro.Location = new System.Drawing.Point(181, 13);
+            this.lblFiltro.Name = "lblFiltro";
+            this.lblFiltro.Size = new System.Drawing.Size(62, 18);
+            this.lblFiltro.TabIndex = 5;
+            this.lblFiltro.Text = "Filtra da:";
             // 
             // label1
             // 
@@ -766,26 +795,295 @@ namespace SnifferProbeRequestApp   {
             // 
             // chartStatisticaLungoPeriodo
             // 
-            chartArea3.Name = "ChartArea1";
-            this.chartStatisticaLungoPeriodo.ChartAreas.Add(chartArea3);
-            legend3.Name = "Legend1";
-            this.chartStatisticaLungoPeriodo.Legends.Add(legend3);
+            chartArea11.Name = "ChartArea1";
+            this.chartStatisticaLungoPeriodo.ChartAreas.Add(chartArea11);
+            legend11.Name = "Legend1";
+            this.chartStatisticaLungoPeriodo.Legends.Add(legend11);
             this.chartStatisticaLungoPeriodo.Location = new System.Drawing.Point(4, 77);
             this.chartStatisticaLungoPeriodo.Name = "chartStatisticaLungoPeriodo";
-            series4.ChartArea = "ChartArea1";
-            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeBar;
-            series4.CustomProperties = "DrawSideBySide=False";
-            series4.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            series4.IsVisibleInLegend = false;
-            series4.Legend = "Legend1";
-            series4.Name = "Series1";
-            series4.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.String;
-            series4.YValuesPerPoint = 2;
-            series4.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.chartStatisticaLungoPeriodo.Series.Add(series4);
+            series16.ChartArea = "ChartArea1";
+            series16.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeBar;
+            series16.CustomProperties = "DrawSideBySide=False";
+            series16.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            series16.IsVisibleInLegend = false;
+            series16.Legend = "Legend1";
+            series16.Name = "Series1";
+            series16.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.String;
+            series16.YValuesPerPoint = 2;
+            series16.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.chartStatisticaLungoPeriodo.Series.Add(series16);
             this.chartStatisticaLungoPeriodo.Size = new System.Drawing.Size(1025, 314);
             this.chartStatisticaLungoPeriodo.TabIndex = 0;
             this.chartStatisticaLungoPeriodo.Text = "chart1";
+            // 
+            // tabMovimentoDevice
+            // 
+            this.tabMovimentoDevice.Controls.Add(this.btnCercaMovimentoDevice);
+            this.tabMovimentoDevice.Controls.Add(this.boxDevice);
+            this.tabMovimentoDevice.Controls.Add(this.lblDevice);
+            this.tabMovimentoDevice.Controls.Add(this.chartMovimentoDevice);
+            this.tabMovimentoDevice.Controls.Add(this.btn12oreMax);
+            this.tabMovimentoDevice.Controls.Add(this.btn6oreMax);
+            this.tabMovimentoDevice.Controls.Add(this.btn1oraMax);
+            this.tabMovimentoDevice.Controls.Add(this.btnNowMax);
+            this.tabMovimentoDevice.Controls.Add(this.lblDateMax);
+            this.tabMovimentoDevice.Controls.Add(this.dateTimePickerDateMax);
+            this.tabMovimentoDevice.Controls.Add(this.btn12oreMin);
+            this.tabMovimentoDevice.Controls.Add(this.btn6oreMIn);
+            this.tabMovimentoDevice.Controls.Add(this.btn1oraMin);
+            this.tabMovimentoDevice.Controls.Add(this.btn30minMin);
+            this.tabMovimentoDevice.Controls.Add(this.lblDateMin);
+            this.tabMovimentoDevice.Controls.Add(this.dateTimePickerDateMin);
+            this.tabMovimentoDevice.Controls.Add(this.lblValoreSelezionatoTrackBar);
+            this.tabMovimentoDevice.Controls.Add(this.lblValoreMassimoTrackbar);
+            this.tabMovimentoDevice.Controls.Add(this.lblValoreMinimoTrackbar);
+            this.tabMovimentoDevice.Controls.Add(this.trackBarTempo);
+            this.tabMovimentoDevice.Location = new System.Drawing.Point(4, 27);
+            this.tabMovimentoDevice.Name = "tabMovimentoDevice";
+            this.tabMovimentoDevice.Size = new System.Drawing.Size(1032, 396);
+            this.tabMovimentoDevice.TabIndex = 3;
+            this.tabMovimentoDevice.Text = "Movimento device";
+            this.tabMovimentoDevice.UseVisualStyleBackColor = true;
+            // 
+            // btnCercaMovimentoDevice
+            // 
+            this.btnCercaMovimentoDevice.Image = global::SnifferProbeRequestApp.Properties.Resources.search;
+            this.btnCercaMovimentoDevice.Location = new System.Drawing.Point(555, 6);
+            this.btnCercaMovimentoDevice.Name = "btnCercaMovimentoDevice";
+            this.btnCercaMovimentoDevice.Size = new System.Drawing.Size(25, 25);
+            this.btnCercaMovimentoDevice.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnCercaMovimentoDevice.TabIndex = 33;
+            this.btnCercaMovimentoDevice.TabStop = false;
+            this.btnCercaMovimentoDevice.Click += new System.EventHandler(this.btnCercaMovimentoDevice_Click);
+            // 
+            // boxDevice
+            // 
+            this.boxDevice.FormattingEnabled = true;
+            this.boxDevice.Location = new System.Drawing.Point(654, 6);
+            this.boxDevice.Name = "boxDevice";
+            this.boxDevice.Size = new System.Drawing.Size(171, 26);
+            this.boxDevice.TabIndex = 32;
+            this.boxDevice.SelectedIndexChanged += new System.EventHandler(this.BoxDevice_SelectedIndexChanged);
+            // 
+            // lblDevice
+            // 
+            this.lblDevice.AutoSize = true;
+            this.lblDevice.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lblDevice.Location = new System.Drawing.Point(594, 10);
+            this.lblDevice.Name = "lblDevice";
+            this.lblDevice.Size = new System.Drawing.Size(54, 18);
+            this.lblDevice.TabIndex = 31;
+            this.lblDevice.Text = "Device:";
+            // 
+            // chartMovimentoDevice
+            // 
+            chartArea12.AxisX.LabelStyle.Enabled = false;
+            chartArea12.AxisX.LineWidth = 0;
+            chartArea12.AxisX.MajorGrid.Enabled = false;
+            chartArea12.AxisX.MajorTickMark.LineWidth = 0;
+            chartArea12.AxisY.LabelStyle.Enabled = false;
+            chartArea12.AxisY.LineWidth = 0;
+            chartArea12.AxisY.MajorGrid.Enabled = false;
+            chartArea12.AxisY.MajorTickMark.LineWidth = 0;
+            chartArea12.Name = "ChartArea1";
+            this.chartMovimentoDevice.ChartAreas.Add(chartArea12);
+            legend12.Name = "Legend1";
+            this.chartMovimentoDevice.Legends.Add(legend12);
+            this.chartMovimentoDevice.Location = new System.Drawing.Point(14, 62);
+            this.chartMovimentoDevice.Name = "chartMovimentoDevice";
+            series17.ChartArea = "ChartArea1";
+            series17.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series17.Legend = "Legend1";
+            series17.MarkerSize = 12;
+            series17.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Square;
+            series17.Name = "ESP";
+            series18.ChartArea = "ChartArea1";
+            series18.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series18.Legend = "Legend1";
+            series18.MarkerColor = System.Drawing.Color.Red;
+            series18.MarkerSize = 15;
+            series18.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Cross;
+            series18.Name = "Device";
+            this.chartMovimentoDevice.Series.Add(series17);
+            this.chartMovimentoDevice.Series.Add(series18);
+            this.chartMovimentoDevice.Size = new System.Drawing.Size(1007, 253);
+            this.chartMovimentoDevice.TabIndex = 30;
+            this.chartMovimentoDevice.Text = "chart1";
+            // 
+            // btn12oreMax
+            // 
+            this.btn12oreMax.ForeColor = System.Drawing.Color.Black;
+            this.btn12oreMax.Location = new System.Drawing.Point(493, 31);
+            this.btn12oreMax.Name = "btn12oreMax";
+            this.btn12oreMax.Size = new System.Drawing.Size(56, 25);
+            this.btn12oreMax.TabIndex = 27;
+            this.btn12oreMax.Text = "12 ore";
+            this.btn12oreMax.UseVisualStyleBackColor = true;
+            this.btn12oreMax.Click += new System.EventHandler(this.Btn12oreMax_Click);
+            // 
+            // btn6oreMax
+            // 
+            this.btn6oreMax.ForeColor = System.Drawing.Color.Black;
+            this.btn6oreMax.Location = new System.Drawing.Point(437, 31);
+            this.btn6oreMax.Name = "btn6oreMax";
+            this.btn6oreMax.Size = new System.Drawing.Size(56, 25);
+            this.btn6oreMax.TabIndex = 26;
+            this.btn6oreMax.Text = "6 ore";
+            this.btn6oreMax.UseVisualStyleBackColor = true;
+            this.btn6oreMax.Click += new System.EventHandler(this.Btn6oreMax_Click);
+            // 
+            // btn1oraMax
+            // 
+            this.btn1oraMax.ForeColor = System.Drawing.Color.Black;
+            this.btn1oraMax.Location = new System.Drawing.Point(381, 31);
+            this.btn1oraMax.Name = "btn1oraMax";
+            this.btn1oraMax.Size = new System.Drawing.Size(56, 25);
+            this.btn1oraMax.TabIndex = 25;
+            this.btn1oraMax.Text = "1 ora";
+            this.btn1oraMax.UseVisualStyleBackColor = true;
+            this.btn1oraMax.Click += new System.EventHandler(this.Btn1oraMax_Click);
+            // 
+            // btnNowMax
+            // 
+            this.btnNowMax.Font = new System.Drawing.Font("Calibri", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnNowMax.ForeColor = System.Drawing.Color.Black;
+            this.btnNowMax.Location = new System.Drawing.Point(325, 31);
+            this.btnNowMax.Name = "btnNowMax";
+            this.btnNowMax.Size = new System.Drawing.Size(56, 25);
+            this.btnNowMax.TabIndex = 24;
+            this.btnNowMax.Text = "Ora";
+            this.btnNowMax.UseVisualStyleBackColor = true;
+            this.btnNowMax.Click += new System.EventHandler(this.BtnNowMax_Click);
+            // 
+            // lblDateMax
+            // 
+            this.lblDateMax.AutoSize = true;
+            this.lblDateMax.ForeColor = System.Drawing.Color.Black;
+            this.lblDateMax.Location = new System.Drawing.Point(301, 9);
+            this.lblDateMax.Name = "lblDateMax";
+            this.lblDateMax.Size = new System.Drawing.Size(19, 18);
+            this.lblDateMax.TabIndex = 23;
+            this.lblDateMax.Text = "a:";
+            // 
+            // dateTimePickerDateMax
+            // 
+            this.dateTimePickerDateMax.Checked = false;
+            this.dateTimePickerDateMax.CustomFormat = "dd/MM/yyyy HH:mm:ss";
+            this.dateTimePickerDateMax.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dateTimePickerDateMax.Location = new System.Drawing.Point(325, 4);
+            this.dateTimePickerDateMax.Name = "dateTimePickerDateMax";
+            this.dateTimePickerDateMax.ShowUpDown = true;
+            this.dateTimePickerDateMax.Size = new System.Drawing.Size(224, 26);
+            this.dateTimePickerDateMax.TabIndex = 22;
+            // 
+            // btn12oreMin
+            // 
+            this.btn12oreMin.ForeColor = System.Drawing.Color.Black;
+            this.btn12oreMin.Location = new System.Drawing.Point(239, 31);
+            this.btn12oreMin.Name = "btn12oreMin";
+            this.btn12oreMin.Size = new System.Drawing.Size(56, 25);
+            this.btn12oreMin.TabIndex = 19;
+            this.btn12oreMin.Text = "12 ore";
+            this.btn12oreMin.UseVisualStyleBackColor = true;
+            this.btn12oreMin.Click += new System.EventHandler(this.Btn12oreMin_Click);
+            // 
+            // btn6oreMIn
+            // 
+            this.btn6oreMIn.ForeColor = System.Drawing.Color.Black;
+            this.btn6oreMIn.Location = new System.Drawing.Point(183, 31);
+            this.btn6oreMIn.Name = "btn6oreMIn";
+            this.btn6oreMIn.Size = new System.Drawing.Size(56, 25);
+            this.btn6oreMIn.TabIndex = 18;
+            this.btn6oreMIn.Text = "6 ore";
+            this.btn6oreMIn.UseVisualStyleBackColor = true;
+            this.btn6oreMIn.Click += new System.EventHandler(this.Btn6oreMIn_Click);
+            // 
+            // btn1oraMin
+            // 
+            this.btn1oraMin.ForeColor = System.Drawing.Color.Black;
+            this.btn1oraMin.Location = new System.Drawing.Point(127, 31);
+            this.btn1oraMin.Name = "btn1oraMin";
+            this.btn1oraMin.Size = new System.Drawing.Size(56, 25);
+            this.btn1oraMin.TabIndex = 17;
+            this.btn1oraMin.Text = "1 ora";
+            this.btn1oraMin.UseVisualStyleBackColor = true;
+            this.btn1oraMin.Click += new System.EventHandler(this.Btn1oraMin_Click);
+            // 
+            // btn30minMin
+            // 
+            this.btn30minMin.Font = new System.Drawing.Font("Calibri", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn30minMin.ForeColor = System.Drawing.Color.Black;
+            this.btn30minMin.Location = new System.Drawing.Point(71, 31);
+            this.btn30minMin.Name = "btn30minMin";
+            this.btn30minMin.Size = new System.Drawing.Size(56, 25);
+            this.btn30minMin.TabIndex = 16;
+            this.btn30minMin.Text = "30 min";
+            this.btn30minMin.UseVisualStyleBackColor = true;
+            this.btn30minMin.Click += new System.EventHandler(this.Btn30minMin_Click);
+            // 
+            // lblDateMin
+            // 
+            this.lblDateMin.AutoSize = true;
+            this.lblDateMin.ForeColor = System.Drawing.Color.Black;
+            this.lblDateMin.Location = new System.Drawing.Point(3, 9);
+            this.lblDateMin.Name = "lblDateMin";
+            this.lblDateMin.Size = new System.Drawing.Size(62, 18);
+            this.lblDateMin.TabIndex = 15;
+            this.lblDateMin.Text = "Filtra da:";
+            // 
+            // dateTimePickerDateMin
+            // 
+            this.dateTimePickerDateMin.Checked = false;
+            this.dateTimePickerDateMin.CustomFormat = "dd/MM/yyyy HH:mm:ss";
+            this.dateTimePickerDateMin.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dateTimePickerDateMin.Location = new System.Drawing.Point(71, 4);
+            this.dateTimePickerDateMin.Name = "dateTimePickerDateMin";
+            this.dateTimePickerDateMin.ShowUpDown = true;
+            this.dateTimePickerDateMin.Size = new System.Drawing.Size(224, 26);
+            this.dateTimePickerDateMin.TabIndex = 14;
+            // 
+            // lblValoreSelezionatoTrackBar
+            // 
+            this.lblValoreSelezionatoTrackBar.ForeColor = System.Drawing.Color.Black;
+            this.lblValoreSelezionatoTrackBar.Location = new System.Drawing.Point(316, 369);
+            this.lblValoreSelezionatoTrackBar.Name = "lblValoreSelezionatoTrackBar";
+            this.lblValoreSelezionatoTrackBar.Size = new System.Drawing.Size(400, 27);
+            this.lblValoreSelezionatoTrackBar.TabIndex = 3;
+            this.lblValoreSelezionatoTrackBar.Text = "Valore selezionato:";
+            this.lblValoreSelezionatoTrackBar.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblValoreSelezionatoTrackBar.Visible = false;
+            // 
+            // lblValoreMassimoTrackbar
+            // 
+            this.lblValoreMassimoTrackbar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblValoreMassimoTrackbar.ForeColor = System.Drawing.Color.Black;
+            this.lblValoreMassimoTrackbar.Location = new System.Drawing.Point(743, 369);
+            this.lblValoreMassimoTrackbar.Name = "lblValoreMassimoTrackbar";
+            this.lblValoreMassimoTrackbar.Size = new System.Drawing.Size(286, 18);
+            this.lblValoreMassimoTrackbar.TabIndex = 2;
+            this.lblValoreMassimoTrackbar.Text = "Valore massimo:";
+            this.lblValoreMassimoTrackbar.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.lblValoreMassimoTrackbar.Visible = false;
+            // 
+            // lblValoreMinimoTrackbar
+            // 
+            this.lblValoreMinimoTrackbar.AutoSize = true;
+            this.lblValoreMinimoTrackbar.ForeColor = System.Drawing.Color.Black;
+            this.lblValoreMinimoTrackbar.Location = new System.Drawing.Point(3, 369);
+            this.lblValoreMinimoTrackbar.Name = "lblValoreMinimoTrackbar";
+            this.lblValoreMinimoTrackbar.Size = new System.Drawing.Size(103, 18);
+            this.lblValoreMinimoTrackbar.TabIndex = 1;
+            this.lblValoreMinimoTrackbar.Text = "Valore minimo:";
+            this.lblValoreMinimoTrackbar.Visible = false;
+            // 
+            // trackBarTempo
+            // 
+            this.trackBarTempo.Enabled = false;
+            this.trackBarTempo.Location = new System.Drawing.Point(3, 321);
+            this.trackBarTempo.Name = "trackBarTempo";
+            this.trackBarTempo.Size = new System.Drawing.Size(1026, 45);
+            this.trackBarTempo.TabIndex = 0;
+            this.trackBarTempo.Scroll += new System.EventHandler(this.TrackBarTempo_Scroll);
             // 
             // btnRefresh
             // 
@@ -797,9 +1095,7 @@ namespace SnifferProbeRequestApp   {
             this.btnRefresh.TabIndex = 1;
             this.btnRefresh.TabStop = false;
             this.toolTipApp.SetToolTip(this.btnRefresh, "Aggiorna i grafici delle rilevazioni");
-            this.btnRefresh.Visible = false;
             this.btnRefresh.Click += new System.EventHandler(this.imgRefresh_Click);
-            this.btnRefresh.Click += new System.EventHandler(this.BtnCercaStatisticheLungoPeriodo_Click);
             // 
             // groupBox2
             // 
@@ -824,6 +1120,7 @@ namespace SnifferProbeRequestApp   {
             this.lblMin2device.Size = new System.Drawing.Size(390, 18);
             this.lblMin2device.TabIndex = 9;
             this.lblMin2device.Text = "Configurare almeno due rilevatori per effettuare le rilevazioni";
+            this.lblMin2device.Visible = false;
             // 
             // pictureBox1
             // 
@@ -883,6 +1180,11 @@ namespace SnifferProbeRequestApp   {
             ((System.ComponentModel.ISupportInitialize)(this.btnCercaStatisticheLungoPeriodo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.upDownNumDevice)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartStatisticaLungoPeriodo)).EndInit();
+            this.tabMovimentoDevice.ResumeLayout(false);
+            this.tabMovimentoDevice.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.btnCercaMovimentoDevice)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartMovimentoDevice)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarTempo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnRefresh)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
@@ -890,6 +1192,7 @@ namespace SnifferProbeRequestApp   {
             ((System.ComponentModel.ISupportInitialize)(this.imgPolito)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         #endregion
@@ -946,7 +1249,7 @@ namespace SnifferProbeRequestApp   {
         private System.Windows.Forms.TabPage tabStatisticaLungoPeriodo;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartStatisticaLungoPeriodo;
         private System.Windows.Forms.NumericUpDown upDownNumDevice;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label lblFiltro;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DateTimePicker dateTimePickerLimite;
         private PictureBox btnCercaStatisticheLungoPeriodo;
@@ -956,6 +1259,27 @@ namespace SnifferProbeRequestApp   {
         private Button btn6Ore;
         private Button btn1Ora;
         private Button btn30minuti;
+        private TabPage tabMovimentoDevice;
+        private TrackBar trackBarTempo;
+        private Label lblValoreSelezionatoTrackBar;
+        private Label lblValoreMassimoTrackbar;
+        private Label lblValoreMinimoTrackbar;
+        private Button btn12oreMin;
+        private Button btn6oreMIn;
+        private Button btn1oraMin;
+        private Button btn30minMin;
+        private Label lblDateMin;
+        private DateTimePicker dateTimePickerDateMin;
+        private ComboBox boxDevice;
+        private Label lblDevice;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartMovimentoDevice;
+        private Button btn12oreMax;
+        private Button btn6oreMax;
+        private Button btn1oraMax;
+        private Button btnNowMax;
+        private Label lblDateMax;
+        private DateTimePicker dateTimePickerDateMax;
+        private PictureBox btnCercaMovimentoDevice;
     }
 }
 
