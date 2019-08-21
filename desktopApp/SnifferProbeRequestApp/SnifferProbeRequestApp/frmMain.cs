@@ -164,8 +164,10 @@ namespace SnifferProbeRequestApp
             }
 
             chartStatisticaLungoPeriodo.ChartAreas[0].AxisY.LabelStyle.Format = "dd/MM/yyyy HH:mm";
+            chartStatisticaLungoPeriodo.ChartAreas[0].RecalculateAxesScale();
         }
 
+        //inizio eventi bottoni timePicketr statistiche lungo periodo
         private void Btn30min_Click(object sender, EventArgs e) {
             dateTimePickerLimite.Value = DateTime.Now.AddMinutes(-30);
         }
@@ -189,6 +191,41 @@ namespace SnifferProbeRequestApp
         private void Btn7giorni_Click(object sender, EventArgs e) {
             dateTimePickerLimite.Value = DateTime.Now.AddDays(-7);
         }
+        //fine eventi bottoni timePicketr statistiche lungo periodo
+
+        //inizio eventi bottoni timePicketr movimento
+        private void Btn30minMin_Click(object sender, EventArgs e) {
+            dateTimePickerDateMin.Value = DateTime.Now.AddMinutes(-30);
+        }
+
+        private void Btn1oraMin_Click(object sender, EventArgs e) {
+            dateTimePickerDateMin.Value = DateTime.Now.AddHours(-1);
+        }
+
+        private void Btn6oreMIn_Click(object sender, EventArgs e) {
+            dateTimePickerDateMin.Value = DateTime.Now.AddHours(-6);
+        }
+
+        private void Btn12oreMin_Click(object sender, EventArgs e) {
+            dateTimePickerDateMin.Value = DateTime.Now.AddHours(-12);
+        }
+
+        private void BtnNowMax_Click(object sender, EventArgs e) {
+            dateTimePickerDateMax.Value = DateTime.Now;
+        }
+
+        private void Btn1oraMax_Click(object sender, EventArgs e) {
+            dateTimePickerDateMax.Value = DateTime.Now.AddHours(-1);
+        }
+
+        private void Btn6oreMax_Click(object sender, EventArgs e) {
+            dateTimePickerDateMax.Value = DateTime.Now.AddHours(-6);
+        }
+
+        private void Btn12oreMax_Click(object sender, EventArgs e) {
+            dateTimePickerDateMax.Value = DateTime.Now.AddHours(-12);
+        }
+        //fine eventi bottoni timePicketr movimento
 
         //CUSTOM PROCEDURE
 
@@ -204,7 +241,6 @@ namespace SnifferProbeRequestApp
                 return;
             }
 
-
             int po = chartNumberDevice.Series[0].Points.AddXY(count.timestamp, count.count);
             chartNumberDevice.Series[0].Points[po].ToolTip = "Timestamp: "+count.timestamp +"\nNumero device connessi: "+count.count;
 
@@ -216,8 +252,7 @@ namespace SnifferProbeRequestApp
         }
 
         private void updateNoConfDevice(object sender, EventArgs e) {
-            BeginInvoke((Action)(() =>
-            {
+            BeginInvoke((Action)(() => {
                 lblNumDeviceNonConf.Text = "Numero device non configurati: " + CommonData.lstNoConfDevices.Count;
 
                 lstBoxNoConfDevice.Items.Clear();
@@ -246,8 +281,7 @@ namespace SnifferProbeRequestApp
                     btnIdentificaDevice.Visible = true;
                     btnSalvaDevice.Visible = true;
                 }
-            }));
-            
+            }));          
         }
 
         private void checkTwoESP(object sender, EventArgs e){
@@ -256,15 +290,15 @@ namespace SnifferProbeRequestApp
                 btnRefresh.Visible = true;
                 lblMin2device.Visible = false;
             } else {
-                tabFeatures.Visible = false;
-                btnRefresh.Visible = false;
-                lblMin2device.Visible = true;
+                tabFeatures.Visible = true; //TODO: invertire
+                btnRefresh.Visible = true; //TODO: invertire
+                lblMin2device.Visible = false; //TODO: invertire
             }
         }
 
         private void updateConfDevice(object sender, EventArgs e) {
             
-            lblNumDeviceConf.BeginInvoke((Action)(() => {
+            BeginInvoke((Action)(() => {
                 lblNumDeviceConf.Text = "Numero device configurati: " + CommonData.lstConfDevices.Count;
 
                 if (CommonData.lstConfDevices.Count == 0) {
@@ -275,14 +309,31 @@ namespace SnifferProbeRequestApp
 
                 tabDeviceConf.TabPages.Clear();
 
-                //cancello tutti i punti ESP dal grafico delle posizioni
+                //cancello tutti i punti ESP dai grafici delle posizioni e dei movimenti
                 chartPositionDevice.Series["ESP"].Points.Clear();
+                chartMovimentoDevice.Series["ESP"].Points.Clear();
 
                 foreach (KeyValuePair<String, Device> device in CommonData.lstConfDevices) {
+
+                    //setto le dimensioni degli assi del grafico che mostra le posizioni dei dispositivi rilevati
+                    chartPositionDevice.ChartAreas[0].AxisX.Maximum = CommonData.getMaxXPositionDevice();
+                    chartPositionDevice.ChartAreas[0].AxisX.Minimum = CommonData.getMinXPositionDevice();
+                    chartPositionDevice.ChartAreas[0].AxisY.Maximum = CommonData.getMaxYPositionDevice();
+                    chartPositionDevice.ChartAreas[0].AxisY.Minimum = CommonData.getMinYPositionDevice();
 
                     //aggiungo sul grafico delle posizioni il punto del device ESP
                     int point = chartPositionDevice.Series["ESP"].Points.AddXY(device.Value.x_position, device.Value.y_position);
                     chartPositionDevice.Series["ESP"].Points[point].ToolTip = device.Key;
+
+                    //setto le dimensioni degli assi del grafico che mostra il movimento dispositivi rilevati
+                    chartMovimentoDevice.ChartAreas[0].AxisX.Maximum = CommonData.getMaxXPositionDevice();
+                    chartMovimentoDevice.ChartAreas[0].AxisX.Minimum = CommonData.getMinXPositionDevice();
+                    chartMovimentoDevice.ChartAreas[0].AxisY.Maximum = CommonData.getMaxYPositionDevice();
+                    chartMovimentoDevice.ChartAreas[0].AxisY.Minimum = CommonData.getMinYPositionDevice();
+
+                    //aggiungo sul grafico dei movimenti il punto del device ESP
+                    point = chartMovimentoDevice.Series["ESP"].Points.AddXY(device.Value.x_position, device.Value.y_position);
+                    chartMovimentoDevice.Series["ESP"].Points[point].ToolTip = device.Key;
 
                     // 
                     // lblIpDeviceConf
@@ -410,6 +461,79 @@ namespace SnifferProbeRequestApp
 
             lblNoDeviceConf.Visible = false;
             tabDeviceConf.Visible = true;
+        }
+
+        private void btnCercaMovimentoDevice_Click(object sender, EventArgs e) {
+            DateTime dateMin = dateTimePickerDateMin.Value.ToUniversalTime();
+            DateTime dateMax = dateTimePickerDateMax.Value.ToUniversalTime();
+
+            boxDevice.Items.Clear();
+
+            foreach (string device in dbManager.connectedDeviceInPeriod(dateMin, dateMax)) {
+                boxDevice.Items.Add(device);
+            }
+
+            if (boxDevice.Items.Count > 0)
+                boxDevice.SelectedIndex = 0;
+            else {
+                //non ci sono device da mostrare
+                boxDevice.Text = "";
+                trackBarTempo.Enabled = false;
+                chartMovimentoDevice.Series["Device"].Points.Clear();
+                lblValoreMassimoTrackbar.Visible = false;
+                lblValoreMinimoTrackbar.Visible = false;
+                lblValoreSelezionatoTrackBar.Visible = false;
+            }
+        }
+
+        private void BoxDevice_SelectedIndexChanged(object sender, EventArgs e) {
+            string device = boxDevice.Text;
+            DateTime dateMin = dateTimePickerDateMin.Value.ToUniversalTime();
+            DateTime dateMax = dateTimePickerDateMax.Value.ToUniversalTime();
+
+            CachedDevicePosition.cache.Clear();
+
+            int i = 0;
+
+            foreach (DevicePosition position in dbManager.deviceMovement(device, dateMin, dateMax)) {
+                CachedDevicePosition.cache.Add(i, position);
+                i++;
+            }
+
+            trackBarTempo.Enabled = true;
+            lblValoreMassimoTrackbar.Visible = true;
+            lblValoreMinimoTrackbar.Visible = true;
+            lblValoreSelezionatoTrackBar.Visible = true;
+
+            trackBarTempo.Minimum = 0;
+            trackBarTempo.Maximum = CachedDevicePosition.cache.Count-1;
+            trackBarTempo.Value = CachedDevicePosition.cache.Count-1;
+
+            lblValoreMinimoTrackbar.Text = "Valore minimo: " + CachedDevicePosition.cache[0].time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+            lblValoreMassimoTrackbar.Text = "Valore massimo: " + CachedDevicePosition.cache[CachedDevicePosition.cache.Count - 1].time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+            lblValoreSelezionatoTrackBar.Text = "Valore selezionato: " + CachedDevicePosition.cache[CachedDevicePosition.cache.Count - 1].time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+
+            //disegno il primo punto
+            //ripulisco i punti del grafico del movimento
+            chartMovimentoDevice.Series["Device"].Points.Clear();
+
+            DevicePosition devicePosition = CachedDevicePosition.cache[CachedDevicePosition.cache.Count - 1];
+
+            //aggiungo la nuova posizione
+            int p = chartMovimentoDevice.Series["Device"].Points.AddXY(devicePosition.xPosition, devicePosition.yPosition);
+            chartMovimentoDevice.Series["Device"].Points[p].ToolTip = devicePosition.time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        private void TrackBarTempo_Scroll(object sender, EventArgs e) {
+            DevicePosition position = CachedDevicePosition.cache[trackBarTempo.Value];
+            lblValoreSelezionatoTrackBar.Text = "Valore selezionato: " + position.time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+
+            //ripulisco i punti del grafico del movimento
+            chartMovimentoDevice.Series["Device"].Points.Clear();
+
+            //aggiungo la nuova posizione
+            int p = chartMovimentoDevice.Series["Device"].Points.AddXY(position.xPosition, position.yPosition);
+            chartMovimentoDevice.Series["Device"].Points[p].ToolTip = position.time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
 
         }
     }

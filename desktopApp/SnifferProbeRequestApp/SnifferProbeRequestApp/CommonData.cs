@@ -23,6 +23,42 @@ namespace SnifferProbeRequestApp {
         //event a cui iscriversi per rilevare la modifica sulla lstConfDevices
         public static event EventHandler LstConfDevicesChanged;
 
+        public static int getMaxXPositionDevice() {
+            int pos = int.MinValue;
+
+            foreach (var device in lstConfDevices) {
+                if (device.Value.x_position > pos) pos = device.Value.x_position;
+            }
+            return pos;
+        }
+
+        public static int getMinXPositionDevice() {
+            int pos = int.MaxValue;
+
+            foreach (var device in lstConfDevices) {
+                if (device.Value.x_position < pos) pos = device.Value.x_position;
+            }
+            return pos;
+        }
+
+        public static int getMaxYPositionDevice() {
+            int pos = int.MinValue;
+
+            foreach (var device in lstConfDevices) {
+                if (device.Value.y_position > pos) pos = device.Value.y_position;
+            }
+            return pos;
+        }
+
+        public static int getMinYPositionDevice() {
+            int pos = int.MaxValue;
+
+            foreach (var device in lstConfDevices) {
+                if (device.Value.y_position < pos) pos = device.Value.y_position;
+            }
+            return pos;
+        }
+
         //LISTA DEVICE NON CONFIGUARATI
         // key = IPAddress device
         // value = evento associato per la sincronizzazione tra i thread di interfaccia grafica e di gestione del socket

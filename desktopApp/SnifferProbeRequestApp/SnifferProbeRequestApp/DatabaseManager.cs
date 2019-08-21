@@ -290,7 +290,8 @@ namespace SnifferProbeRequestApp {
                 points.Add(
                     new DevicePosition((String)record["sourceAddress"],
                         (Double)record["x_position"],
-                        (Double)record["y_position"])
+                        (Double)record["y_position"],
+                        DateTime.UtcNow) //il tempo in questo caso non è importante e quindi lo setto a Now
                     );
             }
             return points;
@@ -298,7 +299,7 @@ namespace SnifferProbeRequestApp {
 
         ///<summary>Calcola i periodi in cui sono rilevati i dispositivi piu frequenti (TOP N) a partire da un timestamp</summary>
         ///<param name="numDevice">Numero dei dispositivi da analizzare (TOP N)</param>
-        ///<param name="dateLimit">Datetome da cui eseguire l'analisi</param>
+        ///<param name="dateLimit">Datetime da cui eseguire l'analisi</param>
         ///<returns>Lista dei periodi di connessione dei TOP N devices</returns>
         ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
         public List<ConnectionPeriod> longTermStatistic(string numDevice, string dateLimit) {
@@ -365,6 +366,77 @@ namespace SnifferProbeRequestApp {
                     );
             }
             return devicePeriod;
+        }
+
+        ///<summary>Ritorna i devices che sono stati rilevati dal sistema tra le date indicate</summary>
+        ///<param name="dateMin">Limite temporale inferiore in cui ricercare</param>
+        ///<param name="dateMax">Limite temporale superiore in cui ricercare</param>
+        ///<returns>Lista dei devices rilevati</returns>
+        ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
+        public List<string> connectedDeviceInPeriod(DateTime dateMin, DateTime dateMax) {
+            List<string> devices = new List<string>();
+
+            string selectQuery = @"SELECT DISTINCT sourceAddress
+                                   FROM dbo.AssembledPacketInfo
+                                   WHERE timestamp_packet >= '" + dateMin.ToString("yyyy-MM-dd HH:mm:ss") + @"' 
+                                   AND timestamp_packet <= '" + dateMax.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+
+            DataTable resultQuery = new DataTable();
+            try {
+                SqlCommand cmd = new SqlCommand(selectQuery, connection);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(resultQuery);
+            } catch (Exception e) {
+                string message = "Errore durante la lettura dei dati dal DB";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppSqlException(message, e);
+            }
+
+            foreach (DataRow record in resultQuery.Rows) {
+                devices.Add((string)record["sourceAddress"]);
+            }
+
+            return devices;
+        }
+
+        ///<summary>Ritorna le posizioni in cui è stato rilevato un device tra le date indicate</summary>
+        ///<param name="device">Device da ricercare</param>
+        ///<param name="dateMin">Limite temporale inferiore in cui ricercare</param>
+        ///<param name="dateMax">Limite temporale superiore in cui ricercare</param>
+        ///<returns>Lista delle posizioni in cui il device è stato rilevato</returns>
+        ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
+        public List<DevicePosition> deviceMovement(string device, DateTime dateMin, DateTime dateMax) {
+
+            List<DevicePosition> positions = new List<DevicePosition>();
+
+            string selectQuery = @"SELECT sourceAddress, timestamp_packet, AVG(x_position) as x_position, AVG(y_position) as y_position
+                                   FROM dbo.AssembledPacketInfo
+                                   WHERE timestamp_packet >= '" + dateMin.ToString("yyyy-MM-dd HH:mm:ss") + @"' 
+                                   AND timestamp_packet <= '" + dateMax.ToString("yyyy-MM-dd HH:mm:ss") + @"' 
+                                   AND sourceAddress = '" + device + @"' 
+                                   GROUP BY sourceAddress, timestamp_packet ORDER BY timestamp_packet";
+
+            DataTable resultQuery = new DataTable();
+            try {
+                SqlCommand cmd = new SqlCommand(selectQuery, connection);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(resultQuery);
+            } catch (Exception e) {
+                string message = "Errore durante la lettura dei dati dal DB";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppSqlException(message, e);
+            }
+
+            foreach (DataRow record in resultQuery.Rows) {
+                positions.Add(
+                    new DevicePosition((string)record["sourceAddress"],
+                                       (double)record["x_position"],
+                                       (double)record["y_position"],
+                                       (DateTime)record["timestamp_packet"])
+                    );
+            }
+
+            return positions;
         }
 
         ///<summary>Chiude la connessione con il DB</summary>
