@@ -17,8 +17,8 @@ namespace SnifferProbeRequestApp
             dbManager = DatabaseManager.getInstance();
 
             //mi iscrivo agli handler
-            CommonData.LstConfDevicesChanged += updateConfDevice;
-            CommonData.LstConfDevicesChanged += checkTwoESP;
+            ConfDevice.LstConfDevicesChanged += updateConfDevice;
+            ConfDevice.LstConfDevicesChanged += checkTwoESP;
             NoConfDevice.LstNoConfDevicesChanged += updateNoConfDevice;
         }
        
@@ -73,8 +73,8 @@ namespace SnifferProbeRequestApp
                     Device device = new Device(ipAddress, 1, xPosition, yPosition, deviceEvent);
 
                     //aggiungo il device alla lista degi device configurati e lancio il delegato associato
-                    CommonData.lstConfDevices.TryAdd(device.ipAddress, device);
-                    CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
+                    ConfDevice.lstConfDevices.TryAdd(device.ipAddress, device);
+                    ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
                     //risveglio il thread che gestisce la connessione del dispositivo in quanto la configurazione è completata
                     deviceEvent.Set();
@@ -99,8 +99,8 @@ namespace SnifferProbeRequestApp
             } else {
                 device.x_position = xPosition;
                 device.y_position = yPosition;
-                CommonData.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
-                CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
+                ConfDevice.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
+                ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
             }
         }
 
@@ -109,8 +109,8 @@ namespace SnifferProbeRequestApp
             try {
                 //devo togliere il device dalla lista dei configurati e aggiungerlo tra quelli non configurati
                 //questo codice è duplicato in ThreadGestioneWifi (valutare se fare una funzione)
-                CommonData.lstConfDevices.TryRemove(deviceIp, out device);
-                CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
+                ConfDevice.lstConfDevices.TryRemove(deviceIp, out device);
+                ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
                 NoConfDevice.lstNoConfDevices.TryAdd(deviceIp, device.evento);
                 NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
@@ -285,23 +285,23 @@ namespace SnifferProbeRequestApp
         }
 
         private void checkTwoESP(object sender, EventArgs e){
-            if (CommonData.lstConfDevices.Count >= 2){
+            if (ConfDevice.lstConfDevices.Count >= 2){
                 tabFeatures.Visible = true;
                 btnRefresh.Visible = true;
                 lblMin2device.Visible = false;
             } else {
-                tabFeatures.Visible = true; //TODO: invertire
-                btnRefresh.Visible = true; //TODO: invertire
-                lblMin2device.Visible = false; //TODO: invertire
+                tabFeatures.Visible = false; //TODO: invertire
+                btnRefresh.Visible = false; //TODO: invertire
+                lblMin2device.Visible = true; //TODO: invertire
             }
         }
 
         private void updateConfDevice(object sender, EventArgs e) {
             
             BeginInvoke((Action)(() => {
-                lblNumDeviceConf.Text = "Numero device configurati: " + CommonData.lstConfDevices.Count;
+                lblNumDeviceConf.Text = "Numero device configurati: " + ConfDevice.lstConfDevices.Count;
 
-                if (CommonData.lstConfDevices.Count == 0) {
+                if (ConfDevice.lstConfDevices.Count == 0) {
                     lblNoDeviceConf.Visible = true;
                     tabDeviceConf.Visible = false;
                     return;
@@ -313,23 +313,23 @@ namespace SnifferProbeRequestApp
                 chartPositionDevice.Series["ESP"].Points.Clear();
                 chartMovimentoDevice.Series["ESP"].Points.Clear();
 
-                foreach (KeyValuePair<String, Device> device in CommonData.lstConfDevices) {
+                foreach (KeyValuePair<String, Device> device in ConfDevice.lstConfDevices) {
 
                     //setto le dimensioni degli assi del grafico che mostra le posizioni dei dispositivi rilevati
-                    chartPositionDevice.ChartAreas[0].AxisX.Maximum = CommonData.getMaxXPositionDevice();
-                    chartPositionDevice.ChartAreas[0].AxisX.Minimum = CommonData.getMinXPositionDevice();
-                    chartPositionDevice.ChartAreas[0].AxisY.Maximum = CommonData.getMaxYPositionDevice();
-                    chartPositionDevice.ChartAreas[0].AxisY.Minimum = CommonData.getMinYPositionDevice();
+                    chartPositionDevice.ChartAreas[0].AxisX.Maximum = ConfDevice.getMaxXPositionDevice();
+                    chartPositionDevice.ChartAreas[0].AxisX.Minimum = ConfDevice.getMinXPositionDevice();
+                    chartPositionDevice.ChartAreas[0].AxisY.Maximum = ConfDevice.getMaxYPositionDevice();
+                    chartPositionDevice.ChartAreas[0].AxisY.Minimum = ConfDevice.getMinYPositionDevice();
 
                     //aggiungo sul grafico delle posizioni il punto del device ESP
                     int point = chartPositionDevice.Series["ESP"].Points.AddXY(device.Value.x_position, device.Value.y_position);
                     chartPositionDevice.Series["ESP"].Points[point].ToolTip = device.Key;
 
                     //setto le dimensioni degli assi del grafico che mostra il movimento dispositivi rilevati
-                    chartMovimentoDevice.ChartAreas[0].AxisX.Maximum = CommonData.getMaxXPositionDevice();
-                    chartMovimentoDevice.ChartAreas[0].AxisX.Minimum = CommonData.getMinXPositionDevice();
-                    chartMovimentoDevice.ChartAreas[0].AxisY.Maximum = CommonData.getMaxYPositionDevice();
-                    chartMovimentoDevice.ChartAreas[0].AxisY.Minimum = CommonData.getMinYPositionDevice();
+                    chartMovimentoDevice.ChartAreas[0].AxisX.Maximum = ConfDevice.getMaxXPositionDevice();
+                    chartMovimentoDevice.ChartAreas[0].AxisX.Minimum = ConfDevice.getMinXPositionDevice();
+                    chartMovimentoDevice.ChartAreas[0].AxisY.Maximum = ConfDevice.getMaxYPositionDevice();
+                    chartMovimentoDevice.ChartAreas[0].AxisY.Minimum = ConfDevice.getMinYPositionDevice();
 
                     //aggiungo sul grafico dei movimenti il punto del device ESP
                     point = chartMovimentoDevice.Series["ESP"].Points.AddXY(device.Value.x_position, device.Value.y_position);

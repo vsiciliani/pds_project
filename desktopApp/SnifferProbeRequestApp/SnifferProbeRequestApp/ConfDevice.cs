@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace SnifferProbeRequestApp {
     /// <summary>
-    /// Classe wrappa i dati che devono essere visibili in tutte le parti del progetto
+    /// Classe statica che wrappa il ConcurrentDictionary che gestisce i rilevatori connessi e configurati
     /// </summary>
-    public static class CommonData {
+    public static class ConfDevice {
         //LISTA DEVICE CONFIGUARATI
         // key = IPAddress device
         // value = informazioni su device

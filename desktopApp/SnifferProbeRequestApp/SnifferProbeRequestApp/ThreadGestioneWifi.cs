@@ -121,8 +121,8 @@ namespace SnifferProbeRequestApp {
                     //devo togliere il device dalla lista dei configurati e aggiungerlo tra quelli non configurati
                     //questo codice è duplicato in frmMain (valutare se fare una funzione)
                     Device device;
-                    CommonData.lstConfDevices.TryRemove((client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), out device);
-                    CommonData.OnLstConfDevicesChanged(this, EventArgs.Empty);
+                    ConfDevice.lstConfDevices.TryRemove((client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), out device);
+                    ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
 
                     NoConfDevice.lstNoConfDevices.TryAdd((client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), device.evento);
                     NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
@@ -153,7 +153,7 @@ namespace SnifferProbeRequestApp {
             //allDone.Set();
 
             //verifico se il dispositivo con quell'IP era già connesso (l'IP del dispositivo era contentuto già nella lstConfDevices)
-            if (CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
+            if (ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
                 //il dispositivo era gia configurato
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
                     
@@ -222,8 +222,8 @@ namespace SnifferProbeRequestApp {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Errore nella deserializzazione del messaggio JSON. Il messaggio verrà scartato");           
                 }
                 //controllo che ci siano messaggi, che il device sia tra quelli configurati e che ci siano almeno 2 device configurati
-                if (packetsInfo != null && CommonData.lstConfDevices.Count>=2) {
-                    if (packetsInfo.listPacketInfo.Count > 0 && CommonData.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
+                if (packetsInfo != null && ConfDevice.lstConfDevices.Count>=2) {
+                    if (packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
                     }

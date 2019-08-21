@@ -85,7 +85,7 @@ namespace SnifferProbeRequestApp {
 
             int id = 1;
 
-            foreach (string device in CommonData.lstConfDevices.Keys) {
+            foreach (string device in ConfDevice.lstConfDevices.Keys) {
                 devices.Add("d"+id.ToString(), device);
                 id++;
             }

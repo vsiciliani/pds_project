@@ -197,7 +197,7 @@ namespace SnifferProbeRequestApp {
 
             foreach (KeyValuePair<string, double> device in weightDevice) {
                 Device dev;
-                CommonData.lstConfDevices.TryGetValue(device.Key, out dev);
+                ConfDevice.lstConfDevices.TryGetValue(device.Key, out dev);
 
                 x += device.Value * dev.x_position;
                 y += device.Value * dev.y_position;
