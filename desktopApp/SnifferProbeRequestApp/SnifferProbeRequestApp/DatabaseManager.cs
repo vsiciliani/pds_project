@@ -59,19 +59,12 @@ namespace SnifferProbeRequestApp {
             }
             query.Remove(query.Length - 1, 1); //elimino l'ultima virgola
 
-            SqlCommand command = new SqlCommand(query.ToString(), connection);
+            int queryResult = runInsertDelete(query.ToString(), null);
+            if (queryResult == packets.listPacketInfo.Count)
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in Packets effettuata con successo");
+            else
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in Packets fallita");
 
-            try
-            {
-                if (command.ExecuteNonQuery() == packets.listPacketInfo.Count) {
-                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in Packets effettuata con successo");
-                } else {
-                    Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "INSERT in Packets fallita");
-                }
-            } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante la INSERT dei dati in Packets", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-            }
             updateAssembled();
         }
 
@@ -120,16 +113,8 @@ namespace SnifferProbeRequestApp {
             whereQuery.Remove(whereQuery.Length - 3, 3); //elimino l'ultimo AND
 
             string queryPackets = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
-            
-            DataTable tablePackets = new DataTable();
-            try {
-                SqlCommand cmd = new SqlCommand(queryPackets, connection);
-                SqlDataAdapter sqlAdapter = new SqlDataAdapter(cmd);
-                sqlAdapter.Fill(tablePackets);
-            } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante la lettura dei dati della tabella Packets", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-            }
+
+            DataTable tablePackets = runSelect(queryPackets, null);
 
             //controllo se devo assemblare dei dati
             if (tablePackets.Rows.Count == 0) return; 
@@ -184,34 +169,21 @@ namespace SnifferProbeRequestApp {
             }
             insertQuery.Remove(insertQuery.Length - 1, 1); //elimino l'ultima virgola
 
-            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, insertQuery.ToString());
-
-            SqlCommand command = new SqlCommand(insertQuery.ToString(), connection);
-            try {
-                if (command.ExecuteNonQuery() == lstAssembledInfo.Count) {
-                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in AssembledPacketInfo effettuata con successo");
-                } else {
-                    Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "INSERT in AssembledPacketInfo fallita");
-                }
-            } catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante la INSERT dei dati in AssembledPacketInfo", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-            }
+            int queryResult = runInsertDelete(insertQuery.ToString(), null);
+            if (queryResult == lstAssembledInfo.Count)
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in AssembledPacketInfo effettuata con successo");
+            else
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in AssembledPacketInfo fallita");
 
             //elimino gli id dalla tabella "raw"
             deleteQuery.Remove(deleteQuery.Length - 1, 1); //elimino l'ultima virgola nalla IN
             deleteQuery.Append(")"); //chiudo la parentesi della IN
-            
-            SqlCommand deleteCommand = new SqlCommand(deleteQuery.ToString(), connection);
-            try {
-                if (deleteCommand.ExecuteNonQuery() == lstAssembledInfo.Count) {
-                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "DELETE da Packets effettuata con successo");
-                }
-            }
-            catch (Exception e) {
-                SnifferAppException exception = new SnifferAppException("Errore durante la DELETE dei dati dalla tabella Packets", e);
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
-            }
+
+            queryResult = runInsertDelete(deleteQuery.ToString(), null);
+            if (queryResult > 0)
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "DELETE da Packets effettuata con successo");
+            else
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "DELETE da Packets fallita");
         }
 
         ///<summary>Conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)</summary>
@@ -229,10 +201,10 @@ namespace SnifferProbeRequestApp {
 			                                    timestamp_packet,
 			                                    prev,
 			                                    succ,
-			                                    CASE WHEN (DATEDIFF(MINUTE,prev,timestamp_packet) >= 2) THEN 1
-					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) >= 2) THEN 2
-					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) < 0) THEN 2
-					                                    ELSE 0 END flag
+			                                    CASE WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) >= 2) THEN 2
+					                                 WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) < 0) THEN 2
+                                                     WHEN (DATEDIFF(MINUTE,prev,timestamp_packet) >= 2) THEN 1
+					                                 ELSE 0 END flag
 		                                    FROM (
 			                                    SELECT sourceAddress, 
 				                                    timestamp_packet,
@@ -247,20 +219,10 @@ namespace SnifferProbeRequestApp {
                                     AND startTimestamp < DATEADD(SECOND, -300, GETUTCDATE())
                                     AND stopTimestamp > DATEADD(SECOND, -120, GETUTCDATE())";
 
-            DataTable resultCount = new DataTable();
-            try {
-                SqlCommand cmd = new SqlCommand(selectQuery, connection);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(resultCount);
-            }
-            catch (Exception e) {
-                string message = "Errore durante la lettura dei dati dal DB";
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
-                throw new SnifferAppSqlException(message, e);
-            }
+            DataTable resultQuery = runSelect(selectQuery, null);
 
-            return new CountDevice((DateTime)resultCount.Rows[0]["date_time"],
-                (int)resultCount.Rows[0]["countDevice"]);
+            return new CountDevice((DateTime)resultQuery.Rows[0]["date_time"],
+                (int)resultQuery.Rows[0]["countDevice"]);
         }
 
         ///<summary>Ritorna i punti dei device rilevati nell'ultimo minuto</summary>
@@ -275,16 +237,7 @@ namespace SnifferProbeRequestApp {
                                    WHERE timestamp_packet > DateADD(mi, -1, GETUTCDATE())
                                    GROUP BY sourceAddress";
 
-            DataTable resultQuery = new DataTable();
-            try {
-                SqlCommand cmd = new SqlCommand(selectQuery, connection);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(resultQuery);
-            } catch (Exception e) {
-                string message = "Errore durante la lettura dei dati dal DB";
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
-                throw new SnifferAppSqlException(message, e);
-            }
+            DataTable resultQuery = runSelect(selectQuery, null);
 
             foreach (DataRow record in resultQuery.Rows) {
                 points.Add(
@@ -321,17 +274,17 @@ namespace SnifferProbeRequestApp {
 			                                    timestamp_packet,
 			                                    prev,
 			                                    succ,
-			                                    CASE WHEN (DATEDIFF(MINUTE,prev,timestamp_packet) >= 2) THEN 1
-					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) >= 2) THEN 2
-					                                    WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) < 0) THEN 2
-					                                    ELSE 0 END flag
+			                                    CASE WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) >= 2) THEN 2
+					                                 WHEN (DATEDIFF(MINUTE,timestamp_packet,succ) < 0) THEN 2
+                                                     WHEN (DATEDIFF(MINUTE,prev,timestamp_packet) >= 2) THEN 1
+					                                 ELSE 0 END flag
 		                                    FROM (
 			                                    SELECT sourceAddress, 
 				                                    timestamp_packet,
 				                                    LAG(timestamp_packet, 1,0) OVER (PARTITION BY sourceAddress ORDER BY timestamp_packet asc) as prev,
 				                                    LAG(timestamp_packet, 1,0) OVER (PARTITION BY sourceAddress ORDER BY timestamp_packet desc) as succ
 			                                    FROM [dbo].[AssembledPacketInfo]
-			                                    WHERE timestamp_packet > '" + dateLimit + @"'
+			                                    WHERE timestamp_packet > @datelimit
 		                                    ) a
 	                                    ) b
 	                                    WHERE flag <> 0
@@ -340,23 +293,15 @@ namespace SnifferProbeRequestApp {
                                     )
                                     SELECT conn.sourceAddress, conn.startTimestamp, conn.stopTimestamp
                                     FROM ConnectionPeriod conn, (
-                                    SELECT TOP " + numDevice + @" sourceAddress, SUM(DATEDIFF(second,startTimestamp,stopTimestamp)) as NumSecond
+                                    SELECT TOP " + numDevice+@" sourceAddress, SUM(DATEDIFF(second,startTimestamp,stopTimestamp)) as NumSecond
 	                                    FROM ConnectionPeriod
 	                                    GROUP BY sourceAddress
 	                                    ORDER BY NumSecond desc) topDev
                                     WHERE conn.sourceAddress = topDev.sourceAddress";
 
-            DataTable resultQuery = new DataTable();
-            try {
-                SqlCommand cmd = new SqlCommand(selectQuery, connection);
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);             
-                da.Fill(resultQuery);
-            } catch (Exception e) {
-                string message = "Errore durante la lettura dei dati dal DB";
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
-                throw new SnifferAppSqlException(message, e);
-            }
+            DataTable resultQuery = runSelect(selectQuery, new Dictionary<string, object>() {
+                ["@datelimit"] = dateLimit
+            });
 
             foreach (DataRow record in resultQuery.Rows) {
                 devicePeriod.Add(
@@ -378,20 +323,14 @@ namespace SnifferProbeRequestApp {
 
             string selectQuery = @"SELECT DISTINCT sourceAddress
                                    FROM dbo.AssembledPacketInfo
-                                   WHERE timestamp_packet >= '" + dateMin.ToString("yyyy-MM-dd HH:mm:ss") + @"' 
-                                   AND timestamp_packet <= '" + dateMax.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                                   WHERE timestamp_packet >= @datemin 
+                                   AND timestamp_packet <= @datemax";
 
-            DataTable resultQuery = new DataTable();
-            try {
-                SqlCommand cmd = new SqlCommand(selectQuery, connection);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(resultQuery);
-            } catch (Exception e) {
-                string message = "Errore durante la lettura dei dati dal DB";
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
-                throw new SnifferAppSqlException(message, e);
-            }
-
+            DataTable resultQuery = runSelect(selectQuery, new Dictionary<string, object>() {
+                ["@datemin"] = dateMin,
+                ["@datemax"] = dateMax
+            });
+            
             foreach (DataRow record in resultQuery.Rows) {
                 devices.Add((string)record["sourceAddress"]);
             }
@@ -411,21 +350,16 @@ namespace SnifferProbeRequestApp {
 
             string selectQuery = @"SELECT sourceAddress, timestamp_packet, AVG(x_position) as x_position, AVG(y_position) as y_position
                                    FROM dbo.AssembledPacketInfo
-                                   WHERE timestamp_packet >= '" + dateMin.ToString("yyyy-MM-dd HH:mm:ss") + @"' 
-                                   AND timestamp_packet <= '" + dateMax.ToString("yyyy-MM-dd HH:mm:ss") + @"' 
-                                   AND sourceAddress = '" + device + @"' 
+                                   WHERE timestamp_packet >= @datemin 
+                                   AND timestamp_packet <= @datemax 
+                                   AND sourceAddress = @device 
                                    GROUP BY sourceAddress, timestamp_packet ORDER BY timestamp_packet";
 
-            DataTable resultQuery = new DataTable();
-            try {
-                SqlCommand cmd = new SqlCommand(selectQuery, connection);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(resultQuery);
-            } catch (Exception e) {
-                string message = "Errore durante la lettura dei dati dal DB";
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
-                throw new SnifferAppSqlException(message, e);
-            }
+            DataTable resultQuery = runSelect(selectQuery, new Dictionary<string, object>() {
+                ["@datemin"] = dateMin,
+                ["@datemax"] = dateMax,
+                ["@device"] = device
+            });
 
             foreach (DataRow record in resultQuery.Rows) {
                 positions.Add(
@@ -437,6 +371,51 @@ namespace SnifferProbeRequestApp {
             }
 
             return positions;
+        }
+
+        ///<summary>Esegue una select sul DB</summary>
+        ///<returns>Ritorna un oggetto DataTable con i risultati della query</returns>
+        ///<param name="query">Stringa contenente la query da lanciare</param>
+        ///<param name="par">Dictionary con i parametri da sostituire nella query (chiave: nome parametro, valore: valore parametro)</param>
+        ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
+        private DataTable runSelect(string query, Dictionary<string, object> par) {
+            DataTable resultQuery = new DataTable();
+            try {
+                SqlCommand cmd = new SqlCommand(query, connection);
+
+                if (par != null) {
+                    foreach (KeyValuePair<string, object> parametro in par) {
+                        cmd.Parameters.AddWithValue(parametro.Key, parametro.Value);
+                    }
+                }
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(resultQuery);
+            } catch (Exception e) {
+                string message = "Errore durante la lettura dei dati dal DB";
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
+                throw new SnifferAppSqlException(message, e);
+            }
+
+            return resultQuery;
+        }
+
+        ///<summary>Esegue una insert/delete sul DB</summary>
+        ///<returns>Ritorna un booleano per indicare se la query è stata eseguita correttamente o no</returns>
+        ///<param name="query">Stringa contenente la query da lanciare</param>
+        ///<param name="par">Dictionary con i parametri da sostituire nella query (chiave: nome parametro, valore: valore parametro)</param>
+        ///<param name="checkCountRow">Numero di righe modificate a DB (per verificare se l'operazione è andata a buon fine</param>
+        ///<exception cref = "SnifferAppSqlException">Eccezione lanciata in caso di errore nella lettura dei dati del DB</exception>
+        private int runInsertDelete(string query, Dictionary<string, object> par) {
+            int numRowModified = 0;
+            SqlCommand cmd = new SqlCommand(query, connection);
+            try {
+                numRowModified = cmd.ExecuteNonQuery();              
+            } catch (Exception e) {
+                SnifferAppException exception = new SnifferAppException("Errore durante la INSERT dei dati in AssembledPacketInfo", e);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Error, exception.Message);
+            }
+            return numRowModified;
         }
 
         ///<summary>Chiude la connessione con il DB</summary>
