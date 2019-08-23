@@ -585,11 +585,12 @@ namespace SnifferProbeRequestApp   {
             // 
             // lblTitle
             // 
+            this.lblTitle.AutoSize = true;
             this.lblTitle.BackColor = System.Drawing.Color.Transparent;
             this.lblTitle.Font = new System.Drawing.Font("Verdana", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTitle.Location = new System.Drawing.Point(192, 21);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(524, 34);
+            this.lblTitle.Size = new System.Drawing.Size(519, 25);
             this.lblTitle.TabIndex = 7;
             this.lblTitle.Text = "SISTEMA RILEVAZIONE PRESENZE INDOOR";
             // 
