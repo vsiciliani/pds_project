@@ -34,7 +34,7 @@ namespace SnifferProbeRequestApp {
             System.Windows.Forms.Application.Exit();
         }
 
-        private static void startHotspot(string ssid, string key) {
+        public static void startHotspot(string ssid, string key) {
             ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe") {
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
@@ -51,7 +51,8 @@ namespace SnifferProbeRequestApp {
             }
         }
 
-        private static void stopHotspot() {
+        //TODO: gestire eccezioni
+        public static void stopHotspot() {
             ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe") {
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
@@ -86,8 +87,7 @@ namespace SnifferProbeRequestApp {
                 Console.WriteLine(timestamp + " | [" + category.Value + "] | " + classe + " | " + message);
             } catch (IOException) {
                 return;
-            }
-            
+            }        
         }
 
         ///<summary>Invia un messaggio su un socket</summary>

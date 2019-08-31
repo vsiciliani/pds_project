@@ -53,6 +53,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Messaging" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
@@ -71,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfDevice.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="valueClass\AssembledPacketInfo.cs" />
     <Compile Include="DatabaseManager.cs" />
     <Compile Include="CachedDevicePosition.cs" />
@@ -82,6 +84,7 @@
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
     <Compile Include="NoConfDevice.cs" />
+    <Compile Include="valueClass\NetworkSettings.cs" />
     <Compile Include="valueClass\PacketInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -10,6 +10,8 @@ namespace SnifferProbeRequestApp {
     /// Classe Singleton che wrappa il thread per la gestione del Wifi e dell'interfaccia verso le ESP
     /// </summary>
     class ThreadGestioneWifi {
+
+        private NetworkSettings settings;
         private volatile bool stopThreadElaboration;
         private ThreadStart delegateThreadElaboration;
         private Thread threadElaboration;
@@ -21,7 +23,8 @@ namespace SnifferProbeRequestApp {
 
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
-        private ThreadGestioneWifi() {
+        private ThreadGestioneWifi(NetworkSettings settings) {
+            this.settings = settings;
             stopThreadElaboration = false;
             //instanzio il db manager
             dbManager = DatabaseManager.getInstance();
@@ -32,9 +35,9 @@ namespace SnifferProbeRequestApp {
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         ///<returns>L'istanza della classe ThreadGestioneWifi</returns>
-        static public ThreadGestioneWifi getInstance() {
+        static public ThreadGestioneWifi getInstance(NetworkSettings settings) {
             if (instance == null) {
-                instance = new ThreadGestioneWifi();
+                instance = new ThreadGestioneWifi(settings);
             }
             return instance;
         }
@@ -43,7 +46,8 @@ namespace SnifferProbeRequestApp {
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         public void start() {
             //TODO: decommentare se non lavoro su PC aziendale
-            //startHotspot("prova4", "pippopluto");
+            if (settings.generateNetwork)
+                Utils.startHotspot(settings.SSID, settings.key);
 
             try {
                 //starto il thread in background che gestisce le connessioni con i devices
@@ -64,7 +68,9 @@ namespace SnifferProbeRequestApp {
         public void stop() {
             stopThreadElaboration = true;
             dbManager.closeConnection();
-            //stopHotspot();
+            if (settings.generateNetwork)
+                Utils.stopHotspot();
+
             try {
                 listener.Stop();
                 threadElaboration.Join();
@@ -83,7 +89,7 @@ namespace SnifferProbeRequestApp {
             // setto il listener sulla porta 5010.
             int port = 5010;
             IPAddress localAddr = IPAddress.Any;
-            listener = new TcpListener(localAddr, port);
+            listener = new TcpListener(localAddr, settings.servicePort);
             try {
                 // starto il listener in attesa di connessione dei client
                 listener.Start();

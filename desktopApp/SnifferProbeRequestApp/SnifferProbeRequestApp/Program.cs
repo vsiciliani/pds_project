@@ -1,5 +1,6 @@
-﻿using System;
-using System.Data.SqlClient;
+﻿using SnifferProbeRequestApp.valueClass;
+using System;
+using System.Configuration;
 using System.Windows.Forms;
 
 namespace SnifferProbeRequestApp
@@ -22,8 +23,16 @@ namespace SnifferProbeRequestApp
 
             ThreadGestioneWifi threadGestioneWifi;
 
+            //TODO: eccezione in caso di settaggi errati
+            NetworkSettings settings = new NetworkSettings(
+                Convert.ToBoolean(ConfigurationManager.AppSettings["generateNetwork"]),
+                ConfigurationManager.AppSettings["ssid"],
+                ConfigurationManager.AppSettings["key"],
+                Convert.ToInt32(ConfigurationManager.AppSettings["servicePort"])
+            );
+
             try {
-                threadGestioneWifi = ThreadGestioneWifi.getInstance();
+                threadGestioneWifi = ThreadGestioneWifi.getInstance(settings);
             } catch (SnifferAppException e) {
                 MessageBox.Show(e.Message, "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return; 
