@@ -13,23 +13,13 @@ namespace SnifferProbeRequestApp
 
         [STAThread]
         static void Main() {
-            //controllo di avere i permessi di amministratore
-            Utils.logMessage("MAIN", Utils.LogCategory.Info, "Is Admin? " + Utils.IsAdmin());
-            //Console.WriteLine("Is Admin? " + Utils.IsAdmin());
-            if (!Utils.IsAdmin()) {
-                //Utils.RestartElevated();
-                //return;
-            }
-
-            ThreadGestioneWifi threadGestioneWifi;
 
             //TODO: eccezione in caso di settaggi errati
             NetworkSettings settings = new NetworkSettings(
-                Convert.ToBoolean(ConfigurationManager.AppSettings["generateNetwork"]),
-                ConfigurationManager.AppSettings["ssid"],
-                ConfigurationManager.AppSettings["key"],
                 Convert.ToInt32(ConfigurationManager.AppSettings["servicePort"])
             );
+
+            ThreadGestioneWifi threadGestioneWifi = null;
 
             try {
                 threadGestioneWifi = ThreadGestioneWifi.getInstance(settings);
@@ -38,6 +28,7 @@ namespace SnifferProbeRequestApp
                 return; 
             } catch (Exception) {
                 MessageBox.Show("Si è verificato un errore generico nell'esecuzione del programma", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                threadGestioneWifi.stop();
                 return;
             }
             

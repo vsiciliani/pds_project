@@ -45,10 +45,6 @@ namespace SnifferProbeRequestApp {
         ///<summary>Stacca un nuovo thread per la gestione delle connessioni con i rilevatori Wifi</summary>
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         public void start() {
-            //TODO: decommentare se non lavoro su PC aziendale
-            if (settings.generateNetwork)
-                Utils.startHotspot(settings.SSID, settings.key);
-
             try {
                 //starto il thread in background che gestisce le connessioni con i devices
                 delegateThreadElaboration = new ThreadStart(elaboration);
@@ -68,9 +64,6 @@ namespace SnifferProbeRequestApp {
         public void stop() {
             stopThreadElaboration = true;
             dbManager.closeConnection();
-            if (settings.generateNetwork)
-                Utils.stopHotspot();
-
             try {
                 listener.Stop();
                 threadElaboration.Join();
