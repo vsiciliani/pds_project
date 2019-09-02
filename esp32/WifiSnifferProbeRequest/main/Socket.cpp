@@ -49,6 +49,6 @@ void Socket::receiveRaw(){
 	lwip_recv(this->socket,this->buffer_ric,MAXBUFL,0);
 }
 
-void Socket::close(){
+Socket::~Socket() {
 	lwip_close(this->socket);
 }

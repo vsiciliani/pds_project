@@ -19,6 +19,7 @@
 #include <math.h>
 #include <condition_variable>
 #include <time.h>
+#include "config.cpp"
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "Socket.h"
@@ -26,11 +27,18 @@
 #include <driver/gpio.h>
 
 
-//#define EXAMPLE_ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
-//#define EXAMPLE_ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
+ //std::string wifiSSID = "Vodafone-50650385";
+ //std::string wifiPassword = "pe7dt3793ae9t7b";
 
-#define WIFI_SSID						"dlink-natale"
-#define WIFI_PASS						"h7onlgqmo8vcbgjr6qc3hg9v"
+ //std::string wifiSSID = "dlink-natale";
+ //std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
+
+ //std::string wifiSSID = "APAndroid2";
+ //std::string wifiPassword = "pippopluto";
+
+ //definizione costanti
+#define WIFI_SSID						"pippo"
+#define WIFI_PASS						"pippopluto"
 #define SERVER_PORT						5010
 #define INTERVALLO_CONNESSIONE_SERVER	20
 
@@ -51,25 +59,22 @@ std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
 Socket *s;
-//memoria inizialmente disponibile
-float memorySpace;
+float memorySpace; //memoria inizialmente disponibile
 
 static EventGroupHandle_t wifi_event_group;
-//definizione costanti
-//std::string wifiSSID = "Vodafone-50650385";
-//std::string wifiPassword = "pe7dt3793ae9t7b";
-
-//std::string wifiSSID = "dlink-natale";
-//std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
-
-//std::string wifiSSID = "APAndroid2";
-//std::string wifiPassword = "pippopluto";
 
 extern "C" {
    void app_main();
 }
 
 void app_main() {
+
+	Config config;
+	loadConfig(config);
+	
+	//ESP_LOGI(tag, "connect to ap SSID:%i", config.num);
+	//ESP_LOGI(tag, "connect to ap SSID: %s", (char*)config.nomeRete);
+	//ESP_LOGI(tag, "connect to ap SSID:%f", config.flt);
 
 	nvs_flash_init();
 
@@ -85,12 +90,15 @@ void app_main() {
 
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-	wifi_config_t wifi_config = {
+	wifi_config_t wifi_config = { 
 		.sta = {
 			{.ssid = WIFI_SSID},
 			{.password = WIFI_PASS}
-		},
+		}, 
 	};
+	
+	//strcpy((char*)wifi_config.sta.ssid, (char*)config.nomeRete);
+	//strcpy((char*)wifi_config.sta.password, (char*)config.key);
 
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
@@ -104,7 +112,7 @@ void app_main() {
 	/* FINE GESTIONE CONNESSIONE WIFI */
 
 	//creo il socket
-	s=new Socket("192.168.1.108", SERVER_PORT);
+	s=new Socket("192.168.137.1", SERVER_PORT);
 
 	//connetto il socket
 	connectSocket();

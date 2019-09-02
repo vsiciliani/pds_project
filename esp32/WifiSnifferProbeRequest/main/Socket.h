@@ -31,7 +31,7 @@ public:
 	int send(std::string message);
 	std::string receive();
 	void receiveRaw();
-	void close();
+	~Socket()
 };
 
 #endif /* MAIN_SOCKETC_H_ */
