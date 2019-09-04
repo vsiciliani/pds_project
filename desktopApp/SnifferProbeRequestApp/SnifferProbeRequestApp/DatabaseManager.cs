@@ -20,13 +20,13 @@ namespace SnifferProbeRequestApp {
             
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Connection String: " + connectionString);
             connection = new SqlConnection(connectionString);
-            try {
+            //try {
                 connection.Open();
-            } catch (SqlException e) {
+            /*} catch (SqlException e) {
                 string message = "Errore durante l'apertura della connessione con il database";
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
                 throw new SnifferAppDBConnectionException(message, e);
-            }
+            }*/
         }
         ///<summary>Ritorna l'istanza della classe DatabaseManager se già creata, oppure la istanzia</summary>
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>

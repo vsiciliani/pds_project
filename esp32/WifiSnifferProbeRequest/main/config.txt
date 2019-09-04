@@ -1,4 +1,0 @@
-SSID = dlink-natale
-key = h7onlgqmo8vcbgjr6qc3hg9v
-serverIp = 192.168.1.108
-port = 5010

@@ -52,3 +52,12 @@ void Socket::receiveRaw(){
 Socket::~Socket() {
 	lwip_close(this->socket); //TODO: implementare regola del 3 (slide 5 pagina 53)
 }
+
+Socket& Socket::operator=(const Socket& source) {
+	if (this != &source) {
+		lwip_close(this->socket);
+		this->socket = source.socket;
+		this->server = source.server;
+	}
+	return *this;
+}

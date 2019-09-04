@@ -19,28 +19,14 @@
 #include <math.h>
 #include <condition_variable>
 #include <time.h>
-#include "config.cpp"
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "Socket.h"
 #include "sdkconfig.h"
 #include <driver/gpio.h>
 
-
- //std::string wifiSSID = "Vodafone-50650385";
- //std::string wifiPassword = "pe7dt3793ae9t7b";
-
- //std::string wifiSSID = "dlink-natale";
- //std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
-
- //std::string wifiSSID = "APAndroid2";
- //std::string wifiPassword = "pippopluto";
-
- //definizione costanti
-#define WIFI_SSID						"pippo"
-#define WIFI_PASS						"pippopluto"
-#define SERVER_PORT						5010
-#define INTERVALLO_CONNESSIONE_SERVER	20
+//definizione delle costanti
+#include "config.cpp"
 
 static char tag[] = "Sniffer-ProbeRequest";
 
@@ -69,13 +55,6 @@ extern "C" {
 
 void app_main() {
 
-	Config config;
-	loadConfig(config);
-	
-	//ESP_LOGI(tag, "connect to ap SSID:%i", config.num);
-	//ESP_LOGI(tag, "connect to ap SSID: %s", (char*)config.nomeRete);
-	//ESP_LOGI(tag, "connect to ap SSID:%f", config.flt);
-
 	nvs_flash_init();
 
 	//setto il led come output
@@ -97,9 +76,6 @@ void app_main() {
 		}, 
 	};
 	
-	//strcpy((char*)wifi_config.sta.ssid, (char*)config.nomeRete);
-	//strcpy((char*)wifi_config.sta.password, (char*)config.key);
-
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
 	ESP_ERROR_CHECK(esp_wifi_start());
@@ -111,55 +87,61 @@ void app_main() {
 
 	/* FINE GESTIONE CONNESSIONE WIFI */
 
-	//creo il socket
-	s=new Socket("192.168.137.1", SERVER_PORT);
-
-	//connetto il socket
-	connectSocket();
-
 	//abilito la modalità di attività promiscua
 	ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
 	ESP_LOGI(tag, "Modalita schema promiscua abilitata");
 
+	bool flag = true;
+
 	//ciclo per gestire i messaggi in entrata
 	do {
-		std::string message = receiveMessage();
+		//creo il socket
+		s = new Socket("192.168.1.4", SERVER_PORT);
+		connectSocket();
+		flag = true;
+		do {	
+			std::string message = receiveMessage();
 
-		if (message.compare("IDENTIFICA")==0){
-			//lancio il thread che si occupa di far lampeggiare il led
-			std::thread threadBlinkLed (blinkLed);
-			//stacco il thread dal flusso principale
-			threadBlinkLed.detach();
-		} else if (message.compare("SYNC_CLOCK")==0) {
-			//effetto la sincronizzazione dei timestamp
-			syncClock();
-		} else if (message.compare("START_SEND")==0){
-			//setto l'handler che gestisce la ricezione del pacchetto
-			ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
+			if (message.compare("IDENTIFICA") == 0) {
+				//lancio il thread che si occupa di far lampeggiare il led
+				std::thread threadBlinkLed(blinkLed);
+				//stacco il thread dal flusso principale
+				threadBlinkLed.detach();
+			}
+			else if (message.compare("SYNC_CLOCK") == 0) {
+				//effetto la sincronizzazione dei timestamp
+				syncClock();
+			}
+			else if (message.compare("START_SEND") == 0) {
+				//setto l'handler che gestisce la ricezione del pacchetto
+				ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
-			//salvo il timestamp per calcolare il tempo di flush verso il server
-			time(&startWaitTime);
+				//salvo il timestamp per calcolare il tempo di flush verso il server
+				time(&startWaitTime);
 
-			//salvo la memoria a disposizione
-			memorySpace = xPortGetFreeHeapSize();
+				//salvo la memoria a disposizione
+				memorySpace = xPortGetFreeHeapSize();
 
-			//prendo il lock per leggere la lista di PacketInfo
-			std::unique_lock<std::mutex> ul(m);
-			//condition variable sul tempo di attesa per il flush
-			cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+				//prendo il lock per leggere la lista di PacketInfo
+				std::unique_lock<std::mutex> ul(m);
+				//condition variable sul tempo di attesa per il flush
+				cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
 
-			ESP_LOGI(tag, "Invio dati dei pacchetti al server");
+				ESP_LOGI(tag, "Invio dati dei pacchetti al server");
 
-			//send dei dati verso il server
-			sendMessage(createJSONArray(listaRecord));
+				//send dei dati verso il server
+				sendMessage(createJSONArray(listaRecord));
 
-			//pulisco la lista di PacketInfo
-			listaRecord.clear();
+				//pulisco la lista di PacketInfo
+				listaRecord.clear();
 
-		} else {
-			ESP_LOGI(tag, "Ricevuto messaggio non valido");
-		}
-
+			}
+			else {
+				ESP_LOGI(tag, "Ricevuto messaggio non valido");
+				flag = false;
+			}
+		} while (flag);
+		delete s;
 	} while (true);
 }
 

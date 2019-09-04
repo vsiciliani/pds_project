@@ -1,28 +1,14 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
+//definizione costanti
+#define WIFI_SSID						"Vodafone-50650385"
+#define WIFI_PASS						"pe7dt3793ae9t7b"
+#define SERVER_PORT						5010
+#define INTERVALLO_CONNESSIONE_SERVER	20
 
-struct Config {
-	char nomeRete [32];
-	char key[64];
-	std::string serverIp;
-	int port;
-};
+//std::string wifiSSID = "Vodafone-50650385";
+ //std::string wifiPassword = "pe7dt3793ae9t7b";
 
-void loadConfig(Config& config) {
-	std::ifstream fin("config.txt");
-	std::string line;
-	while (getline(fin, line)) {
-		
-		std::istringstream sin(line.substr(line.find("=") + 1)); //Input stream class to operate on strings.
-		if (line.find("SSID") != -1)
-			sin >> config.nomeRete;
-		else if (line.find("key") != -1)
-			sin >> config.key;
-		else if (line.find("serverIp") != -1)
-			sin >> config.serverIp;
-		else if (line.find("port") != -1)
-			sin >> config.port;
-	}
-}
+ //std::string wifiSSID = "dlink-natale";
+ //std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
+
+ //std::string wifiSSID = "APAndroid2";
+ //std::string wifiPassword = "pippopluto";

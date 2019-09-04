@@ -25,12 +25,13 @@ namespace SnifferProbeRequestApp
                 threadGestioneWifi = ThreadGestioneWifi.getInstance(settings);
             } catch (SnifferAppException e) {
                 MessageBox.Show(e.Message, "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return; 
-            } catch (Exception) {
+                return;
+            }
+            /*} catch (Exception) {
                 MessageBox.Show("Si è verificato un errore generico nell'esecuzione del programma", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 threadGestioneWifi.stop();
                 return;
-            }
+            }*/
             
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
