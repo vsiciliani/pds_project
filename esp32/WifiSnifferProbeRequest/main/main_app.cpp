@@ -8,6 +8,8 @@
 #include <iostream>
 #include <esp_wifi.h>
 #include <esp_wifi_types.h>
+#include <esp_event_loop.h>
+#include <freertos/event_groups.h>
 #include <nvs_flash.h>
 #include <esp_log.h>
 #include <string>
@@ -17,15 +19,19 @@
 #include <math.h>
 #include <condition_variable>
 #include <time.h>
-#include "Wifi.h"
 #include "WifiPacket.h"
 #include "PacketInfo.h"
 #include "Socket.h"
 #include "sdkconfig.h"
-//#include "GPIO.h"
 #include <driver/gpio.h>
 
+//definizione delle costanti
+#include "config.cpp"
+
+static char tag[] = "Sniffer-ProbeRequest";
+
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
+static esp_err_t event_handler(void* ctx, system_event_t* event);
 bool checkTimeoutThreadConnessionePc();
 void connectSocket();
 void blinkLed();
@@ -34,33 +40,18 @@ std::string createJSONArray(std::list<std::string>);
 bool sendMessage(std::string message);
 std::string receiveMessage();
 
-static char tag[]="Sniffer-ProbeRequest";
-
 std::list<std::string> listaRecord;
 std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
-WiFi wifi;
 Socket *s;
-//memoria inizialmente disponibile
-float memorySpace;
+float memorySpace; //memoria inizialmente disponibile
 
-//definizione costanti
-//std::string wifiSSID = "Vodafone-50650385";
-//std::string wifiPassword = "pe7dt3793ae9t7b";
-
-std::string wifiSSID = "dlink-natale";
-std::string wifiPassword = "h7onlgqmo8vcbgjr6qc3hg9v";
-
-//std::string wifiSSID = "APAndroid2";
-//std::string wifiPassword = "pippopluto";
-
-int intervalloConnessionePc = 20;
+static EventGroupHandle_t wifi_event_group;
 
 extern "C" {
    void app_main();
 }
-
 
 void app_main() {
 
@@ -68,67 +59,96 @@ void app_main() {
 
 	//setto il led come output
 	::gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+
+	/* GESTIONE CONNESSIONE WIFI */
+
+	wifi_event_group = xEventGroupCreate();
+
+	tcpip_adapter_init();
+	ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
+
+	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+	wifi_config_t wifi_config = { 
+		.sta = {
+			{.ssid = WIFI_SSID},
+			{.password = WIFI_PASS}
+		}, 
+	};
 	
-	//connetto il dispositivo alla rete Wifi
-	int result = wifi.connectAP(wifiSSID, wifiPassword);
+	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+	ESP_ERROR_CHECK(esp_wifi_start());
 
-	while (result != 0){
-		ESP_LOGE(tag, "Connessione alla rete WiFi fallita. Nuovo tentativo tra 10 secondi... ");
-		sleep(10);
-		result = wifi.connectAP(wifiSSID, wifiPassword);
-	}
+	ESP_LOGI(tag, "Inizializzazione completata");
+	esp_wifi_connect();
+	
+	ESP_LOGI(tag, "connect to ap SSID: %s",	WIFI_SSID);
 
-	ESP_LOGI(tag, "Connesso a %s con IP: %s Gateway: %s",wifi.getStaSSID().c_str(), wifi.getStaIp().c_str(), wifi.getStaGateway().c_str());
+	/* FINE GESTIONE CONNESSIONE WIFI */
 
-	//creo il socket
-	s=new Socket("192.168.1.108",5010);
-
-	//connetto il socket
-	connectSocket();
-
-	//abilito la modalità di attività promiscua
-	ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
-	ESP_LOGI(tag, "Modalita schema promiscua abilitata");
+	bool flag = true;
 
 	//ciclo per gestire i messaggi in entrata
 	do {
-		std::string message = receiveMessage();
+		ESP_LOGI(tag, "Apertura socket con il server...");
+		//creo il socket
+		s = new Socket(SERVER_HOST, SERVER_PORT);
+		connectSocket();
 
-		if (message.compare("IDENTIFICA")==0){
-			//lancio il thread che si occupa di far lampeggiare il led
-			std::thread threadBlinkLed (blinkLed);
-			//stacco il thread dal flusso principale
-			threadBlinkLed.detach();
-		} else if (message.compare("SYNC_CLOCK")==0) {
-			//effetto la sincronizzazione dei timestamp
-			syncClock();
-		} else if (message.compare("START_SEND")==0){
-			//setto l'handler che gestisce la ricezione del pacchetto
-			ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
+		//abilito la modalità di attività promiscua
+		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
+		ESP_LOGI(tag, "Modalita schema promiscua abilitata");
 
-			//salvo il timestamp per calcolare il tempo di flush verso il server
-			time(&startWaitTime);
+		flag = true;
+		do {	
+			std::string message = receiveMessage();
 
-			//salvo la memoria a disposizione
-			memorySpace = xPortGetFreeHeapSize();
+			if (message.compare("IDENTIFICA") == 0) {
+				//lancio il thread che si occupa di far lampeggiare il led
+				std::thread threadBlinkLed(blinkLed);
+				//stacco il thread dal flusso principale
+				threadBlinkLed.detach();
+			}
+			else if (message.compare("SYNC_CLOCK") == 0) {
+				//effetto la sincronizzazione dei timestamp
+				syncClock();
+			}
+			else if (message.compare("START_SEND") == 0) {
+				
+				//setto l'handler che gestisce la ricezione del pacchetto
+				ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
-			//prendo il lock per leggere la lista di PacketInfo
-			std::unique_lock<std::mutex> ul(m);
-			//condition variable sul tempo di attesa per il flush
-			cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+				//salvo il timestamp per calcolare il tempo di flush verso il server
+				time(&startWaitTime);
 
-			ESP_LOGI(tag, "Invio dati dei pacchetti al server");
+				//salvo la memoria a disposizione
+				memorySpace = xPortGetFreeHeapSize();
 
-			//send dei dati verso il server
-			sendMessage(createJSONArray(listaRecord));
+				//prendo il lock per leggere la lista di PacketInfo
+				std::unique_lock<std::mutex> ul(m);
+				//condition variable sul tempo di attesa per il flush
+				cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
 
-			//pulisco la lista di PacketInfo
-			listaRecord.clear();
+				ESP_LOGI(tag, "Invio dati dei pacchetti al server");
 
-		} else {
-			ESP_LOGI(tag, "Ricevuto messaggio non valido");
-		}
+				//send dei dati verso il server
+				sendMessage(createJSONArray(listaRecord));
 
+				//pulisco la lista di PacketInfo
+				listaRecord.clear();
+
+			}
+			else {
+				ESP_LOGI(tag, "Ricevuto messaggio non valido");
+				flag = false;
+			}
+		} while (flag);
+		//abilito la modalità di attività promiscua
+		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(false));
+		ESP_LOGI(tag, "Modalita schema promiscua disattivata");
+		delete s;
+		ESP_LOGI(tag, "Socket con il server chiuso");
 	} while (true);
 }
 
@@ -166,7 +186,7 @@ bool checkTimeoutThreadConnessionePc() {
 	float percMemoryAvailable =freeMemory/memorySpace;
 	ESP_LOGI(tag, "Percentuale memoria libera: %f", percMemoryAvailable);
 	//flusho il buffer verso il server è passato il tempo successivo o se la memoria libera e meno del 10 percento
-	if ((difftime(now,startWaitTime)>intervalloConnessionePc) || (percMemoryAvailable < 0.1))
+	if ((difftime(now,startWaitTime)> INTERVALLO_CONNESSIONE_SERVER) || (percMemoryAvailable < 0.1))
 		return true;
 	else
 		return false;
@@ -264,4 +284,23 @@ void blinkLed(){
 		sleep(1);
 		time(&blink_time);
 	} while(difftime(blink_time,blink_time_start)<30); //lampeggia per 30 secondi
+}
+
+static esp_err_t event_handler(void* ctx, system_event_t* event) {
+	/* For accessing reason codes in case of disconnection */
+	//system_event_info_t* info = &event->event_info;
+
+	switch (event->event_id) {
+	case SYSTEM_EVENT_STA_START:
+		esp_wifi_connect();
+		break;
+	case SYSTEM_EVENT_STA_GOT_IP:
+		ESP_LOGI(tag, "got ip:%s",
+			ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
+		xEventGroupSetBits(wifi_event_group, BIT0);
+		break;
+	default:
+		break;
+	}
+	return ESP_OK;
 }

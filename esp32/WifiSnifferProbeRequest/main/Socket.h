@@ -31,7 +31,8 @@ public:
 	int send(std::string message);
 	std::string receive();
 	void receiveRaw();
-	void close();
+	~Socket();
+	Socket& operator=(const Socket& source);
 };
 
 #endif /* MAIN_SOCKETC_H_ */
