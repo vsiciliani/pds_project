@@ -80,24 +80,26 @@ void app_main() {
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
 	ESP_ERROR_CHECK(esp_wifi_start());
 
-	ESP_LOGI(tag, "wifi_init_sta finished.");
+	ESP_LOGI(tag, "Inizializzazione completata");
 	esp_wifi_connect();
 	
-	ESP_LOGI(tag, "connect to ap SSID:%s",	WIFI_SSID);
+	ESP_LOGI(tag, "connect to ap SSID: %s",	WIFI_SSID);
 
 	/* FINE GESTIONE CONNESSIONE WIFI */
-
-	//abilito la modalità di attività promiscua
-	ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
-	ESP_LOGI(tag, "Modalita schema promiscua abilitata");
 
 	bool flag = true;
 
 	//ciclo per gestire i messaggi in entrata
 	do {
+		ESP_LOGI(tag, "Apertura socket con il server...");
 		//creo il socket
-		s = new Socket("192.168.1.4", SERVER_PORT);
+		s = new Socket(SERVER_HOST, SERVER_PORT);
 		connectSocket();
+
+		//abilito la modalità di attività promiscua
+		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
+		ESP_LOGI(tag, "Modalita schema promiscua abilitata");
+
 		flag = true;
 		do {	
 			std::string message = receiveMessage();
@@ -113,6 +115,7 @@ void app_main() {
 				syncClock();
 			}
 			else if (message.compare("START_SEND") == 0) {
+				
 				//setto l'handler che gestisce la ricezione del pacchetto
 				ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
@@ -141,7 +144,11 @@ void app_main() {
 				flag = false;
 			}
 		} while (flag);
+		//abilito la modalità di attività promiscua
+		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(false));
+		ESP_LOGI(tag, "Modalita schema promiscua disattivata");
 		delete s;
+		ESP_LOGI(tag, "Socket con il server chiuso");
 	} while (true);
 }
 

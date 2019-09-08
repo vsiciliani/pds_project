@@ -29,9 +29,6 @@ int Socket::connect(){
 		this->socket = result;
 		return lwip_connect(this->socket, (struct sockaddr*) & server, sizeof(struct sockaddr_in));
 	}
-
-	//this->socket = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	//return lwip_connect(this->socket, (struct sockaddr *)&server, sizeof(struct sockaddr_in));
 }
 
 int Socket::send(std::string message){

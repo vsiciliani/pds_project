@@ -83,6 +83,7 @@ namespace SnifferProbeRequestApp {
             int port = 5010;
             IPAddress localAddr = IPAddress.Any;
             listener = new TcpListener(localAddr, settings.servicePort);
+            
             try {
                 // starto il listener in attesa di connessione dei client
                 listener.Start();
@@ -97,12 +98,19 @@ namespace SnifferProbeRequestApp {
             while (!stopThreadElaboration) {
                 //allDone.Reset();
                 TcpClient client = null;
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Waiting for a connection...");
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "In attesa di connessioni...");
                 try {
                     //aspetto una connessione da parte di un rilevatore
+                    //con il controllo sul metodo pending evito la chiamata bloccante AcceptTcpClient() che non mi fa chiudere il thread quando chiudo la GUI
+                    while (!listener.Pending()) {
+                        Thread.Sleep(2000);
+                    }
                     client = listener.AcceptTcpClient();
                 } catch (SocketException) {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante il binding del socket");
+                    break;
+                } catch (InvalidOperationException) {
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Il listener TCP è stato chiuso");
                     break;
                 }
 
