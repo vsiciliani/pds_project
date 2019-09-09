@@ -40,6 +40,7 @@ namespace SnifferProbeRequestApp   {
             System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.groupBoxSettings = new System.Windows.Forms.GroupBox();
             this.btnSalvaDevice = new System.Windows.Forms.PictureBox();
             this.separatoreSettingRigth = new System.Windows.Forms.Label();
@@ -80,9 +81,7 @@ namespace SnifferProbeRequestApp   {
             this.lblTitle = new System.Windows.Forms.Label();
             this.tabFeatures = new System.Windows.Forms.TabControl();
             this.tabConteggioDevice = new System.Windows.Forms.TabPage();
-            this.lblInfoConteggioDevice = new System.Windows.Forms.Label();
             this.tabPosizioneDevice = new System.Windows.Forms.TabPage();
-            this.lblInfoPosizioneDevice = new System.Windows.Forms.Label();
             this.tabStatisticaLungoPeriodo = new System.Windows.Forms.TabPage();
             this.btn7giorni = new System.Windows.Forms.Button();
             this.btn1giorno = new System.Windows.Forms.Button();
@@ -90,12 +89,12 @@ namespace SnifferProbeRequestApp   {
             this.btn6Ore = new System.Windows.Forms.Button();
             this.btn1Ora = new System.Windows.Forms.Button();
             this.btn30minuti = new System.Windows.Forms.Button();
-            this.btnCercaStatisticheLungoPeriodo = new System.Windows.Forms.PictureBox();
             this.lblFiltro = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.dateTimePickerLimite = new System.Windows.Forms.DateTimePicker();
             this.upDownNumDevice = new System.Windows.Forms.NumericUpDown();
             this.chartStatisticaLungoPeriodo = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.btnCercaStatisticheLungoPeriodo = new System.Windows.Forms.PictureBox();
             this.tabMovimentoDevice = new System.Windows.Forms.TabPage();
             this.btnCercaMovimentoDevice = new System.Windows.Forms.PictureBox();
             this.boxDevice = new System.Windows.Forms.ComboBox();
@@ -121,6 +120,8 @@ namespace SnifferProbeRequestApp   {
             this.btnRefresh = new System.Windows.Forms.PictureBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.lblMin2device = new System.Windows.Forms.Label();
+            this.groupBoxGuida = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.imgPolito = new System.Windows.Forms.PictureBox();
             this.groupBoxSettings.SuspendLayout();
@@ -136,22 +137,23 @@ namespace SnifferProbeRequestApp   {
             this.tabConteggioDevice.SuspendLayout();
             this.tabPosizioneDevice.SuspendLayout();
             this.tabStatisticaLungoPeriodo.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnCercaStatisticheLungoPeriodo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.upDownNumDevice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartStatisticaLungoPeriodo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnCercaStatisticheLungoPeriodo)).BeginInit();
             this.tabMovimentoDevice.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnCercaMovimentoDevice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartMovimentoDevice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarTempo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnRefresh)).BeginInit();
             this.groupBox2.SuspendLayout();
+            this.groupBoxGuida.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgPolito)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBoxSettings
             // 
-            this.groupBoxSettings.BackColor = System.Drawing.SystemColors.GrayText;
+            this.groupBoxSettings.BackColor = System.Drawing.Color.Transparent;
             this.groupBoxSettings.Controls.Add(this.btnSalvaDevice);
             this.groupBoxSettings.Controls.Add(this.separatoreSettingRigth);
             this.groupBoxSettings.Controls.Add(this.btnIdentificaDevice);
@@ -168,14 +170,14 @@ namespace SnifferProbeRequestApp   {
             this.groupBoxSettings.Controls.Add(this.lblElencoDeviceConf);
             this.groupBoxSettings.Controls.Add(this.lblNumDeviceNonConf);
             this.groupBoxSettings.Controls.Add(this.lblNumDeviceConf);
-            this.groupBoxSettings.Font = new System.Drawing.Font("Calibri", 11F);
-            this.groupBoxSettings.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.groupBoxSettings.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
+            this.groupBoxSettings.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.groupBoxSettings.Location = new System.Drawing.Point(12, 137);
             this.groupBoxSettings.Name = "groupBoxSettings";
             this.groupBoxSettings.Size = new System.Drawing.Size(1059, 133);
             this.groupBoxSettings.TabIndex = 0;
             this.groupBoxSettings.TabStop = false;
-            this.groupBoxSettings.Text = "Settings";
+            this.groupBoxSettings.Text = "Impostazioni";
             // 
             // btnSalvaDevice
             // 
@@ -238,6 +240,7 @@ namespace SnifferProbeRequestApp   {
             // lblYPosition
             // 
             this.lblYPosition.AutoSize = true;
+            this.lblYPosition.Font = new System.Drawing.Font("Calibri", 11F);
             this.lblYPosition.Location = new System.Drawing.Point(901, 100);
             this.lblYPosition.Name = "lblYPosition";
             this.lblYPosition.Size = new System.Drawing.Size(89, 18);
@@ -248,6 +251,7 @@ namespace SnifferProbeRequestApp   {
             // lblXPosition
             // 
             this.lblXPosition.AutoSize = true;
+            this.lblXPosition.Font = new System.Drawing.Font("Calibri", 11F);
             this.lblXPosition.Location = new System.Drawing.Point(901, 73);
             this.lblXPosition.Name = "lblXPosition";
             this.lblXPosition.Size = new System.Drawing.Size(91, 18);
@@ -291,6 +295,7 @@ namespace SnifferProbeRequestApp   {
             // 
             this.tabDeviceConf.Controls.Add(this.tabPage1);
             this.tabDeviceConf.Controls.Add(this.tabPage2);
+            this.tabDeviceConf.Font = new System.Drawing.Font("Calibri", 11F);
             this.tabDeviceConf.Location = new System.Drawing.Point(255, 36);
             this.tabDeviceConf.Name = "tabDeviceConf";
             this.tabDeviceConf.SelectedIndex = 0;
@@ -450,30 +455,30 @@ namespace SnifferProbeRequestApp   {
             // lblElencoDeviceConf
             // 
             this.lblElencoDeviceConf.AutoSize = true;
-            this.lblElencoDeviceConf.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
+            this.lblElencoDeviceConf.Font = new System.Drawing.Font("Calibri", 11F);
             this.lblElencoDeviceConf.Location = new System.Drawing.Point(249, 17);
             this.lblElencoDeviceConf.Name = "lblElencoDeviceConf";
-            this.lblElencoDeviceConf.Size = new System.Drawing.Size(182, 18);
+            this.lblElencoDeviceConf.Size = new System.Drawing.Size(181, 18);
             this.lblElencoDeviceConf.TabIndex = 2;
             this.lblElencoDeviceConf.Text = "Elenco rilevatori configurati:";
             // 
             // lblNumDeviceNonConf
             // 
             this.lblNumDeviceNonConf.AutoSize = true;
-            this.lblNumDeviceNonConf.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
+            this.lblNumDeviceNonConf.Font = new System.Drawing.Font("Calibri", 11F);
             this.lblNumDeviceNonConf.Location = new System.Drawing.Point(4, 42);
             this.lblNumDeviceNonConf.Name = "lblNumDeviceNonConf";
-            this.lblNumDeviceNonConf.Size = new System.Drawing.Size(232, 18);
+            this.lblNumDeviceNonConf.Size = new System.Drawing.Size(231, 18);
             this.lblNumDeviceNonConf.TabIndex = 1;
             this.lblNumDeviceNonConf.Text = "Numero rilevatori non configurati:  0";
             // 
             // lblNumDeviceConf
             // 
             this.lblNumDeviceConf.AutoSize = true;
-            this.lblNumDeviceConf.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
+            this.lblNumDeviceConf.Font = new System.Drawing.Font("Calibri", 11F);
             this.lblNumDeviceConf.Location = new System.Drawing.Point(6, 18);
             this.lblNumDeviceConf.Name = "lblNumDeviceConf";
-            this.lblNumDeviceConf.Size = new System.Drawing.Size(205, 18);
+            this.lblNumDeviceConf.Size = new System.Drawing.Size(204, 18);
             this.lblNumDeviceConf.TabIndex = 0;
             this.lblNumDeviceConf.Text = "Numero rilevatori configurati:  0";
             // 
@@ -497,7 +502,7 @@ namespace SnifferProbeRequestApp   {
             this.chartNumberDevice.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.chartNumberDevice.Legends.Add(legend1);
-            this.chartNumberDevice.Location = new System.Drawing.Point(6, 24);
+            this.chartNumberDevice.Location = new System.Drawing.Point(6, 6);
             this.chartNumberDevice.Name = "chartNumberDevice";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
@@ -508,7 +513,7 @@ namespace SnifferProbeRequestApp   {
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
             series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
             this.chartNumberDevice.Series.Add(series1);
-            this.chartNumberDevice.Size = new System.Drawing.Size(1017, 366);
+            this.chartNumberDevice.Size = new System.Drawing.Size(1017, 384);
             this.chartNumberDevice.TabIndex = 0;
             this.chartNumberDevice.Text = "chartNumberDevice";
             // 
@@ -526,7 +531,7 @@ namespace SnifferProbeRequestApp   {
             this.chartPositionDevice.ChartAreas.Add(chartArea2);
             legend2.Name = "Legend1";
             this.chartPositionDevice.Legends.Add(legend2);
-            this.chartPositionDevice.Location = new System.Drawing.Point(6, 32);
+            this.chartPositionDevice.Location = new System.Drawing.Point(6, 6);
             this.chartPositionDevice.Name = "chartPositionDevice";
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
@@ -543,7 +548,7 @@ namespace SnifferProbeRequestApp   {
             series3.Name = "Device";
             this.chartPositionDevice.Series.Add(series2);
             this.chartPositionDevice.Series.Add(series3);
-            this.chartPositionDevice.Size = new System.Drawing.Size(1004, 358);
+            this.chartPositionDevice.Size = new System.Drawing.Size(1020, 384);
             this.chartPositionDevice.TabIndex = 0;
             this.chartPositionDevice.Text = "chart1";
             // 
@@ -556,30 +561,33 @@ namespace SnifferProbeRequestApp   {
             // lblProgetto
             // 
             this.lblProgetto.AutoSize = true;
-            this.lblProgetto.Font = new System.Drawing.Font("Verdana", 11F, System.Drawing.FontStyle.Bold);
-            this.lblProgetto.Location = new System.Drawing.Point(276, 55);
+            this.lblProgetto.Font = new System.Drawing.Font("Verdana", 13F, System.Drawing.FontStyle.Bold);
+            this.lblProgetto.ForeColor = System.Drawing.Color.DarkBlue;
+            this.lblProgetto.Location = new System.Drawing.Point(420, 46);
             this.lblProgetto.Name = "lblProgetto";
-            this.lblProgetto.Size = new System.Drawing.Size(335, 18);
+            this.lblProgetto.Size = new System.Drawing.Size(412, 22);
             this.lblProgetto.TabIndex = 3;
             this.lblProgetto.Text = "Progetto di Programmazione di Sistema";
             // 
             // lblAnno
             // 
             this.lblAnno.AutoSize = true;
-            this.lblAnno.Font = new System.Drawing.Font("Verdana", 11F, System.Drawing.FontStyle.Bold);
-            this.lblAnno.Location = new System.Drawing.Point(331, 83);
+            this.lblAnno.Font = new System.Drawing.Font("Verdana", 13F, System.Drawing.FontStyle.Bold);
+            this.lblAnno.ForeColor = System.Drawing.Color.DarkBlue;
+            this.lblAnno.Location = new System.Drawing.Point(475, 74);
             this.lblAnno.Name = "lblAnno";
-            this.lblAnno.Size = new System.Drawing.Size(232, 18);
+            this.lblAnno.Size = new System.Drawing.Size(285, 22);
             this.lblAnno.TabIndex = 4;
             this.lblAnno.Text = "Anno Accademico 2017/18";
             // 
             // lblNomeCognome
             // 
             this.lblNomeCognome.AutoSize = true;
-            this.lblNomeCognome.Font = new System.Drawing.Font("Verdana", 11F, System.Drawing.FontStyle.Bold);
-            this.lblNomeCognome.Location = new System.Drawing.Point(334, 111);
+            this.lblNomeCognome.Font = new System.Drawing.Font("Verdana", 13F, System.Drawing.FontStyle.Bold);
+            this.lblNomeCognome.ForeColor = System.Drawing.Color.DarkBlue;
+            this.lblNomeCognome.Location = new System.Drawing.Point(478, 102);
             this.lblNomeCognome.Name = "lblNomeCognome";
-            this.lblNomeCognome.Size = new System.Drawing.Size(228, 18);
+            this.lblNomeCognome.Size = new System.Drawing.Size(287, 22);
             this.lblNomeCognome.TabIndex = 5;
             this.lblNomeCognome.Text = "Vincenzo Siciliani #243178";
             // 
@@ -587,10 +595,11 @@ namespace SnifferProbeRequestApp   {
             // 
             this.lblTitle.AutoSize = true;
             this.lblTitle.BackColor = System.Drawing.Color.Transparent;
-            this.lblTitle.Font = new System.Drawing.Font("Verdana", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTitle.Location = new System.Drawing.Point(192, 21);
+            this.lblTitle.Font = new System.Drawing.Font("Verdana", 17F, System.Drawing.FontStyle.Bold);
+            this.lblTitle.ForeColor = System.Drawing.Color.DarkBlue;
+            this.lblTitle.Location = new System.Drawing.Point(336, 12);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(519, 25);
+            this.lblTitle.Size = new System.Drawing.Size(578, 28);
             this.lblTitle.TabIndex = 7;
             this.lblTitle.Text = "SISTEMA RILEVAZIONE PRESENZE INDOOR";
             // 
@@ -600,6 +609,7 @@ namespace SnifferProbeRequestApp   {
             this.tabFeatures.Controls.Add(this.tabPosizioneDevice);
             this.tabFeatures.Controls.Add(this.tabStatisticaLungoPeriodo);
             this.tabFeatures.Controls.Add(this.tabMovimentoDevice);
+            this.tabFeatures.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tabFeatures.Location = new System.Drawing.Point(9, 54);
             this.tabFeatures.Name = "tabFeatures";
             this.tabFeatures.SelectedIndex = 0;
@@ -609,7 +619,6 @@ namespace SnifferProbeRequestApp   {
             // 
             // tabConteggioDevice
             // 
-            this.tabConteggioDevice.Controls.Add(this.lblInfoConteggioDevice);
             this.tabConteggioDevice.Controls.Add(this.chartNumberDevice);
             this.tabConteggioDevice.Location = new System.Drawing.Point(4, 27);
             this.tabConteggioDevice.Name = "tabConteggioDevice";
@@ -619,20 +628,8 @@ namespace SnifferProbeRequestApp   {
             this.tabConteggioDevice.Text = "Conteggio Device";
             this.tabConteggioDevice.UseVisualStyleBackColor = true;
             // 
-            // lblInfoConteggioDevice
-            // 
-            this.lblInfoConteggioDevice.AutoSize = true;
-            this.lblInfoConteggioDevice.ForeColor = System.Drawing.Color.Black;
-            this.lblInfoConteggioDevice.Location = new System.Drawing.Point(6, 6);
-            this.lblInfoConteggioDevice.Name = "lblInfoConteggioDevice";
-            this.lblInfoConteggioDevice.Size = new System.Drawing.Size(565, 18);
-            this.lblInfoConteggioDevice.TabIndex = 1;
-            this.lblInfoConteggioDevice.Text = "Questo grafico mostra il numero di device connessi continuativamente per almero 5" +
-    " minuti";
-            // 
             // tabPosizioneDevice
             // 
-            this.tabPosizioneDevice.Controls.Add(this.lblInfoPosizioneDevice);
             this.tabPosizioneDevice.Controls.Add(this.chartPositionDevice);
             this.tabPosizioneDevice.Location = new System.Drawing.Point(4, 27);
             this.tabPosizioneDevice.Name = "tabPosizioneDevice";
@@ -642,17 +639,6 @@ namespace SnifferProbeRequestApp   {
             this.tabPosizioneDevice.Text = "Posizione Device";
             this.tabPosizioneDevice.UseVisualStyleBackColor = true;
             // 
-            // lblInfoPosizioneDevice
-            // 
-            this.lblInfoPosizioneDevice.AutoSize = true;
-            this.lblInfoPosizioneDevice.ForeColor = System.Drawing.Color.Black;
-            this.lblInfoPosizioneDevice.Location = new System.Drawing.Point(6, 7);
-            this.lblInfoPosizioneDevice.Name = "lblInfoPosizioneDevice";
-            this.lblInfoPosizioneDevice.Size = new System.Drawing.Size(674, 18);
-            this.lblInfoPosizioneDevice.TabIndex = 2;
-            this.lblInfoPosizioneDevice.Text = "Questo grafico mostra la posizione dei device rilevati nell\'ultimo minuto rispett" +
-    "o alla posizione dei rilevatori";
-            // 
             // tabStatisticaLungoPeriodo
             // 
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn7giorni);
@@ -661,12 +647,12 @@ namespace SnifferProbeRequestApp   {
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn6Ore);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn1Ora);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.btn30minuti);
-            this.tabStatisticaLungoPeriodo.Controls.Add(this.btnCercaStatisticheLungoPeriodo);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.lblFiltro);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.label1);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.dateTimePickerLimite);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.upDownNumDevice);
             this.tabStatisticaLungoPeriodo.Controls.Add(this.chartStatisticaLungoPeriodo);
+            this.tabStatisticaLungoPeriodo.Controls.Add(this.btnCercaStatisticheLungoPeriodo);
             this.tabStatisticaLungoPeriodo.Location = new System.Drawing.Point(4, 27);
             this.tabStatisticaLungoPeriodo.Name = "tabStatisticaLungoPeriodo";
             this.tabStatisticaLungoPeriodo.Size = new System.Drawing.Size(1032, 396);
@@ -741,17 +727,6 @@ namespace SnifferProbeRequestApp   {
             this.btn30minuti.UseVisualStyleBackColor = true;
             this.btn30minuti.Click += new System.EventHandler(this.Btn30min_Click);
             // 
-            // btnCercaStatisticheLungoPeriodo
-            // 
-            this.btnCercaStatisticheLungoPeriodo.Image = global::SnifferProbeRequestApp.Properties.Resources.search;
-            this.btnCercaStatisticheLungoPeriodo.Location = new System.Drawing.Point(481, 9);
-            this.btnCercaStatisticheLungoPeriodo.Name = "btnCercaStatisticheLungoPeriodo";
-            this.btnCercaStatisticheLungoPeriodo.Size = new System.Drawing.Size(25, 25);
-            this.btnCercaStatisticheLungoPeriodo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.btnCercaStatisticheLungoPeriodo.TabIndex = 6;
-            this.btnCercaStatisticheLungoPeriodo.TabStop = false;
-            this.btnCercaStatisticheLungoPeriodo.Click += new System.EventHandler(this.BtnCercaStatisticheLungoPeriodo_Click);
-            // 
             // lblFiltro
             // 
             this.lblFiltro.AutoSize = true;
@@ -817,6 +792,17 @@ namespace SnifferProbeRequestApp   {
             this.chartStatisticaLungoPeriodo.Size = new System.Drawing.Size(1025, 314);
             this.chartStatisticaLungoPeriodo.TabIndex = 0;
             this.chartStatisticaLungoPeriodo.Text = "chart1";
+            // 
+            // btnCercaStatisticheLungoPeriodo
+            // 
+            this.btnCercaStatisticheLungoPeriodo.Image = global::SnifferProbeRequestApp.Properties.Resources.search;
+            this.btnCercaStatisticheLungoPeriodo.Location = new System.Drawing.Point(481, 9);
+            this.btnCercaStatisticheLungoPeriodo.Name = "btnCercaStatisticheLungoPeriodo";
+            this.btnCercaStatisticheLungoPeriodo.Size = new System.Drawing.Size(25, 25);
+            this.btnCercaStatisticheLungoPeriodo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnCercaStatisticheLungoPeriodo.TabIndex = 6;
+            this.btnCercaStatisticheLungoPeriodo.TabStop = false;
+            this.btnCercaStatisticheLungoPeriodo.Click += new System.EventHandler(this.BtnCercaStatisticheLungoPeriodo_Click);
             // 
             // tabMovimentoDevice
             // 
@@ -1102,12 +1088,12 @@ namespace SnifferProbeRequestApp   {
             // 
             // groupBox2
             // 
-            this.groupBox2.BackColor = System.Drawing.SystemColors.GrayText;
+            this.groupBox2.BackColor = System.Drawing.Color.Transparent;
             this.groupBox2.Controls.Add(this.lblMin2device);
             this.groupBox2.Controls.Add(this.btnRefresh);
             this.groupBox2.Controls.Add(this.tabFeatures);
-            this.groupBox2.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.groupBox2.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.groupBox2.Location = new System.Drawing.Point(12, 276);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(1059, 487);
@@ -1118,16 +1104,42 @@ namespace SnifferProbeRequestApp   {
             // lblMin2device
             // 
             this.lblMin2device.AutoSize = true;
+            this.lblMin2device.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMin2device.Location = new System.Drawing.Point(9, 22);
             this.lblMin2device.Name = "lblMin2device";
             this.lblMin2device.Size = new System.Drawing.Size(390, 18);
             this.lblMin2device.TabIndex = 9;
             this.lblMin2device.Text = "Configurare almeno due rilevatori per effettuare le rilevazioni";
             // 
+            // groupBoxGuida
+            // 
+            this.groupBoxGuida.BackColor = System.Drawing.Color.Transparent;
+            this.groupBoxGuida.Controls.Add(this.label4);
+            this.groupBoxGuida.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
+            this.groupBoxGuida.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.groupBoxGuida.Location = new System.Drawing.Point(1078, 137);
+            this.groupBoxGuida.Name = "groupBoxGuida";
+            this.groupBoxGuida.Size = new System.Drawing.Size(296, 626);
+            this.groupBoxGuida.TabIndex = 10;
+            this.groupBoxGuida.TabStop = false;
+            this.groupBoxGuida.Text = "Guida";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Calibri", 11F);
+            this.label4.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label4.Location = new System.Drawing.Point(6, 17);
+            this.label4.MaximumSize = new System.Drawing.Size(285, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(284, 594);
+            this.label4.TabIndex = 0;
+            this.label4.Text = resources.GetString("label4.Text");
+            // 
             // pictureBox1
             // 
             this.pictureBox1.Image = global::SnifferProbeRequestApp.Properties.Resources.icon;
-            this.pictureBox1.Location = new System.Drawing.Point(18, 10);
+            this.pictureBox1.Location = new System.Drawing.Point(78, 12);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(120, 119);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -1138,9 +1150,9 @@ namespace SnifferProbeRequestApp   {
             // 
             this.imgPolito.BackColor = System.Drawing.Color.Transparent;
             this.imgPolito.Image = global::SnifferProbeRequestApp.Properties.Resources.polito_logo;
-            this.imgPolito.Location = new System.Drawing.Point(768, 12);
+            this.imgPolito.Location = new System.Drawing.Point(1017, -3);
             this.imgPolito.Name = "imgPolito";
-            this.imgPolito.Size = new System.Drawing.Size(280, 122);
+            this.imgPolito.Size = new System.Drawing.Size(307, 136);
             this.imgPolito.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.imgPolito.TabIndex = 6;
             this.imgPolito.TabStop = false;
@@ -1149,8 +1161,9 @@ namespace SnifferProbeRequestApp   {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.AppWorkspace;
-            this.ClientSize = new System.Drawing.Size(1080, 769);
+            this.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.ClientSize = new System.Drawing.Size(1386, 769);
+            this.Controls.Add(this.groupBoxGuida);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.pictureBox1);
@@ -1174,14 +1187,12 @@ namespace SnifferProbeRequestApp   {
             ((System.ComponentModel.ISupportInitialize)(this.chartPositionDevice)).EndInit();
             this.tabFeatures.ResumeLayout(false);
             this.tabConteggioDevice.ResumeLayout(false);
-            this.tabConteggioDevice.PerformLayout();
             this.tabPosizioneDevice.ResumeLayout(false);
-            this.tabPosizioneDevice.PerformLayout();
             this.tabStatisticaLungoPeriodo.ResumeLayout(false);
             this.tabStatisticaLungoPeriodo.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnCercaStatisticheLungoPeriodo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.upDownNumDevice)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartStatisticaLungoPeriodo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.btnCercaStatisticheLungoPeriodo)).EndInit();
             this.tabMovimentoDevice.ResumeLayout(false);
             this.tabMovimentoDevice.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnCercaMovimentoDevice)).EndInit();
@@ -1190,6 +1201,8 @@ namespace SnifferProbeRequestApp   {
             ((System.ComponentModel.ISupportInitialize)(this.btnRefresh)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBoxGuida.ResumeLayout(false);
+            this.groupBoxGuida.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgPolito)).EndInit();
             this.ResumeLayout(false);
@@ -1245,8 +1258,6 @@ namespace SnifferProbeRequestApp   {
         private System.Windows.Forms.PictureBox btnEliminaDevice;
         private System.Windows.Forms.PictureBox btnSalvaModificaDevice;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Label lblInfoConteggioDevice;
-        private System.Windows.Forms.Label lblInfoPosizioneDevice;
         private System.Windows.Forms.Label lblMin2device;
         private System.Windows.Forms.TabPage tabStatisticaLungoPeriodo;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartStatisticaLungoPeriodo;
@@ -1282,6 +1293,8 @@ namespace SnifferProbeRequestApp   {
         private Label lblDateMax;
         private DateTimePicker dateTimePickerDateMax;
         private PictureBox btnCercaMovimentoDevice;
+        private GroupBox groupBoxGuida;
+        private Label label4;
     }
 }
 
