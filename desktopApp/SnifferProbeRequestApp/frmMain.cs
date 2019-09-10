@@ -285,14 +285,15 @@ namespace SnifferProbeRequestApp
         }
 
         private void checkTwoESP(object sender, EventArgs e){
-            if (ConfDevice.lstConfDevices.Count >= 2){
+            if (ConfDevice.lstConfDevices.Count >= 2 && 
+                (ConfDevice.getMaxXPositionDevice() != ConfDevice.getMinXPositionDevice() || ConfDevice.getMaxYPositionDevice() != ConfDevice.getMinYPositionDevice())){
                 tabFeatures.Visible = true;
                 btnRefresh.Visible = true;
                 lblMin2device.Visible = false;
             } else {
-                tabFeatures.Visible = false; //TODO: invertire
-                btnRefresh.Visible = false; //TODO: invertire
-                lblMin2device.Visible = true; //TODO: invertire
+                tabFeatures.Visible = false;
+                btnRefresh.Visible = false;
+                lblMin2device.Visible = true;
             }
         }
 
@@ -318,9 +319,7 @@ namespace SnifferProbeRequestApp
                     //setto le dimensioni degli assi del grafico che mostra le posizioni dei dispositivi rilevati
                     chartPositionDevice.ChartAreas[0].AxisX.Maximum = ConfDevice.getMaxXPositionDevice();
                     chartPositionDevice.ChartAreas[0].AxisX.Minimum = ConfDevice.getMinXPositionDevice();
-                    chartPositionDevice.ChartAreas[0].AxisY.Maximum = ConfDevice.getMaxYPositionDevice();
-                    chartPositionDevice.ChartAreas[0].AxisY.Minimum = ConfDevice.getMinYPositionDevice();
-
+                    
                     //aggiungo sul grafico delle posizioni il punto del device ESP
                     int point = chartPositionDevice.Series["ESP"].Points.AddXY(device.Value.x_position, device.Value.y_position);
                     chartPositionDevice.Series["ESP"].Points[point].ToolTip = device.Key;
@@ -328,9 +327,7 @@ namespace SnifferProbeRequestApp
                     //setto le dimensioni degli assi del grafico che mostra il movimento dispositivi rilevati
                     chartMovimentoDevice.ChartAreas[0].AxisX.Maximum = ConfDevice.getMaxXPositionDevice();
                     chartMovimentoDevice.ChartAreas[0].AxisX.Minimum = ConfDevice.getMinXPositionDevice();
-                    chartMovimentoDevice.ChartAreas[0].AxisY.Maximum = ConfDevice.getMaxYPositionDevice();
-                    chartMovimentoDevice.ChartAreas[0].AxisY.Minimum = ConfDevice.getMinYPositionDevice();
-
+                    
                     //aggiungo sul grafico dei movimenti il punto del device ESP
                     point = chartMovimentoDevice.Series["ESP"].Points.AddXY(device.Value.x_position, device.Value.y_position);
                     chartMovimentoDevice.Series["ESP"].Points[point].ToolTip = device.Key;

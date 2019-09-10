@@ -26,20 +26,20 @@ namespace SnifferProbeRequestApp   {
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend7 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series10 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend8 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series11 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series12 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.groupBoxSettings = new System.Windows.Forms.GroupBox();
             this.btnSalvaDevice = new System.Windows.Forms.PictureBox();
@@ -223,6 +223,7 @@ namespace SnifferProbeRequestApp   {
             // 
             // txtYPosition
             // 
+            this.txtYPosition.Font = new System.Drawing.Font("Calibri", 11F);
             this.txtYPosition.Location = new System.Drawing.Point(996, 97);
             this.txtYPosition.Name = "txtYPosition";
             this.txtYPosition.Size = new System.Drawing.Size(53, 25);
@@ -231,6 +232,7 @@ namespace SnifferProbeRequestApp   {
             // 
             // txtXPosition
             // 
+            this.txtXPosition.Font = new System.Drawing.Font("Calibri", 11F);
             this.txtXPosition.Location = new System.Drawing.Point(996, 70);
             this.txtXPosition.Name = "txtXPosition";
             this.txtXPosition.Size = new System.Drawing.Size(53, 25);
@@ -272,6 +274,7 @@ namespace SnifferProbeRequestApp   {
             // lstBoxNoConfDevice
             // 
             this.lstBoxNoConfDevice.BackColor = System.Drawing.SystemColors.Window;
+            this.lstBoxNoConfDevice.Font = new System.Drawing.Font("Calibri", 11F);
             this.lstBoxNoConfDevice.ForeColor = System.Drawing.SystemColors.WindowText;
             this.lstBoxNoConfDevice.FormattingEnabled = true;
             this.lstBoxNoConfDevice.ItemHeight = 18;
@@ -284,7 +287,7 @@ namespace SnifferProbeRequestApp   {
             // lblConfiguraDevice
             // 
             this.lblConfiguraDevice.AutoSize = true;
-            this.lblConfiguraDevice.Font = new System.Drawing.Font("Calibri", 11F, System.Drawing.FontStyle.Bold);
+            this.lblConfiguraDevice.Font = new System.Drawing.Font("Calibri", 11F);
             this.lblConfiguraDevice.Location = new System.Drawing.Point(748, 17);
             this.lblConfiguraDevice.Name = "lblConfiguraDevice";
             this.lblConfiguraDevice.Size = new System.Drawing.Size(177, 18);
@@ -494,60 +497,60 @@ namespace SnifferProbeRequestApp   {
             // 
             this.chartNumberDevice.BorderlineWidth = 0;
             this.chartNumberDevice.CausesValidation = false;
-            chartArea1.AxisX.MajorGrid.Enabled = false;
-            chartArea1.AxisY.MajorGrid.LineColor = System.Drawing.Color.Gray;
-            chartArea1.AxisY.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
-            chartArea1.AxisY.MajorGrid.LineWidth = 2;
-            chartArea1.Name = "ChartArea1";
-            this.chartNumberDevice.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chartNumberDevice.Legends.Add(legend1);
+            chartArea5.AxisX.MajorGrid.Enabled = false;
+            chartArea5.AxisY.MajorGrid.LineColor = System.Drawing.Color.Gray;
+            chartArea5.AxisY.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
+            chartArea5.AxisY.MajorGrid.LineWidth = 2;
+            chartArea5.Name = "ChartArea1";
+            this.chartNumberDevice.ChartAreas.Add(chartArea5);
+            legend5.Name = "Legend1";
+            this.chartNumberDevice.Legends.Add(legend5);
             this.chartNumberDevice.Location = new System.Drawing.Point(6, 6);
             this.chartNumberDevice.Name = "chartNumberDevice";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-            series1.IsVisibleInLegend = false;
-            series1.IsXValueIndexed = true;
-            series1.Legend = "Legend1";
-            series1.Name = "N. dispositivi univoci";
-            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
-            series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
-            this.chartNumberDevice.Series.Add(series1);
+            series7.ChartArea = "ChartArea1";
+            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+            series7.IsVisibleInLegend = false;
+            series7.IsXValueIndexed = true;
+            series7.Legend = "Legend1";
+            series7.Name = "N. dispositivi univoci";
+            series7.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
+            series7.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int64;
+            this.chartNumberDevice.Series.Add(series7);
             this.chartNumberDevice.Size = new System.Drawing.Size(1017, 384);
             this.chartNumberDevice.TabIndex = 0;
             this.chartNumberDevice.Text = "chartNumberDevice";
             // 
             // chartPositionDevice
             // 
-            chartArea2.AxisX.LabelStyle.Enabled = false;
-            chartArea2.AxisX.LineWidth = 0;
-            chartArea2.AxisX.MajorGrid.Enabled = false;
-            chartArea2.AxisX.MajorTickMark.LineWidth = 0;
-            chartArea2.AxisY.LabelStyle.Enabled = false;
-            chartArea2.AxisY.LineWidth = 0;
-            chartArea2.AxisY.MajorGrid.Enabled = false;
-            chartArea2.AxisY.MajorTickMark.LineWidth = 0;
-            chartArea2.Name = "ChartArea1";
-            this.chartPositionDevice.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chartPositionDevice.Legends.Add(legend2);
+            chartArea6.AxisX.LabelStyle.Enabled = false;
+            chartArea6.AxisX.LineWidth = 0;
+            chartArea6.AxisX.MajorGrid.Enabled = false;
+            chartArea6.AxisX.MajorTickMark.LineWidth = 0;
+            chartArea6.AxisY.LabelStyle.Enabled = false;
+            chartArea6.AxisY.LineWidth = 0;
+            chartArea6.AxisY.MajorGrid.Enabled = false;
+            chartArea6.AxisY.MajorTickMark.LineWidth = 0;
+            chartArea6.Name = "ChartArea1";
+            this.chartPositionDevice.ChartAreas.Add(chartArea6);
+            legend6.Name = "Legend1";
+            this.chartPositionDevice.Legends.Add(legend6);
             this.chartPositionDevice.Location = new System.Drawing.Point(6, 6);
             this.chartPositionDevice.Name = "chartPositionDevice";
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series2.Legend = "Legend1";
-            series2.MarkerSize = 12;
-            series2.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Square;
-            series2.Name = "ESP";
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series3.Legend = "Legend1";
-            series3.MarkerColor = System.Drawing.Color.Red;
-            series3.MarkerSize = 15;
-            series3.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Cross;
-            series3.Name = "Device";
-            this.chartPositionDevice.Series.Add(series2);
-            this.chartPositionDevice.Series.Add(series3);
+            series8.ChartArea = "ChartArea1";
+            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series8.Legend = "Legend1";
+            series8.MarkerSize = 12;
+            series8.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Square;
+            series8.Name = "ESP";
+            series9.ChartArea = "ChartArea1";
+            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series9.Legend = "Legend1";
+            series9.MarkerColor = System.Drawing.Color.Red;
+            series9.MarkerSize = 15;
+            series9.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Cross;
+            series9.Name = "Device";
+            this.chartPositionDevice.Series.Add(series8);
+            this.chartPositionDevice.Series.Add(series9);
             this.chartPositionDevice.Size = new System.Drawing.Size(1020, 384);
             this.chartPositionDevice.TabIndex = 0;
             this.chartPositionDevice.Text = "chart1";
@@ -772,23 +775,23 @@ namespace SnifferProbeRequestApp   {
             // 
             // chartStatisticaLungoPeriodo
             // 
-            chartArea3.Name = "ChartArea1";
-            this.chartStatisticaLungoPeriodo.ChartAreas.Add(chartArea3);
-            legend3.Name = "Legend1";
-            this.chartStatisticaLungoPeriodo.Legends.Add(legend3);
+            chartArea7.Name = "ChartArea1";
+            this.chartStatisticaLungoPeriodo.ChartAreas.Add(chartArea7);
+            legend7.Name = "Legend1";
+            this.chartStatisticaLungoPeriodo.Legends.Add(legend7);
             this.chartStatisticaLungoPeriodo.Location = new System.Drawing.Point(4, 77);
             this.chartStatisticaLungoPeriodo.Name = "chartStatisticaLungoPeriodo";
-            series4.ChartArea = "ChartArea1";
-            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeBar;
-            series4.CustomProperties = "DrawSideBySide=False";
-            series4.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            series4.IsVisibleInLegend = false;
-            series4.Legend = "Legend1";
-            series4.Name = "Series1";
-            series4.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.String;
-            series4.YValuesPerPoint = 2;
-            series4.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            this.chartStatisticaLungoPeriodo.Series.Add(series4);
+            series10.ChartArea = "ChartArea1";
+            series10.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.RangeBar;
+            series10.CustomProperties = "DrawSideBySide=False";
+            series10.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            series10.IsVisibleInLegend = false;
+            series10.Legend = "Legend1";
+            series10.Name = "Series1";
+            series10.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.String;
+            series10.YValuesPerPoint = 2;
+            series10.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            this.chartStatisticaLungoPeriodo.Series.Add(series10);
             this.chartStatisticaLungoPeriodo.Size = new System.Drawing.Size(1025, 314);
             this.chartStatisticaLungoPeriodo.TabIndex = 0;
             this.chartStatisticaLungoPeriodo.Text = "chart1";
@@ -865,35 +868,35 @@ namespace SnifferProbeRequestApp   {
             // 
             // chartMovimentoDevice
             // 
-            chartArea4.AxisX.LabelStyle.Enabled = false;
-            chartArea4.AxisX.LineWidth = 0;
-            chartArea4.AxisX.MajorGrid.Enabled = false;
-            chartArea4.AxisX.MajorTickMark.LineWidth = 0;
-            chartArea4.AxisY.LabelStyle.Enabled = false;
-            chartArea4.AxisY.LineWidth = 0;
-            chartArea4.AxisY.MajorGrid.Enabled = false;
-            chartArea4.AxisY.MajorTickMark.LineWidth = 0;
-            chartArea4.Name = "ChartArea1";
-            this.chartMovimentoDevice.ChartAreas.Add(chartArea4);
-            legend4.Name = "Legend1";
-            this.chartMovimentoDevice.Legends.Add(legend4);
+            chartArea8.AxisX.LabelStyle.Enabled = false;
+            chartArea8.AxisX.LineWidth = 0;
+            chartArea8.AxisX.MajorGrid.Enabled = false;
+            chartArea8.AxisX.MajorTickMark.LineWidth = 0;
+            chartArea8.AxisY.LabelStyle.Enabled = false;
+            chartArea8.AxisY.LineWidth = 0;
+            chartArea8.AxisY.MajorGrid.Enabled = false;
+            chartArea8.AxisY.MajorTickMark.LineWidth = 0;
+            chartArea8.Name = "ChartArea1";
+            this.chartMovimentoDevice.ChartAreas.Add(chartArea8);
+            legend8.Name = "Legend1";
+            this.chartMovimentoDevice.Legends.Add(legend8);
             this.chartMovimentoDevice.Location = new System.Drawing.Point(14, 62);
             this.chartMovimentoDevice.Name = "chartMovimentoDevice";
-            series5.ChartArea = "ChartArea1";
-            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series5.Legend = "Legend1";
-            series5.MarkerSize = 12;
-            series5.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Square;
-            series5.Name = "ESP";
-            series6.ChartArea = "ChartArea1";
-            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series6.Legend = "Legend1";
-            series6.MarkerColor = System.Drawing.Color.Red;
-            series6.MarkerSize = 15;
-            series6.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Cross;
-            series6.Name = "Device";
-            this.chartMovimentoDevice.Series.Add(series5);
-            this.chartMovimentoDevice.Series.Add(series6);
+            series11.ChartArea = "ChartArea1";
+            series11.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series11.Legend = "Legend1";
+            series11.MarkerSize = 12;
+            series11.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Square;
+            series11.Name = "ESP";
+            series12.ChartArea = "ChartArea1";
+            series12.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series12.Legend = "Legend1";
+            series12.MarkerColor = System.Drawing.Color.Red;
+            series12.MarkerSize = 15;
+            series12.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Cross;
+            series12.Name = "Device";
+            this.chartMovimentoDevice.Series.Add(series11);
+            this.chartMovimentoDevice.Series.Add(series12);
             this.chartMovimentoDevice.Size = new System.Drawing.Size(1007, 253);
             this.chartMovimentoDevice.TabIndex = 30;
             this.chartMovimentoDevice.Text = "chart1";
@@ -1107,9 +1110,10 @@ namespace SnifferProbeRequestApp   {
             this.lblMin2device.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMin2device.Location = new System.Drawing.Point(9, 22);
             this.lblMin2device.Name = "lblMin2device";
-            this.lblMin2device.Size = new System.Drawing.Size(390, 18);
+            this.lblMin2device.Size = new System.Drawing.Size(550, 18);
             this.lblMin2device.TabIndex = 9;
-            this.lblMin2device.Text = "Configurare almeno due rilevatori per effettuare le rilevazioni";
+            this.lblMin2device.Text = "Configurare almeno due rilevatori per effettuare le rilevazioni (in due posizioni" +
+    " diverse)";
             // 
             // groupBoxGuida
             // 
@@ -1172,6 +1176,7 @@ namespace SnifferProbeRequestApp   {
             this.Controls.Add(this.lblAnno);
             this.Controls.Add(this.lblProgetto);
             this.Controls.Add(this.groupBoxSettings);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmMain";
             this.Text = "Sistema rilevazione presenze";
             this.groupBoxSettings.ResumeLayout(false);
