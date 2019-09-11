@@ -588,7 +588,7 @@ namespace SnifferProbeRequestApp   {
             this.lblNomeCognome.AutoSize = true;
             this.lblNomeCognome.Font = new System.Drawing.Font("Verdana", 13F, System.Drawing.FontStyle.Bold);
             this.lblNomeCognome.ForeColor = System.Drawing.Color.DarkBlue;
-            this.lblNomeCognome.Location = new System.Drawing.Point(478, 102);
+            this.lblNomeCognome.Location = new System.Drawing.Point(474, 103);
             this.lblNomeCognome.Name = "lblNomeCognome";
             this.lblNomeCognome.Size = new System.Drawing.Size(287, 22);
             this.lblNomeCognome.TabIndex = 5;

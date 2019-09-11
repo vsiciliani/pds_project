@@ -69,13 +69,11 @@ void app_main() {
 
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-	wifi_config_t wifi_config = { 
-		.sta = {
-			{.ssid = WIFI_SSID},
-			{.password = WIFI_PASS}
-		}, 
-	};
-	
+
+	wifi_config_t wifi_config = { };
+	strcpy((char*)wifi_config.sta.ssid, (const char*)WIFI_SSID);
+	strcpy((char*)wifi_config.sta.password, (const char*)WIFI_PASS);
+
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
 	ESP_ERROR_CHECK(esp_wifi_start());
@@ -215,7 +213,7 @@ void connectSocket(){
 	while (res < 0) {
 		ESP_LOGE(tag, "Connessione con il server fallita. Nuovo tentativo tra 10 secondi...");
 		//attende 10 secondi tra un tentativo di connessione e il successivo
-		sleep(10);
+		sleep(TIMEOUT_RICONNESSIONE_SERVER);
 		res = s->connect();
 	}
 	ESP_LOGI(tag, "Socket connesso");
