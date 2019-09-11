@@ -17,3 +17,10 @@ Il progetto è composto da due moduli:
     *  salvare le informazioni ricevute in un DB;
     *  elaborare le informazioni ricevute per generare l'output desiderato (numero di device connessi nel tempo e posizione dei device);
     *  gestire una interfaccia grafica per la gestione dell'applicativo.
+
+Il modulo desktop è una applicazione Windows e per essere eseguita è sufficiente lanciare il file eseguibile **SnifferProbeRequestApp.exe**. Tramite il file **SnifferProbeRequestApp.exe.config** è possibile settare la porta su cui il server è in ascolto.
+
+Il modulo ESP è un programma C++ che va *flashato* sui dispositivi ESP32. Per farlo eseguire i seguenti passaggi:
+1. unzippare l'archivio .zip **Esp32CodeV1.0.zip** associato alla release selezionata;
+2. entrare nella cartella creata dall'operazione precedente;
+3. Eseguire il seguente comando da console *bash* : ```make flash```.
