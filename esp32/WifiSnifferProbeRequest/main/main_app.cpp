@@ -69,13 +69,11 @@ void app_main() {
 
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-	wifi_config_t wifi_config = { 
-		.sta = {
-			{.ssid = WIFI_SSID},
-			{.password = WIFI_PASS}
-		}, 
-	};
-	
+
+	wifi_config_t wifi_config = { };
+	strcpy((char*)wifi_config.sta.ssid, (const char*)WIFI_SSID);
+	strcpy((char*)wifi_config.sta.password, (const char*)WIFI_PASS);
+
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
 	ESP_ERROR_CHECK(esp_wifi_start());
@@ -213,9 +211,9 @@ void connectSocket(){
 	int res = s->connect();
 
 	while (res < 0) {
-		ESP_LOGE(tag, "Connessione con il server fallita. Nuovo tentativo tra 10 secondi...");
+		ESP_LOGE(tag, "Connessione con il server fallita. Nuovo tentativo tra 5 secondi...");
 		//attende 10 secondi tra un tentativo di connessione e il successivo
-		sleep(10);
+		sleep(5);
 		res = s->connect();
 	}
 	ESP_LOGI(tag, "Socket connesso");
@@ -239,6 +237,7 @@ std::string receiveMessage(){
 	return messaggio;
 }
 
+//procedura per sincronizzare il clock con il server
 void syncClock(){
 	long delay = 0;
 	long request_timestamp;
@@ -275,11 +274,9 @@ void blinkLed(){
 	time(&blink_time_start);
 
 	do {
-		//ESP32CPP::GPIO::high(GPIO_NUM_2);
-		//write(GPIO_NUM_2, false);
 		::gpio_set_level(GPIO_NUM_2, true);
 		sleep(1);
-		//ESP32CPP::GPIO::low(GPIO_NUM_2);
+		
 		::gpio_set_level(GPIO_NUM_2, false);
 		sleep(1);
 		time(&blink_time);
@@ -288,8 +285,7 @@ void blinkLed(){
 
 static esp_err_t event_handler(void* ctx, system_event_t* event) {
 	/* For accessing reason codes in case of disconnection */
-	//system_event_info_t* info = &event->event_info;
-
+	
 	switch (event->event_id) {
 	case SYSTEM_EVENT_STA_START:
 		esp_wifi_connect();
