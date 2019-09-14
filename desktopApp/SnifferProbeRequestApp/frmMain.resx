@@ -123,17 +123,14 @@
   <metadata name="timerUpdateChartNumberDevice.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <metadata name="toolTipApp.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>248, 17</value>
-  </metadata>
   <data name="label4.Text" xml:space="preserve">
     <value>Per configurare un nuovo rilevatore collegare l'ESP alla stessa rete del server. Il dispositivo rilevato verrà mostrato nel box "Impostazioni", selezionarlo e quindi impostare le coordinate del dispositivo.
-E' possibile modificare o eliminare un rilevaotre in qualsiasi momento sempre dalla sezione "Impostazioni".
+E' possibile modificare o eliminare un rilevatore in qualsiasi momento sempre dalla sezione "Impostazioni".
 
-Nella parte bassa ci sono tutte le statistiche relative alle rilevazioni:
+Nella parte inferiore dell'interfaccia ci sono tutte le statistiche relative alle rilevazioni:
 - Conteggio Device: mostra il numero di device connessi continuativemente da almeno 5 minuti (refresh automatico ogni 30 secondi);
-- Posizione Device: mostra la posizione dei device rilevati nell'ultimo minuto rispetto alla posizione dei rilevatori (refresh automatico ogni 30 secondi);
-- Statistiche lungo periodo: mostra su un grafico temporale a partire dall'istante scelto che indica quando i primi N dispositivi (per numero di minuti di connessione) sono stati rilevati. N è un parametro configurabile.
+- Posizione Device: mostra la posizione (media) dei device rilevati nell'ultimo minuto rispetto alla posizione dei rilevatori (refresh automatico ogni 30 secondi);
+- Statistiche lungo periodo: mostra su un grafico temporale, a partire dall'istante selezionato, che mostra i periodi in cui i primi N dispositivi (per numero di minuti di connessione) sono stati rilevati. N è un parametro configurabile.
 - Movimento device: mostra i device rilevati in un intervallo temporale e tutte le posizioni occupate da esso. Scegliere l'intervallo temporale di interesse ed effettuare la ricerca dei dispositivi rilevati. Tra questi scegliere un dispositivo e il grafico sottostante mostrerà le posizioni occupate dal dispositivo nel tempo (selezionabile con lo slider presente sotto il grafico).</value>
   </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
