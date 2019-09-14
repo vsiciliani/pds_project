@@ -361,3 +361,4 @@ ASALocalRun/
 .localhistory/
 
 esp32/build/*
+esp32/sdkconfig*
