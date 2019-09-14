@@ -11,9 +11,12 @@ namespace SnifferProbeRequestApp
     public partial class frmMain : Form
     {
         DatabaseManager dbManager = null;
-        public frmMain()
+        public frmMain(NetworkSettings settings)
         {
             InitializeComponent();
+
+            lblServerPort.Text = "Porta Server: " + settings.servicePort;
+
             dbManager = DatabaseManager.getInstance();
 
             //mi iscrivo agli handler
@@ -26,11 +29,15 @@ namespace SnifferProbeRequestApp
         private void timerUpdateChartNumberDevice_Tick(object sender, EventArgs e)
         {
             updateChartNumberDevice();
+            updateChartPosition();
         }
 
-        private void imgRefresh_Click(object sender, EventArgs e)
-        {
+        private void imgRefreshConteggio_Click(object sender, EventArgs e) {
             updateChartNumberDevice();
+        }
+
+        private void BtnRefreshPosizioni_Click(object sender, EventArgs e) {
+            updateChartPosition();
         }
 
         private void btnIdentificaDevice_Click(object sender, EventArgs e) {
@@ -231,18 +238,27 @@ namespace SnifferProbeRequestApp
 
         public void updateChartNumberDevice() {
             CountDevice count;
-            List<DevicePosition> points;
-
+            
             try {
                 count = dbManager.countDevice();
-                points = dbManager.devicesPosition();
             } catch (SnifferAppSqlException e) {
                 MessageBox.Show("Errore", e.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             int po = chartNumberDevice.Series[0].Points.AddXY(count.timestamp, count.count);
-            chartNumberDevice.Series[0].Points[po].ToolTip = "Timestamp: "+count.timestamp +"\nNumero device connessi: "+count.count;
+            chartNumberDevice.Series[0].Points[po].ToolTip = "Timestamp: "+count.timestamp +"\nNumero device connessi: "+count.count; 
+        }
+
+        public void updateChartPosition() {
+            List<DevicePosition> points;
+
+            try {
+                points = dbManager.devicesPosition();
+            } catch (SnifferAppSqlException e) {
+                MessageBox.Show("Errore", e.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             chartPositionDevice.Series["Device"].Points.Clear();
             foreach (DevicePosition point in points) {
@@ -288,11 +304,11 @@ namespace SnifferProbeRequestApp
             if (ConfDevice.lstConfDevices.Count >= 2 && 
                 (ConfDevice.getMaxXPositionDevice() != ConfDevice.getMinXPositionDevice() || ConfDevice.getMaxYPositionDevice() != ConfDevice.getMinYPositionDevice())){
                 tabFeatures.Visible = true;
-                btnRefresh.Visible = true;
+                btnRefreshConteggio.Visible = true;
                 lblMin2device.Visible = false;
             } else {
                 tabFeatures.Visible = false;
-                btnRefresh.Visible = false;
+                btnRefreshConteggio.Visible = false;
                 lblMin2device.Visible = true;
             }
         }

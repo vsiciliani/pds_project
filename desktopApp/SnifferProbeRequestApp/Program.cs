@@ -40,7 +40,7 @@ namespace SnifferProbeRequestApp
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new frmMain());
+                Application.Run(new frmMain(settings));
             } catch (Exception) {
                 MessageBox.Show("Si è verificato un errore generico nell'esecuzione del programma", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 threadGestioneWifi.stop();
