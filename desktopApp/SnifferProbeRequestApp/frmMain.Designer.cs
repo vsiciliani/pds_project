@@ -1126,7 +1126,7 @@ namespace SnifferProbeRequestApp   {
             this.groupBox2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.groupBox2.Location = new System.Drawing.Point(12, 276);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(1059, 487);
+            this.groupBox2.Size = new System.Drawing.Size(1059, 491);
             this.groupBox2.TabIndex = 9;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Rilevazioni";
@@ -1150,7 +1150,7 @@ namespace SnifferProbeRequestApp   {
             this.groupBoxGuida.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.groupBoxGuida.Location = new System.Drawing.Point(1078, 137);
             this.groupBoxGuida.Name = "groupBoxGuida";
-            this.groupBoxGuida.Size = new System.Drawing.Size(296, 626);
+            this.groupBoxGuida.Size = new System.Drawing.Size(296, 630);
             this.groupBoxGuida.TabIndex = 10;
             this.groupBoxGuida.TabStop = false;
             this.groupBoxGuida.Text = "Guida";
@@ -1163,7 +1163,7 @@ namespace SnifferProbeRequestApp   {
             this.label4.Location = new System.Drawing.Point(6, 17);
             this.label4.MaximumSize = new System.Drawing.Size(285, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(284, 594);
+            this.label4.Size = new System.Drawing.Size(284, 612);
             this.label4.TabIndex = 0;
             this.label4.Text = resources.GetString("label4.Text");
             // 
