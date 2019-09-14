@@ -360,4 +360,4 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
-esp32/WifiSnifferProbeRequest/build/*
+esp32/build/*
