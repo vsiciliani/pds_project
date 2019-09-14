@@ -3,7 +3,7 @@
 Rilevatore di persone in un'area utilizzando il wifi delle schede ESP32
 
 Il progetto è composto da due moduli:
-1.  **[Modulo ESP](https://gitlab.com/vsiciliani/pds_project/tree/develop/esp32/WifiSnifferProbeRequest/main):** è il codice da flashare sul modulo ESP che permette di:
+1.  **[Modulo ESP](https://gitlab.com/vsiciliani/pds_project/tree/develop/esp32/main):** è il codice da flashare sul modulo ESP che permette di:
     *  connettere l'ESP alla rete wifi;
     *  aprire un socket con il server;
     *  sincronizzare il modulo ESP con il server;
