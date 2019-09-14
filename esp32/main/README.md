@@ -25,8 +25,10 @@ Il codice del modulo Wifi è suddiso nei seguenti file **.cpp**:
     * receiveRaw (riceve il messaggio in byte);
     * close.
 4. **WifiPacket.cpp**: è la classe che implementa la logica di parsing del pacchetto ricevuto dalla scheda di rete;
-
-Oltre ai precedenti file cpp, sono presenti tre classi C++ per la gestione del WiFi che sono state clonata dal repository GitHub di [kolban](https://github.com/nkolban/esp32-snippets). Le classi sono:
-*  WiFi;
-*  WiFiEventHandler;
-*  FreeRTOS.
+5. **config.cpp**: è il file di configurazione del modulo. Permette di settare:
+    * *Wifi SSID* della rete in cui è presente il server;
+    * *Wifi Password* della rete in cui è presente il server;
+    * *Server Host*
+    * *Server Port*
+    * *Intervallo di connessione con il server* espresso in secondi (tempo tra una send dei dati verso il server e la successiva);
+    * *Timeout riconnessione server* espesso in secondi (tempo tra un tentivato di connessione con il server e il successivo in caso di fallimento).
