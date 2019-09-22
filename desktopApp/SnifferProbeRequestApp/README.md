@@ -20,3 +20,12 @@ Il modello dati si basa su *due tabelle* all'interno del DB:
 1. **Packets**: è la tabella che contiene i dati così come sono ricevuti dai rilevatori;
 2. **AssembledPacketInfo**: è la tabella che contiene i dati aggregati della tabella **Packets**. E' la tabella su cui si basano tutte le informazioni mostrate nella GUI.
 
+## Richiami teorici
+
+In questo modulo sono stati implementati i seguenti argomenti trattati durante il corso:
+
+1. Programmazione **multi thread** ([Link](ThreadGestioneWifi.cs));
+2. Utilizzo **strutture dati thread safe** ([Link1](NoConfDevice.cs#L13), [Link2](ConfDevice.cs#L12));
+3. Utilizzo di **delegati** ([Link](ConfDevice.cs#L15)) e **EventHandler** ([Link](ConfDevice.cs#L23));
+4. Utilizzo dei **ManualResetEvent** per la gestione della sincronizzazione ([Link](ThreadGestioneWifi.cs#L172)); 
+5. Gestione strutturata delle **eccezioni** ([Link](SnifferAppException.cs)).
