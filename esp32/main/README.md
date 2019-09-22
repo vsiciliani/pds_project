@@ -32,3 +32,18 @@ Il codice del modulo Wifi è suddiso nei seguenti file **.cpp**:
     * *Server Port*
     * *Intervallo di connessione con il server* espresso in secondi (tempo tra una send dei dati verso il server e la successiva);
     * *Timeout riconnessione server* espesso in secondi (tempo tra un tentivato di connessione con il server e il successivo in caso di fallimento).
+
+## Richiami teorici
+
+In questo modulo sono stati implementati i seguenti argomenti trattati durante il corso:
+
+1. Programmazione **multi thread** ([Link](main_app.cpp#L107)); 
+2. Utilizzo dei **lock** e dei **mutex** per la sincronizzazione tra più thread([Link](main_app.cpp#L127));
+3. Utilizzo delle **condition variable** ([Link](main_app.cpp#L129));
+4. Utilizzo del **distruttore** per rilasciare le risorse associate all'istanze di una classe ([Link](Socket.cpp#L49));
+5. Implementazione **overload degli operatori** ([Link](Socket.cpp#L53)).
+
+In questo modulo è stata volontariamente omessa la gestione delle eccezioni in quanto tutto le casistiche di errore *standard* (errori nella connessione alla rete Wifi, errori nella creazione del socket verso il server o messaggi inattesi nella comunicazione con il server) sono state gestite nel codice. Tutte le altre casistiche inattese portano al *reboot* del dispositivo che quindi riparte da una condizione di lavoro pulita.
+
+Inoltre vista la velocità di reboot il dispositivo si ricollegherà alla rete Wifi con lo stesso IP (anche in caso di rete che utilizza un DHCP) e quindi la riconessione sarà totalmente gestita dal server rendendola totalmente *trasparente* per l'utente che non dovrà riconfigurare il dispositivo manualmente.   
+ 
