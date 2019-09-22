@@ -2,6 +2,8 @@
 
 Rilevatore di persone in un'area utilizzando il wifi delle schede ESP32 ([Traccia del progetto](Traccia.pdf))
 
+## Struttura progetto
+
 Il progetto è composto da due moduli:
 1.  **[Modulo ESP](esp32/main):** è il codice da flashare sul modulo ESP che permette di:
     *  connettere l'ESP alla rete wifi;
@@ -17,6 +19,8 @@ Il progetto è composto da due moduli:
     *  salvare le informazioni ricevute in un DB;
     *  elaborare le informazioni ricevute per generare l'output desiderato (numero di device connessi nel tempo e posizione dei device);
     *  gestire una interfaccia grafica per la gestione dell'applicativo.
+
+## Modalità di esecuzione moduli
 
 Il modulo desktop è una applicazione Windows e per essere eseguita è sufficiente lanciare il file eseguibile **SnifferProbeRequestApp.exe**. Tramite il file **SnifferProbeRequestApp.exe.config** è possibile settare la porta su cui il server è in ascolto.
 
