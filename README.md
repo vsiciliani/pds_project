@@ -1,6 +1,6 @@
 # Progetto di programmazione di sistema
 
-Rilevatore di persone in un'area utilizzando il wifi delle schede ESP32
+Rilevatore di persone in un'area utilizzando il wifi delle schede ESP32 ([Traccia del progetto](Traccia.pdf))
 
 Il progetto è composto da due moduli:
 1.  **[Modulo ESP](esp32/main):** è il codice da flashare sul modulo ESP che permette di:
