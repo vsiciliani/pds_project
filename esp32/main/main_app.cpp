@@ -30,6 +30,8 @@
 
 static char tag[] = "Sniffer-ProbeRequest";
 
+//dichiarazione funzioni
+void init_esp();
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
 static esp_err_t event_handler(void* ctx, system_event_t* event);
 bool checkTimeoutThreadConnessionePc();
@@ -40,6 +42,7 @@ std::string createJSONArray(std::list<std::string>);
 bool sendMessage(std::string message);
 std::string receiveMessage();
 
+//dichiarazioni variabili globali
 std::list<std::string> listaRecord;
 std::mutex m;
 std::condition_variable cvMinuto;
@@ -55,36 +58,10 @@ extern "C" {
 
 void app_main() {
 
-	nvs_flash_init();
+	//eseguo l'inizializzazione del sensore e del WiFi
+	init_esp();
 
-	//setto il led come output
-	::gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-
-	/* GESTIONE CONNESSIONE WIFI */
-
-	wifi_event_group = xEventGroupCreate();
-
-	tcpip_adapter_init();
-	ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
-
-	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-
-	wifi_config_t wifi_config = { };
-	strcpy((char*)wifi_config.sta.ssid, (const char*)WIFI_SSID);
-	strcpy((char*)wifi_config.sta.password, (const char*)WIFI_PASS);
-
-	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-	ESP_ERROR_CHECK(esp_wifi_start());
-
-	ESP_LOGI(tag, "Inizializzazione completata");
-	esp_wifi_connect();
-	
-	ESP_LOGI(tag, "connect to ap SSID: %s",	WIFI_SSID);
-
-	/* FINE GESTIONE CONNESSIONE WIFI */
-
+	//flag per gestire il loop del codice
 	bool flag = true;
 
 	//ciclo per gestire i messaggi in entrata
@@ -148,6 +125,37 @@ void app_main() {
 		delete s;
 		ESP_LOGI(tag, "Socket con il server chiuso");
 	} while (true);
+}
+
+//funzione per inizializzare il sensore per lo sniffing
+void init_esp() {
+	nvs_flash_init();
+
+	//setto il led come output
+	::gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+
+	/* GESTIONE CONNESSIONE WIFI */
+
+	wifi_event_group = xEventGroupCreate();
+
+	tcpip_adapter_init();
+	ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
+
+	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+	wifi_config_t wifi_config = { };
+	strcpy((char*)wifi_config.sta.ssid, (const char*)WIFI_SSID);
+	strcpy((char*)wifi_config.sta.password, (const char*)WIFI_PASS);
+
+	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+	ESP_ERROR_CHECK(esp_wifi_start());
+
+	ESP_LOGI(tag, "Inizializzazione completata");
+	esp_wifi_connect();
+
+	ESP_LOGI(tag, "connect to ap SSID: %s", WIFI_SSID);
 }
 
 //processo di gestione del pacchetto Wifi sniffato
