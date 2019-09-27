@@ -219,9 +219,9 @@ void connectSocket(){
 	int res = s->connect();
 
 	while (res < 0) {
-		ESP_LOGE(tag, "Connessione con il server fallita. Nuovo tentativo tra 5 secondi...");
+		ESP_LOGE(tag, "Connessione con il server fallita. Nuovo tentativo tra %d secondi...", TIMEOUT_RICONNESSIONE_SERVER);
 		//attende 10 secondi tra un tentativo di connessione e il successivo
-		sleep(5);
+		sleep(TIMEOUT_RICONNESSIONE_SERVER);
 		res = s->connect();
 	}
 	ESP_LOGI(tag, "Socket connesso");
