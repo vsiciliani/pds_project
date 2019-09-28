@@ -7,12 +7,12 @@
 
 #include "Socket.h"
 
-Socket::Socket(const char* serverAddress, int serverPort){
+Socket::Socket(std::string serverAddress, int serverPort){
 
 	if (this->socket!=-1) return;
 
 	server.sin_family = AF_INET;
-	inet_pton(AF_INET, serverAddress, &server.sin_addr.s_addr);
+	inet_pton(AF_INET, serverAddress.c_str(), &server.sin_addr.s_addr); //converte la stringa del server in binario e la salva nella struttura server
 	server.sin_port = lwip_htons(serverPort);
 }
 
@@ -47,14 +47,15 @@ void Socket::receiveRaw(){
 }
 
 Socket::~Socket() {
-	lwip_close(this->socket); //TODO: implementare regola del 3 (slide 5 pagina 53)
+	lwip_close(this->socket);
 }
 
-Socket& Socket::operator=(const Socket& source) {
+Socket& Socket::operator=(Socket&& source) {
 	if (this != &source) {
 		lwip_close(this->socket);
 		this->socket = source.socket;
 		this->server = source.server;
+		source.socket = -1; //resetto il socket nel source per evitare che il dustruttore sull'oggetto source chiuda il socket
 	}
 	return *this;
 }

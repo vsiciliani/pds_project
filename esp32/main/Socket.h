@@ -21,18 +21,18 @@ class Socket {
 private:
 	int socket = -1;
 	struct sockaddr_in server;
-
 	char buffer_send[MAXBUFL]="";
-
+	Socket(const Socket& source) = delete; //costruttore di copia bloccato per evitare di creare più istanze dello stesso socket
+	Socket& operator=(const Socket& source); //operatore di assegnazione di copia bloccato per evitare di creare più istanze dello stesso socket
 public:
 	char buffer_ric[MAXBUFL]="";
-	Socket(const char* serverAddress, int serverPort);
+	Socket(std::string serverAddress, int serverPort);
 	int connect();
 	int send(std::string message);
 	std::string receive();
 	void receiveRaw();
+	Socket& operator=(Socket&& source); //operatore di assegnazione per movimento
 	~Socket();
-	Socket& operator=(const Socket& source);
 };
 
 #endif /* MAIN_SOCKETC_H_ */
