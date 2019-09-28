@@ -1,5 +1,7 @@
 # Progetto di programmazione di sistema
 
+![Banner](banner.png)
+
 Rilevatore di persone in un'area utilizzando il wifi delle schede ESP32 ([Traccia del progetto](Traccia.pdf))
 
 ## Struttura progetto
