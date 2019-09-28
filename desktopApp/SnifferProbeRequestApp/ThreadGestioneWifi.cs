@@ -28,7 +28,6 @@ namespace SnifferProbeRequestApp {
             stopThreadElaboration = false;
             //instanzio il db manager
             dbManager = DatabaseManager.getInstance();
-            start();
         }
 
         ///<summary>Ritorna l'istanza della classe ThreadGestioneWifi se già creata, oppure la istanzia</summary>
