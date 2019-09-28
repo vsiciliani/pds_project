@@ -42,7 +42,7 @@ In questo modulo sono stati implementati i seguenti argomenti trattati durante i
 3. Utilizzo delle **condition variable** ([Link](main_app.cpp#L129));
 4. Utilizzo del **distruttore** per rilasciare le risorse associate all'istanze di una classe ([Link](Socket.cpp#L49));
 5. Implementazione **overload degli operatori** ([Link](Socket.cpp#L53));
-6. Gestione degli **opeatori e costruttori di copia e movimento** ([Link])(Socket.cpp#L25)).
+6. Gestione degli **opeatori e costruttori di copia e movimento** ([Link](Socket.h#L25)).
 
 In questo modulo è stata volontariamente omessa la gestione delle eccezioni in quanto tutto le casistiche di errore *standard* (errori nella connessione alla rete Wifi, errori nella creazione del socket verso il server o messaggi inattesi nella comunicazione con il server) sono state gestite nel codice. Tutte le altre casistiche inattese portano al *reboot* del dispositivo che quindi riparte da una condizione di lavoro pulita.
 
