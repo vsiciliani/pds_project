@@ -12,7 +12,7 @@ namespace SnifferProbeRequestApp {
     /// </summary>
     class DatabaseManager {
         private static DatabaseManager instance = null;
-        private string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True;MultipleActiveResultSets=True;";
+        private string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;MultipleActiveResultSets=True;";
         private SqlConnection connection;
 
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
