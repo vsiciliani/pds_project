@@ -40,9 +40,10 @@ In questo modulo sono stati implementati i seguenti argomenti trattati durante i
 1. Programmazione **multi thread** ([Link](main_app.cpp#L107)); 
 2. Utilizzo dei **lock** e dei **mutex** per la sincronizzazione tra più thread([Link](main_app.cpp#L127));
 3. Utilizzo delle **condition variable** ([Link](main_app.cpp#L129));
-4. Utilizzo del **distruttore** per rilasciare le risorse associate all'istanze di una classe ([Link](Socket.cpp#L49));
-5. Implementazione **overload degli operatori** ([Link](Socket.cpp#L53));
-6. Gestione degli **opeatori e costruttori di copia e movimento** ([Link](Socket.h#L25)).
+4. Utilizzo degli **smart pointer** per gestire i puntatori ([Link](main_app.cpp#L72));
+5. Utilizzo del **distruttore** per rilasciare le risorse associate all'istanze di una classe ([Link](Socket.cpp#L49));
+6. Implementazione **overload degli operatori** ([Link](Socket.cpp#L53));
+7. Gestione degli **opeatori e costruttori di copia e movimento** ([Link](Socket.h#L25)).
 
 In questo modulo è stata volontariamente omessa la gestione delle eccezioni in quanto tutto le casistiche di errore *standard* (errori nella connessione alla rete Wifi, errori nella creazione del socket verso il server o messaggi inattesi nella comunicazione con il server) sono state gestite nel codice. Tutte le altre casistiche inattese portano al *reboot* del dispositivo che quindi riparte da una condizione di lavoro pulita.
 
