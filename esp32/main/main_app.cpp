@@ -40,7 +40,7 @@ void connectSocket(std::shared_ptr<Socket>);
 void blinkLed();
 void syncClock(std::shared_ptr<Socket>);
 std::string createJSONArray(std::list<std::string>);
-bool sendMessage(std::shared_ptr<Socket>, std::string message);
+void sendMessage(std::shared_ptr<Socket>, std::string message);
 std::string receiveMessage(std::shared_ptr<Socket>);
 
 //dichiarazioni variabili globali
@@ -48,7 +48,6 @@ std::list<std::string> listaRecord;
 std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
-//Socket *s;
 float memorySpace; //memoria inizialmente disponibile
 
 static EventGroupHandle_t wifi_event_group;
@@ -70,7 +69,6 @@ void app_main() {
 		ESP_LOGI(tag, "Apertura socket con il server...");
 		//creo il socket
 		std::shared_ptr<Socket> socket = std::make_shared<Socket>(SERVER_HOST, SERVER_PORT);
-		//s = new Socket(SERVER_HOST, SERVER_PORT);
 		connectSocket(socket);
 
 		//abilito la modalità di attività promiscua
@@ -229,13 +227,12 @@ void connectSocket(std::shared_ptr<Socket> socket){
 }
 
 //procedura per inviare un messaggio (stringa) al server
-bool sendMessage(std::shared_ptr<Socket> socket, std::string message){
+void sendMessage(std::shared_ptr<Socket> socket, std::string message){
 	int numByteSent;
 	do {
 		numByteSent = socket->send(message);
 	} while (numByteSent != message.length());
 	ESP_LOGI(tag, "Messaggio inviato al server con successo");
-	return true;
 }
 
 //procedura per ricevere un messaggio (stringa) dal socket
