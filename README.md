@@ -27,6 +27,6 @@ Il progetto è composto da due moduli:
 Il modulo desktop è una applicazione Windows e per essere eseguita è sufficiente lanciare il file eseguibile **SnifferProbeRequestApp.exe**. Tramite il file **SnifferProbeRequestApp.exe.config** è possibile settare la porta su cui il server è in ascolto.
 
 Il modulo ESP è un programma C++ che va *flashato* sui dispositivi ESP32. Per farlo eseguire i seguenti passaggi:
-1. unzippare l'archivio .zip **Esp32CodeV1.0.zip** associato alla release selezionata;
+1. unzippare l'archivio **Esp32CodeV1.0.zip** associato alla release selezionata;
 2. entrare nella cartella creata dall'operazione precedente;
 3. Eseguire il seguente comando da console *bash* : ```make flash```.
