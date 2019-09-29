@@ -12,28 +12,6 @@ namespace SnifferProbeRequestApp {
     ///<summary>Classe statica che contiene funzioni di utilità</summary>
     static class Utils {
 
-        static public bool IsAdmin() {
-            WindowsIdentity id = WindowsIdentity.GetCurrent();
-            WindowsPrincipal p = new WindowsPrincipal(id);
-            return p.IsInRole(WindowsBuiltInRole.Administrator);
-        }
-
-        static public void RestartElevated() {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.CreateNoWindow = true;
-            startInfo.WorkingDirectory = Environment.CurrentDirectory;
-            startInfo.FileName = System.Windows.Forms.Application.ExecutablePath;
-            startInfo.Verb = "runas";
-            try {
-                Process p = Process.Start(startInfo);
-            } catch {
-
-            }
-
-            System.Windows.Forms.Application.Exit();
-        }
-
         ///<summary>Classe statica che permette di definire il livello di log</summary>
         public class LogCategory {
             private LogCategory(string value) { Value = value; }

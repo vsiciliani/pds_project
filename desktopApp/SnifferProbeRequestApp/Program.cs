@@ -20,7 +20,7 @@ namespace SnifferProbeRequestApp
                 settings = new NetworkSettings(
                     Convert.ToInt32(ConfigurationManager.AppSettings["servicePort"])
                 );
-                if (settings.servicePort <= 1024)
+                if (settings.servicePort <= 1023)
                    throw new ArgumentOutOfRangeException();
                
                 threadGestioneWifi = ThreadGestioneWifi.getInstance(settings);

@@ -12,13 +12,12 @@ namespace SnifferProbeRequestApp {
     class ThreadGestioneWifi {
 
         private NetworkSettings settings;
-        private volatile bool stopThreadElaboration;
+        private volatile bool stopThreadElaboration; //volatile indiica che la variabile viene gestita da più thread
         private ThreadStart delegateThreadElaboration;
         private Thread threadElaboration;
 
         private static ThreadGestioneWifi instance = null;
         private TcpListener listener;
-        //private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DatabaseManager dbManager = null;
 
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
@@ -31,6 +30,7 @@ namespace SnifferProbeRequestApp {
         }
 
         ///<summary>Ritorna l'istanza della classe ThreadGestioneWifi se già creata, oppure la istanzia</summary>
+        ///<param name="settings">Impostazione di connessione</param>
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         ///<returns>L'istanza della classe ThreadGestioneWifi</returns>
@@ -78,8 +78,7 @@ namespace SnifferProbeRequestApp {
         /// </summary>
         private void elaboration() {
             
-            // setto il listener sulla porta 5010.
-            int port = 5010;
+            //mi metto in ascolto su tutte le perificeriche sulla porto indicata nei NetworkSettings
             IPAddress localAddr = IPAddress.Any;
             listener = new TcpListener(localAddr, settings.servicePort);
             
@@ -95,15 +94,15 @@ namespace SnifferProbeRequestApp {
             
             //ciclo fin quando non viene invocato il metodo stop in attesa di nuovi rilevatori 
             while (!stopThreadElaboration) {
-                //allDone.Reset();
                 TcpClient client = null;
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "In attesa di connessioni...");
                 try {
                     //aspetto una connessione da parte di un rilevatore
                     //con il controllo sul metodo pending evito la chiamata bloccante AcceptTcpClient() che non mi fa chiudere il thread quando chiudo la GUI
-                    while (!listener.Pending()) {
+                    while (!listener.Pending() && !stopThreadElaboration) {
                         Thread.Sleep(2000);
                     }
+                    if (stopThreadElaboration) break;
                     client = listener.AcceptTcpClient();
                 } catch (SocketException) {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante il binding del socket");
@@ -134,8 +133,6 @@ namespace SnifferProbeRequestApp {
                     NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
                     break;
                 }
-
-                //allDone.WaitOne();
             }
             //attendo la fine di tutti i thread
             listaThreadSocket.ForEach(thread => thread.Join());
@@ -156,8 +153,6 @@ namespace SnifferProbeRequestApp {
                 throw new SnifferAppSocketException(message, e);
             }
 
-            //allDone.Set();
-
             //verifico se il dispositivo con quell'IP era già connesso (l'IP del dispositivo era contentuto già nella lstConfDevices)
             if (ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
                 //il dispositivo era gia configurato
@@ -175,7 +170,18 @@ namespace SnifferProbeRequestApp {
                 NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
                 //mi risveglio quando dalla GUI è richiesta la configurazione del dispositivo o si vuole inviare al rilevatore il segnale "IDENTIFICA"
-                deviceConfEvent.WaitOne();
+                bool isSignalled = false;
+                while (!isSignalled && !stopThreadElaboration) {
+                    isSignalled = deviceConfEvent.WaitOne(TimeSpan.FromSeconds(20));
+                }
+
+                //mi sono risvegliato dall'evento ma il thread deve fermarsi
+                if (stopThreadElaboration) {
+                    //chiudo il client TCP
+                    client.Close();
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket chiuso");
+                    return;
+                }
 
                 do {
                     //controllo se il device è stato eliminato dalla lista dei device non configurati
@@ -187,7 +193,20 @@ namespace SnifferProbeRequestApp {
                         Utils.sendMessage(stream, remoteIpEndPoint, "IDENTIFICA");
                         
                         deviceConfEvent.Reset();
-                        deviceConfEvent.WaitOne();
+
+                        //come su, volutare se realizzare un wrapper sull'evento
+                        isSignalled = false;
+                        while (!isSignalled && !stopThreadElaboration) {
+                            isSignalled = deviceConfEvent.WaitOne(TimeSpan.FromSeconds(20));
+                        }
+
+                        //mi sono risvegliato dall'evento ma il thread deve fermarsi
+                        if (stopThreadElaboration) {
+                            //chiudo il client TCP
+                            client.Close();
+                            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket chiuso");
+                            return;
+                        }
                     }
                 } while (true);
             }
@@ -227,14 +246,11 @@ namespace SnifferProbeRequestApp {
                 } catch (Exception) { 
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Errore nella deserializzazione del messaggio JSON. Il messaggio verrà scartato");           
                 }
-                //controllo che ci siano messaggi, che il device sia tra quelli configurati e che ci siano almeno 2 device configurati
-                if (packetsInfo != null && ConfDevice.lstConfDevices.Count>=2) {
-                    if (packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
-                        //salvo i dati nella tabella raw del DB
-                        dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
-                    }
-                }
-                    
+                //controllo che ci siano messaggie che ci siano almeno 2 device configurati
+                if (packetsInfo != null && ConfDevice.lstConfDevices.Count>=2 && packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device))
+                    //salvo i dati nella tabella raw del DB
+                    dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
+
                 //decremento il contatore per la sincronizzazione dei timestamp
                 countSyncTimestamp--;
             }
