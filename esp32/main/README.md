@@ -10,12 +10,12 @@ Il codice del modulo Wifi è suddiso nei seguenti file **.cpp**:
         * messaggio **IDENTIFICA**: stacca un thread in cui gira una funzione che fa lampeggiare il LED built-in sul modulo ESP;
         * messaggio **SYNC_CLOCK**: esegue una funzione di sincronizzazione del clock interno con quello del server (tramite scambio di 4 messaggi che contengono dei timestamp);
         * messaggio **START_SEND**: 
-            * setto l'handler per la gestione del messaggio ricevuto (parsing del messaggio e aggiunta del messaggio in una lista);
-            * il dispositivo rimane in attesa di ricevere nuovi messaggi (e di gestirli tramite l'*handler*) fin quando non passa il tempo di attesa definito (1 minuto) o fin quando la mememoria occupata non supera il 90% di quella totale;
-            * invio sul socket con il server di un messaggio JSON che serializza i dati contenuti nella lista dei messaggi ricevuti e parsati;
+            * setto l'handler per la gestione del messaggio catturato (parsing del messaggio e aggiunta del messaggio in una lista);
+            * il dispositivo rimane in attesa di catturare nuovi messaggi (e di gestirli tramite l'*handler*) fin quando non passa il tempo di attesa definito (1 minuto) o fin quando la mememoria occupata non supera il 90% di quella totale;
+            * invio sul socket con il server di un messaggio JSON che serializza i dati contenuti nella lista dei messaggi catturati e parsati;
             * pulizia della lista di messaggi ricevuti.
     
-    La concorrenza sulla lista dei messaggi ricevuti da parte dei vari handler, in caso di ricezione contemporanea di più messaggi, è gestita da un **mutex** con l'uso di *unique_lock* e *lock_guard*.
+    La concorrenza sulla lista dei messaggi catturati e gestiti da parte dei vari handler, in caso di ricezione contemporanea di più messaggi, è gestita da un **mutex** con l'uso di *unique_lock* e *lock_guard*.
     Il main thread tra un invio dei dati ad un server ed il successivo utilizza una chiamata bloccante **wait** sullo *unique_lock* che viene risvegliato da una notifica inviata sul lock da un handler quando finisce la sua funzionalità. Al suo risveglio una funzione controlla se l'elaborazione nel main thread deve continuare (passato il tempo massimo tra un invio e il successivo o memoria troppo piena) oppure deve rimettersi in attesa.
 2. **PacketInfo.cpp:** è la classe che definisce l'oggetto che contiene le informazioni da salvare dopo il parsing di un pacchetto e implementa la funzione di serializazzione in JSON dell'oggetto stesso.
 3. **Socket.cpp:** è la classe che gestisce il Socket per la connessione al server. Implementa le seguenti funzionalità:
@@ -47,5 +47,5 @@ In questo modulo sono stati implementati i seguenti argomenti trattati durante i
 
 In questo modulo è stata volontariamente omessa la gestione delle eccezioni in quanto tutto le casistiche di errore *standard* (errori nella connessione alla rete Wifi, errori nella creazione del socket verso il server o messaggi inattesi nella comunicazione con il server) sono state gestite nel codice. Tutte le altre casistiche inattese portano al *reboot* del dispositivo che quindi riparte da una condizione di lavoro pulita.
 
-Inoltre vista la velocità di reboot il dispositivo si ricollegherà alla rete Wifi con lo stesso IP (anche in caso di rete che utilizza un DHCP) e quindi la riconessione sarà totalmente gestita dal server rendendola totalmente *trasparente* per l'utente che non dovrà riconfigurare il dispositivo manualmente.   
+Inoltre vista la velocità di reboot il dispositivo si ricollegherà alla rete Wifi con lo stesso IP (anche in caso di rete che utilizza un DHCP) e quindi la riconessione sarà gestita totalmente dal server rendendola completamente *trasparente* per l'utente che non dovrà riconfigurare il dispositivo manualmente.   
  
