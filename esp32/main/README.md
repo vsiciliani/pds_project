@@ -1,17 +1,17 @@
 # MODULO ESP
 
-Il codice del modulo Wifi è suddiso nei seguenti file **.cpp**:
+Il codice del modulo ESP è suddiso nei seguenti file **.cpp**:
 1.  **main_app.cpp:** è il main del codice. L'algoritmo è composto dai seguenti passi:
     1. inizializzazione del modulo ESP;
     2. connessione alla rete WiFi;
     3. apertura del socket verso il server;
     4. abilitazione della modalità promiscua sulla scheda WiFi;
-    5. parsing dei messaggi dal server (in un loop infinito):
+    5. parsing dei messaggi dal server (in un loop infinito). I possibili messaggi sono:
         * messaggio **IDENTIFICA**: stacca un thread in cui gira una funzione che fa lampeggiare il LED built-in sul modulo ESP;
         * messaggio **SYNC_CLOCK**: esegue una funzione di sincronizzazione del clock interno con quello del server (tramite scambio di 4 messaggi che contengono dei timestamp);
-        * messaggio **START_SEND**: 
-            * setto l'handler per la gestione del messaggio catturato (parsing del messaggio e aggiunta del messaggio in una lista);
-            * il dispositivo rimane in attesa di catturare nuovi messaggi (e di gestirli tramite l'*handler*) fin quando non passa il tempo di attesa definito (1 minuto) o fin quando la mememoria occupata non supera il 90% di quella totale;
+        * messaggio **START_SEND**. Esegue i seguenti passi: 
+            * configura l'handler per la gestione del messaggio catturato (parsing del messaggio e aggiunta del messaggio in una lista);
+            * attende di catturare nuovi messaggi (e di gestirli tramite l'*handler*) fin quando non trascorre il tempo di attesa definito nel file **config.cpp** (campo *Intervallo di connessione con il server*) o fin quando la mememoria occupata non supera il 90% di quella totale;
             * invio sul socket con il server di un messaggio JSON che serializza i dati contenuti nella lista dei messaggi catturati e parsati;
             * pulizia della lista di messaggi ricevuti.
     
