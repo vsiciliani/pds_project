@@ -11,12 +11,12 @@ Il codice del modulo ESP è suddiso nei seguenti file **.cpp**:
         * messaggio **SYNC_CLOCK**: esegue una funzione di sincronizzazione del clock interno con quello del server (tramite scambio di 4 messaggi che contengono dei timestamp);
         * messaggio **START_SEND**. Esegue in successione i seguenti passi: 
             * configurazione dell'handler per la gestione del messaggio catturato (parsing del messaggio e aggiunta del messaggio in una lista);
-            * attesa cattura di nuovi messaggi (e di gestirli tramite l'*handler*) fin quando non trascorre il tempo di attesa definito nel file **config.cpp** (campo *Intervallo di connessione con il server*) o fin quando la mememoria occupata non supera il 90% di quella totale;
+            * attesa cattura di nuovi messaggi (e di gestirli tramite l'*handler*) fin quando non trascorre il tempo di attesa definito nel file **config.cpp** (campo *Intervallo di connessione con il server*) o fin quando la memoria occupata non supera il 90% di quella totale;
             * invio sul socket con il server di un messaggio JSON che serializza i dati contenuti nella lista dei messaggi catturati e parsati;
             * pulizia della lista dei messaggi ricevuti.
-    
+            
     La concorrenza degli accessi, da parte dei diversi thread, sulla lista dei messaggi catturati e gestiti da parte dei vari handler, in caso di ricezione contemporanea di più messaggi, è gestita da un **mutex** con l'uso di *unique_lock* e *lock_guard*.
-    Il main thread tra i vari invii dei dati al server utilizza una chiamata bloccante **wait** sullo *unique_lock* che viene risvegliato da una notifica inviata sul lock da un handler quando finisce la sua funzionalità. Al risveglio del main thread una funzione controlla se la sua elaborazione deve continuare (passato il tempo massimo tra un invio e il successivo o memoria troppo piena) oppure deve rimettersi in attesa.
+    Il main thread tra i vari invii dei dati al server utilizza una chiamata bloccante **wait** sullo *unique_lock* che viene risvegliato da una notifica inviata sul lock da un handler quando finisce la sua funzionalità. Al risveglio del main thread una funzione controlla se la sua elaborazione deve continuare (superamento del tempo massimo tra un invio e il successivo o memoria disponibile inferiore al 10%) oppure deve rimettersi in attesa.
 2. **PacketInfo.cpp:** è la classe che definisce l'oggetto che contiene le informazioni da salvare dopo il parsing di un pacchetto e implementa la funzione di serializazzione in JSON dell'oggetto stesso.
 3. **Socket.cpp:** è la classe che gestisce il Socket per la connessione al server. Implementa le seguenti funzionalità:
     * connect;
