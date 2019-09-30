@@ -9,11 +9,11 @@ Il codice del modulo ESP è suddiso nei seguenti file **.cpp**:
     5. parsing dei messaggi dal server (in un loop infinito). I possibili messaggi sono:
         * messaggio **IDENTIFICA**: stacca un thread in cui gira una funzione che fa lampeggiare il LED built-in sul modulo ESP;
         * messaggio **SYNC_CLOCK**: esegue una funzione di sincronizzazione del clock interno con quello del server (tramite scambio di 4 messaggi che contengono dei timestamp);
-        * messaggio **START_SEND**. Esegue i seguenti passi: 
-            * configura l'handler per la gestione del messaggio catturato (parsing del messaggio e aggiunta del messaggio in una lista);
-            * attende di catturare nuovi messaggi (e di gestirli tramite l'*handler*) fin quando non trascorre il tempo di attesa definito nel file **config.cpp** (campo *Intervallo di connessione con il server*) o fin quando la mememoria occupata non supera il 90% di quella totale;
+        * messaggio **START_SEND**. Esegue in successione i seguenti passi: 
+            * configurazione dell'handler per la gestione del messaggio catturato (parsing del messaggio e aggiunta del messaggio in una lista);
+            * attesa cattura di nuovi messaggi (e di gestirli tramite l'*handler*) fin quando non trascorre il tempo di attesa definito nel file **config.cpp** (campo *Intervallo di connessione con il server*) o fin quando la mememoria occupata non supera il 90% di quella totale;
             * invio sul socket con il server di un messaggio JSON che serializza i dati contenuti nella lista dei messaggi catturati e parsati;
-            * pulizia della lista di messaggi ricevuti.
+            * pulizia della lista dei messaggi ricevuti.
     
     La concorrenza sulla lista dei messaggi catturati e gestiti da parte dei vari handler, in caso di ricezione contemporanea di più messaggi, è gestita da un **mutex** con l'uso di *unique_lock* e *lock_guard*.
     Il main thread tra un invio dei dati ad un server ed il successivo utilizza una chiamata bloccante **wait** sullo *unique_lock* che viene risvegliato da una notifica inviata sul lock da un handler quando finisce la sua funzionalità. Al suo risveglio una funzione controlla se l'elaborazione nel main thread deve continuare (passato il tempo massimo tra un invio e il successivo o memoria troppo piena) oppure deve rimettersi in attesa.
