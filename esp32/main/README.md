@@ -15,8 +15,8 @@ Il codice del modulo ESP è suddiso nei seguenti file **.cpp**:
             * invio sul socket con il server di un messaggio JSON che serializza i dati contenuti nella lista dei messaggi catturati e parsati;
             * pulizia della lista dei messaggi ricevuti.
     
-    La concorrenza sulla lista dei messaggi catturati e gestiti da parte dei vari handler, in caso di ricezione contemporanea di più messaggi, è gestita da un **mutex** con l'uso di *unique_lock* e *lock_guard*.
-    Il main thread tra un invio dei dati ad un server ed il successivo utilizza una chiamata bloccante **wait** sullo *unique_lock* che viene risvegliato da una notifica inviata sul lock da un handler quando finisce la sua funzionalità. Al suo risveglio una funzione controlla se l'elaborazione nel main thread deve continuare (passato il tempo massimo tra un invio e il successivo o memoria troppo piena) oppure deve rimettersi in attesa.
+    La concorrenza degli accessi, da parte dei diversi thread, sulla lista dei messaggi catturati e gestiti da parte dei vari handler, in caso di ricezione contemporanea di più messaggi, è gestita da un **mutex** con l'uso di *unique_lock* e *lock_guard*.
+    Il main thread tra i vari invii dei dati al server utilizza una chiamata bloccante **wait** sullo *unique_lock* che viene risvegliato da una notifica inviata sul lock da un handler quando finisce la sua funzionalità. Al risveglio del main thread una funzione controlla se la sua elaborazione deve continuare (passato il tempo massimo tra un invio e il successivo o memoria troppo piena) oppure deve rimettersi in attesa.
 2. **PacketInfo.cpp:** è la classe che definisce l'oggetto che contiene le informazioni da salvare dopo il parsing di un pacchetto e implementa la funzione di serializazzione in JSON dell'oggetto stesso.
 3. **Socket.cpp:** è la classe che gestisce il Socket per la connessione al server. Implementa le seguenti funzionalità:
     * connect;
