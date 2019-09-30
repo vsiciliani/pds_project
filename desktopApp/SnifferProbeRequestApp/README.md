@@ -1,7 +1,7 @@
 # MODULO DESKTOP
 
 Il modulo desktop, realizzato in **C#**, ha il compito di gestire la connessione con i rilevatori WiFi, raccogliere i dati, elaborarli e mostrarli all'utente tramite la GUI.
-E' composto da più **thread**:
+E' composto dai seguenti **thread**:
 * Thread per la gestione della **GUI** e delle interazioni con l'utente;
 * Thread per la **gestione delle connessioni** in ingresso verso il server da parte dei vari rilevatori. Gestisce il socket in ascolto sulla porta configurabile tramite il file *App.config* e accetta le connessioni in ingresso.
 * Thread per la **gestione della connessione con un rilevatore** (viene staccato un thread per ogni rilevatore). Questo thread mantiene attiva la connessione e si occupa di inviare/ricevere messaggi con il rilevatore associato.
