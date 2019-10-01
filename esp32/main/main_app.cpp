@@ -40,7 +40,7 @@ void connectSocket(std::shared_ptr<Socket>);
 void blinkLed();
 void syncClock(std::shared_ptr<Socket>);
 std::string createJSONArray(std::list<std::string>);
-void sendMessage(std::shared_ptr<Socket>, std::string message);
+int sendMessage(std::shared_ptr<Socket>, std::string message);
 std::string receiveMessage(std::shared_ptr<Socket>);
 
 //dichiarazioni variabili globali
@@ -108,7 +108,13 @@ void app_main() {
 				ESP_LOGI(tag, "Invio dati dei pacchetti al server");
 
 				//send dei dati verso il server
-				sendMessage(socket, createJSONArray(listaRecord));
+				int byteSent = sendMessage(socket, createJSONArray(listaRecord));
+				
+				//invio è fallito
+				if (byteSent < 0) {
+					flag = false;
+					break;
+				}
 
 				//pulisco la lista di PacketInfo
 				listaRecord.clear();
@@ -119,10 +125,10 @@ void app_main() {
 				flag = false;
 			}
 		} while (flag);
-		//abilito la modalità di attività promiscua
+		//disabilito la modalità di attività promiscua
 		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(false));
 		ESP_LOGI(tag, "Modalita schema promiscua disattivata");
-		ESP_LOGI(tag, "Socket con il server chiuso");
+		
 	} while (true);
 }
 
@@ -227,12 +233,21 @@ void connectSocket(std::shared_ptr<Socket> socket){
 }
 
 //procedura per inviare un messaggio (stringa) al server
-void sendMessage(std::shared_ptr<Socket> socket, std::string message){
+int sendMessage(std::shared_ptr<Socket> socket, std::string message){
 	int numByteSent;
+	int length = message.length();
+	int retry = 5;
 	do {
 		numByteSent = socket->send(message);
-	} while (numByteSent != message.length());
-	ESP_LOGI(tag, "Messaggio inviato al server con successo");
+		if (numByteSent != length) {
+			ESP_LOGE(tag, "Invio del messaggio al server fallito. Ci sono ancora %d retry", retry-1 );
+			retry--;
+		} else {
+			ESP_LOGI(tag, "Messaggio inviato al server con successo");
+			return numByteSent;
+		}
+	} while (retry > 0);
+	return -1;
 }
 
 //procedura per ricevere un messaggio (stringa) dal socket
@@ -249,10 +264,11 @@ void syncClock(std::shared_ptr<Socket> socket){
 	long request_timestamp;
 	long reply_timestamp;
 	long received_timestamp;
+	int byteSent = 0;
 
 	for (int i=0; i<4; i++){
 		time(&request_timestamp);
-		sendMessage(socket, "SYNC_CLOCK_START//n");
+		byteSent = sendMessage(socket, "SYNC_CLOCK_START//n");
 		socket->receiveRaw();
 
 		received_timestamp = 0;
@@ -270,7 +286,7 @@ void syncClock(std::shared_ptr<Socket> socket){
 	tv.tv_sec = received_timestamp + (delay/2);
 	tv.tv_usec = 0;
 	settimeofday(&tv, NULL);
-	sendMessage(socket, "SYNC_CLOCK_STOP//n");
+	byteSent = sendMessage(socket, "SYNC_CLOCK_STOP//n");
 }
 
 //procedura che gestire il lampeggio del led quando viene richiesta dal server l'IDENTIFICAZIONE

@@ -80,7 +80,7 @@ namespace SnifferProbeRequestApp {
                 } catch (IOException e) {
                     string errorMessage = "Errore nella ricezione dei dati sul socket";
                     Utils.logMessage("Utils.cs -- ReceiveMessage", Utils.LogCategory.Error, errorMessage);
-                    throw new SnifferAppSocketException(errorMessage, e);
+                    throw new SnifferAppSocketTimeoutException(errorMessage, e);
                 }
             }
 

@@ -32,6 +32,14 @@ int Socket::connect(){
 }
 
 int Socket::send(std::string message){
+	/*fd_set writeset;
+	struct timeval tv;
+	FD_ZERO(&writeset);
+	FD_SET(this->socket, &writeset);
+	int ret = 0;
+	while (ret == 0) {
+		lwip_select(s + 1, &readset, &writeset, &errset, NULL);*/
+
 	return lwip_write(this->socket,message.c_str(),message.size());
 }
 
@@ -48,6 +56,7 @@ void Socket::receiveRaw(){
 
 Socket::~Socket() {
 	lwip_close(this->socket);
+	ESP_LOGI("Socket.cpp", "Socket con il server chiuso");
 }
 
 Socket& Socket::operator=(Socket&& source) {
