@@ -262,12 +262,16 @@ namespace SnifferProbeRequestApp {
             } catch (SnifferAppSocketTimeoutException e) {
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Device :" + remoteIpEndPoint.Address.ToString() + " -- " +e.Message);
             }
-            
+
+            //devo togliere il device dalla lista dei configurati
+            ConfDevice.lstConfDevices.TryRemove((client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), out device);
+            ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
+
             //chiudo il client TCP
             stream.Close();
             client.Close();
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket con " + remoteIpEndPoint.Address.ToString() + " chiuso");
-               
+
         }         
     }
 }

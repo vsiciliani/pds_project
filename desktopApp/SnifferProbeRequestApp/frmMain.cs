@@ -300,17 +300,19 @@ namespace SnifferProbeRequestApp
             }));          
         }
 
-        private void checkTwoESP(object sender, EventArgs e){
-            if (ConfDevice.lstConfDevices.Count >= 2 && 
-                (ConfDevice.getMaxXPositionDevice() != ConfDevice.getMinXPositionDevice() || ConfDevice.getMaxYPositionDevice() != ConfDevice.getMinYPositionDevice())){
-                tabFeatures.Visible = true;
-                btnRefreshConteggio.Visible = true;
-                lblMin2device.Visible = false;
-            } else {
-                tabFeatures.Visible = false;
-                btnRefreshConteggio.Visible = false;
-                lblMin2device.Visible = true;
-            }
+        private void checkTwoESP(object sender, EventArgs e) {
+            BeginInvoke((Action)(() => {
+                if (ConfDevice.lstConfDevices.Count >= 2 &&
+                (ConfDevice.getMaxXPositionDevice() != ConfDevice.getMinXPositionDevice() || ConfDevice.getMaxYPositionDevice() != ConfDevice.getMinYPositionDevice())) {
+                    tabFeatures.Visible = true;
+                    btnRefreshConteggio.Visible = true;
+                    lblMin2device.Visible = false;
+                } else {
+                    tabFeatures.Visible = false;
+                    btnRefreshConteggio.Visible = false;
+                    lblMin2device.Visible = true;
+                }
+            }));
         }
 
         private void updateConfDevice(object sender, EventArgs e) {
@@ -469,11 +471,10 @@ namespace SnifferProbeRequestApp
                     tabPage.UseVisualStyleBackColor = true;
 
                     tabDeviceConf.TabPages.Add(tabPage);
-                }  
+                }
+                lblNoDeviceConf.Visible = false;
+                tabDeviceConf.Visible = true;
             }));
-
-            lblNoDeviceConf.Visible = false;
-            tabDeviceConf.Visible = true;
         }
 
         private void btnCercaMovimentoDevice_Click(object sender, EventArgs e) {
