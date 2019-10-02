@@ -66,7 +66,7 @@ namespace SnifferProbeRequestApp {
             while (true) {
                 byte[] receivedBytes = new byte[MAXBUFFER];
                 try {
-                    Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Device :" + endPoint.Address.ToString() + " In attesa di dati");
+                    Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Device: " + endPoint.Address.ToString() + " In attesa di dati");
                 } catch(SocketException)  {
                     Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Device : (errore nella lettura dell'IP del device) In attesa di dati");
                 }
