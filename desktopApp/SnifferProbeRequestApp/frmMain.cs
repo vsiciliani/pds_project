@@ -77,7 +77,7 @@ namespace SnifferProbeRequestApp
                     ManualResetEvent deviceEvent;
                     NoConfDevice.lstNoConfDevices.TryRemove(ipAddress, out deviceEvent);
 
-                    Device device = new Device(ipAddress, 1, xPosition, yPosition, deviceEvent);
+                    Device device = new Device(ipAddress, 1, xPosition, yPosition, 0, deviceEvent);
 
                     //aggiungo il device alla lista degi device configurati e lancio il delegato associato
                     ConfDevice.lstConfDevices.TryAdd(device.ipAddress, device);

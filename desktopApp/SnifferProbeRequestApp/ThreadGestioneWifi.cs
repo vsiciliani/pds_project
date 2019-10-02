@@ -216,6 +216,12 @@ namespace SnifferProbeRequestApp {
                     } while (true);
                 }
 
+                //incremento il numero di socket associati al device
+                //non faccio il check se il device c'è nella lista perchè in questo punto del codice c'è sicuramente
+                ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device);
+                device.openSocket = device.openSocket + 1;
+                ConfDevice.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
+
                 string messageReceived;
                 //count per triggerare la sincronizzazione dei clock tra il server e il rilevatore
                 int countSyncTimestamp = 0;
@@ -251,7 +257,7 @@ namespace SnifferProbeRequestApp {
                     } catch (Exception) {
                         Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Errore nella deserializzazione del messaggio JSON. Il messaggio verrà scartato");
                     }
-                    //controllo che ci siano messaggie che ci siano almeno 2 device configurati
+                    //controllo che ci siano messaggi e che ci siano almeno 2 device configurati
                     if (packetsInfo != null && ConfDevice.lstConfDevices.Count >= 2 && packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device))
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
@@ -263,15 +269,21 @@ namespace SnifferProbeRequestApp {
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Device :" + remoteIpEndPoint.Address.ToString() + " -- " +e.Message);
             }
 
-            //devo togliere il device dalla lista dei configurati
-            ConfDevice.lstConfDevices.TryRemove((client.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), out device);
-            ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
-
             //chiudo il client TCP
             stream.Close();
             client.Close();
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket con " + remoteIpEndPoint.Address.ToString() + " chiuso");
 
-        }         
+            //decremento il numero di socket aperti sul device
+            ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device);
+            device.openSocket = device.openSocket - 1;
+            ConfDevice.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
+
+            //se il numero di socket aperti è zero devo togliere il device dalla lista dei configurati
+            if (device.openSocket <= 0 && !stopThreadElaboration) {
+                ConfDevice.lstConfDevices.TryRemove(remoteIpEndPoint.Address.ToString(), out device);
+                ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
+            }
+        }
     }
 }
