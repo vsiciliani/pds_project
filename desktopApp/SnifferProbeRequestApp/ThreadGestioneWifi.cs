@@ -221,6 +221,7 @@ namespace SnifferProbeRequestApp {
                 ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device);
                 device.openSocket = device.openSocket + 1;
                 ConfDevice.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket aperti con " + remoteIpEndPoint.Address.ToString() + ": " + device.openSocket);
 
                 string messageReceived;
                 //count per triggerare la sincronizzazione dei clock tra il server e il rilevatore
@@ -278,10 +279,12 @@ namespace SnifferProbeRequestApp {
             ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device);
             device.openSocket = device.openSocket - 1;
             ConfDevice.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket aperti con " + remoteIpEndPoint.Address.ToString() + ": " + device.openSocket);
 
             //se il numero di socket aperti è zero devo togliere il device dalla lista dei configurati
             if (device.openSocket <= 0 && !stopThreadElaboration) {
                 ConfDevice.lstConfDevices.TryRemove(remoteIpEndPoint.Address.ToString(), out device);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Device " + remoteIpEndPoint.Address.ToString() + " eliminato dalla lista dei device configurati");
                 ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
             }
         }

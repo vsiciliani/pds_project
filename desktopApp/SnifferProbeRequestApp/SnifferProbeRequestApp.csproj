@@ -141,6 +141,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="resource\img\error.png" />
+    <Content Include="DBApp_log.ldf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>DBApp.mdf</DependentUpon>
+    </Content>
     <Content Include="icon.ico" />
     <Content Include="resource\img\icon.png" />
     <None Include="resource\img\plus.png" />
