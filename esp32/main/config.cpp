@@ -3,7 +3,7 @@
 #define WIFI_PASS						"pe7dt3793ae9t7b"
 #define SERVER_HOST						"192.168.1.4"
 #define SERVER_PORT						5010
-#define INTERVALLO_CONNESSIONE_SERVER	10
+#define INTERVALLO_CONNESSIONE_SERVER	30
 #define TIMEOUT_RICONNESSIONE_SERVER	10
 
  //std::string wifiSSID = "APAndroid2";

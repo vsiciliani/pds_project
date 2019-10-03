@@ -40,8 +40,8 @@ void connectSocket(std::shared_ptr<Socket>);
 void blinkLed();
 void syncClock(std::shared_ptr<Socket>);
 std::string createJSONArray(std::list<std::string>);
-int sendMessage(std::shared_ptr<Socket>, std::string message);
-std::string receiveMessage(std::shared_ptr<Socket>);
+void sendMessage(std::shared_ptr<Socket>, std::string message);
+std::string receiveMessage(std::shared_ptr<Socket>, bool timeoutSet);
 
 //dichiarazioni variabili globali
 std::list<std::string> listaRecord;
@@ -49,6 +49,7 @@ std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
 float memorySpace; //memoria inizialmente disponibile
+bool flag = true; //flag per gestire il loop del codice in caso di errori sul socket
 
 static EventGroupHandle_t wifi_event_group;
 
@@ -61,9 +62,6 @@ void app_main() {
 	//eseguo l'inizializzazione del sensore e del WiFi
 	init_esp();
 
-	//flag per gestire il loop del codice
-	bool flag = true;
-
 	//ciclo per gestire i messaggi in entrata
 	do {
 		ESP_LOGI(tag, "Apertura socket con il server...");
@@ -75,9 +73,11 @@ void app_main() {
 		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
 		ESP_LOGI(tag, "Modalita schema promiscua abilitata");
 
+		bool interactivePhase = true; //finchè è true non devo applicare il timeout in ricezione perchè è la fase interattiva con il server
+
 		flag = true;
 		do {	
-			std::string message = receiveMessage(socket);
+			std::string message = receiveMessage(socket, !interactivePhase);
 
 			if (message.compare("IDENTIFICA") == 0) {
 				//lancio il thread che si occupa di far lampeggiare il led
@@ -88,6 +88,7 @@ void app_main() {
 			else if (message.compare("SYNC_CLOCK") == 0) {
 				//effetto la sincronizzazione dei timestamp
 				syncClock(socket);
+				interactivePhase = false; //finita la fase di interattività con il server
 			}
 			else if (message.compare("START_SEND") == 0) {
 				
@@ -108,14 +109,8 @@ void app_main() {
 				ESP_LOGI(tag, "Invio dati dei pacchetti al server");
 
 				//send dei dati verso il server
-				int byteSent = sendMessage(socket, createJSONArray(listaRecord));
+				sendMessage(socket, createJSONArray(listaRecord));
 				
-				//invio è fallito
-				if (byteSent < 0) {
-					flag = false;
-					break;
-				}
-
 				//pulisco la lista di PacketInfo
 				listaRecord.clear();
 
@@ -233,7 +228,7 @@ void connectSocket(std::shared_ptr<Socket> socket){
 }
 
 //procedura per inviare un messaggio (stringa) al server
-int sendMessage(std::shared_ptr<Socket> socket, std::string message){
+void sendMessage(std::shared_ptr<Socket> socket, std::string message){
 	int numByteSent;
 	int length = message.length();
 	int retry = 5;
@@ -244,18 +239,30 @@ int sendMessage(std::shared_ptr<Socket> socket, std::string message){
 			retry--;
 		} else {
 			ESP_LOGI(tag, "Messaggio inviato al server con successo");
-			return numByteSent;
+			return;
 		}
 	} while (retry > 0);
-	return -1;
+	flag = false;
+	return;
 }
 
 //procedura per ricevere un messaggio (stringa) dal socket
-std::string receiveMessage(std::shared_ptr<Socket> socket){
-	//ripulisco il buffer di ricezione
-	std::string messaggio = socket->receive();
-	ESP_LOGI(tag, "Messaggio ricevuto: %s", messaggio.c_str());
-	return messaggio;
+std::string receiveMessage(std::shared_ptr<Socket> socket, bool timeoutSet){
+	int result = 0;
+	int retry = 5;
+	do {
+		std::string messaggio = socket->receive(result, timeoutSet);
+		if (result <= 0) {
+			ESP_LOGE(tag, "Ricezione del messaggio dal server fallito. Ci sono ancora %d retry", retry - 1);
+			retry--;
+		}
+		else {
+			ESP_LOGI(tag, "Messaggio ricevuto: %s", messaggio.c_str());
+			return messaggio;
+		}
+	} while (retry > 0);
+	flag = false;
+	return "";
 }
 
 //procedura per sincronizzare il clock con il server
@@ -264,12 +271,18 @@ void syncClock(std::shared_ptr<Socket> socket){
 	long request_timestamp;
 	long reply_timestamp;
 	long received_timestamp;
-	int byteSent = 0;
+	int result = 0;
 
 	for (int i=0; i<4; i++){
 		time(&request_timestamp);
-		byteSent = sendMessage(socket, "SYNC_CLOCK_START//n");
-		socket->receiveRaw();
+		sendMessage(socket, "SYNC_CLOCK_START//n");
+		socket->receiveRaw(result);
+
+		if (result <= 0) {
+			ESP_LOGE(tag, "Sincronizzazione con il server fallita.");
+			flag = false;
+			return;
+		}
 
 		received_timestamp = 0;
 		for (int j=0; j<8; j++){
@@ -286,7 +299,7 @@ void syncClock(std::shared_ptr<Socket> socket){
 	tv.tv_sec = received_timestamp + (delay/2);
 	tv.tv_usec = 0;
 	settimeofday(&tv, NULL);
-	byteSent = sendMessage(socket, "SYNC_CLOCK_STOP//n");
+	sendMessage(socket, "SYNC_CLOCK_STOP//n");
 }
 
 //procedura che gestire il lampeggio del led quando viene richiesta dal server l'IDENTIFICAZIONE

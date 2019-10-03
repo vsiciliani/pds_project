@@ -146,7 +146,8 @@ namespace SnifferProbeRequestApp {
             IPEndPoint remoteIpEndPoint = null;
             Device device;
             NetworkStream stream = client.GetStream();
-            stream.ReadTimeout = 120000; //in millis
+            stream.ReadTimeout = 120000; //timeout in lettura in millis
+            stream.WriteTimeout = 15000; //timeout in scrittura in millis
 
             try {
                 remoteIpEndPoint = client.Client.RemoteEndPoint as IPEndPoint;

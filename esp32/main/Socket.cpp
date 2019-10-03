@@ -14,6 +14,10 @@ Socket::Socket(std::string serverAddress, int serverPort){
 	server.sin_family = AF_INET;
 	inet_pton(AF_INET, serverAddress.c_str(), &server.sin_addr.s_addr); //converte la stringa del server in binario e la salva nella struttura server
 	server.sin_port = lwip_htons(serverPort);
+
+	//setto le impostazioni per il timeout
+	tv.tv_sec = 15;
+	tv.tv_usec = 0;
 }
 
 int Socket::connect(){
@@ -32,25 +36,44 @@ int Socket::connect(){
 }
 
 int Socket::send(std::string message){
-	/*fd_set writeset;
-	struct timeval tv;
+	fd_set writeset;
 	FD_ZERO(&writeset);
 	FD_SET(this->socket, &writeset);
-	int ret = 0;
-	while (ret == 0) {
-		lwip_select(s + 1, &readset, &writeset, &errset, NULL);*/
 
+	int ret = lwip_select(FD_SETSIZE, NULL, &writeset, NULL, &tv);
+	if (ret <= 0) return -1; //ret = 0: select in timeout; ret < 0: select in errore
 	return lwip_write(this->socket,message.c_str(),message.size());
 }
 
-std::string Socket::receive(){
+std::string Socket::receive(int& result, bool timeoutSet){
 	char buffer_ric[MAXBUFL]="";
+	fd_set readset;
+	FD_ZERO(&readset);
+	FD_SET(this->socket, &readset);
+	
+	if (timeoutSet)
+		result = lwip_select(FD_SETSIZE, &readset, NULL, NULL, &tv);
+	else 
+		result = lwip_select(FD_SETSIZE, &readset, NULL, NULL, NULL);
+
+	if (result <= 0) { //result = 0: select in timeout; result < 0: select in errore
+		return ""; 
+	}
 	lwip_recv(this->socket,buffer_ric,MAXBUFL,0);
 	return std::string(buffer_ric);
 }
 
-void Socket::receiveRaw(){
+void Socket::receiveRaw(int& result){
+	fd_set readset;
+	FD_ZERO(&readset);
+	FD_SET(this->socket, &readset);
+
 	memset(this->buffer_ric, 0, MAXBUFL * (sizeof this->buffer_ric[0]) );
+	result = lwip_select(FD_SETSIZE, &readset, NULL, NULL, &tv);
+	
+	if (result <= 0) { //result = 0: select in timeout; result < 0: select in errore
+		return;
+	}
 	lwip_recv(this->socket,this->buffer_ric,MAXBUFL,0);
 }
 
