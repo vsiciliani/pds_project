@@ -39,12 +39,12 @@ bool checkTimeoutThreadConnessionePc();
 void connectSocket(std::shared_ptr<Socket>);
 void blinkLed();
 void syncClock(std::shared_ptr<Socket>);
-std::string createJSONArray(std::list<std::string>);
+std::string createJSONArray(int size);
 void sendMessage(std::shared_ptr<Socket>, std::string message);
 std::string receiveMessage(std::shared_ptr<Socket>, bool timeoutSet);
 
 //dichiarazioni variabili globali
-std::list<std::string> listaRecord;
+std::list<std::string> listaPackets;
 std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
@@ -69,10 +69,6 @@ void app_main() {
 		std::shared_ptr<Socket> socket = std::make_shared<Socket>(SERVER_HOST, SERVER_PORT);
 		connectSocket(socket);
 
-		//abilito la modalità di attività promiscua
-		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
-		ESP_LOGI(tag, "Modalita schema promiscua abilitata");
-
 		bool interactivePhase = true; //finchè è true non devo applicare il timeout in ricezione perchè è la fase interattiva con il server
 
 		flag = true;
@@ -92,37 +88,41 @@ void app_main() {
 			}
 			else if (message.compare("START_SEND") == 0) {
 				
-				//setto l'handler che gestisce la ricezione del pacchetto
-				ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
+				if (listaPackets.empty()) {
+					//setto l'handler che gestisce la ricezione del pacchetto
+					ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
 
-				//salvo il timestamp per calcolare il tempo di flush verso il server
-				time(&startWaitTime);
+					//salvo il timestamp per calcolare il tempo di flush verso il server
+					time(&startWaitTime);
 
-				//salvo la memoria a disposizione
-				memorySpace = xPortGetFreeHeapSize();
+					//salvo la memoria a disposizione
+					memorySpace = xPortGetFreeHeapSize();
 
-				//prendo il lock per leggere la lista di PacketInfo
-				std::unique_lock<std::mutex> ul(m);
-				//condition variable sul tempo di attesa per il flush
-				cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+					//prendo il lock per leggere la lista di PacketInfo
+					std::unique_lock<std::mutex> ul(m);
+					//condition variable sul tempo di attesa per il flush
+					cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
+
+					//disabilito l'handler che gestisce la ricezione del pacchetto
+					ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(nullptr));
+				}
 
 				ESP_LOGI(tag, "Invio dati dei pacchetti al server");
-
-				//send dei dati verso il server
-				sendMessage(socket, createJSONArray(listaRecord));
 				
-				//pulisco la lista di PacketInfo
-				listaRecord.clear();
-
+				//invio al server 20 (max) pacchetti alla volta tramite un JSON
+				int numPacket = listaPackets.size();
+				
+				if (numPacket > 20)
+					sendMessage(socket, createJSONArray(20));
+				else
+					sendMessage(socket, createJSONArray(numPacket));	
 			}
 			else {
 				ESP_LOGI(tag, "Ricevuto messaggio non valido");
 				flag = false;
 			}
 		} while (flag);
-		//disabilito la modalità di attività promiscua
-		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(false));
-		ESP_LOGI(tag, "Modalita schema promiscua disattivata");
+		listaPackets.clear();
 		
 	} while (true);
 }
@@ -156,6 +156,10 @@ void init_esp() {
 	esp_wifi_connect();
 
 	ESP_LOGI(tag, "connect to ap SSID: %s", WIFI_SSID);
+
+	//abilito la modalità di attività promiscua
+	ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
+	ESP_LOGI(tag, "Modalita schema promiscua abilitata");
 }
 
 //processo di gestione del pacchetto Wifi sniffato
@@ -176,11 +180,13 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 
 		//lock sulla scrittura della lista che contiene gli oggetti PacketInfo
 		std::lock_guard<std::mutex> l(m);
-		listaRecord.push_back(record.JSONSerializer());
+		for (int i = 0; i < 11; i++) {
+			listaPackets.push_back(record.JSONSerializer());
+		}
 
 		//setto la condition variable
+		ESP_LOGI(tag, "Pacchetto rilevato ed elaborato. Dimensione lista pacchetti: %d", listaPackets.size());
 		cvMinuto.notify_one();
-		ESP_LOGI(tag, "Pacchetto rilevato ed elaborato");
 	}
 }
 
@@ -199,15 +205,17 @@ bool checkTimeoutThreadConnessionePc() {
 }
 
 //preparo il messaggio JSON da inviare al server
-std::string createJSONArray(std::list<std::string>){
-	std::list<std::string>::iterator it;
+std::string createJSONArray(int size){
 	std::string buf;
+
 	buf="{ \"listPacketInfo\" : [ ";
-	for (it= listaRecord.begin(); it != listaRecord.end(); it++){
-		if (it!= listaRecord.begin()){
-			buf+=", ";
-		}
-		buf+=it->c_str();
+
+	for (int i = 0; i < size; i++) {
+		if (i != 0)
+			buf += ", ";
+
+		buf += listaPackets.front().c_str();
+		listaPackets.pop_front();
 	}
 
 	buf+="]}//n";

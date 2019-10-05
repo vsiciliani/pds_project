@@ -242,8 +242,8 @@ namespace SnifferProbeRequestApp {
                             Utils.syncClock(client.Client);
                             messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
                         }
-                        //resetto il count; sincronizzo i timestamp ogni 5 interazioni
-                        countSyncTimestamp = 5;
+                        //resetto il count; sincronizzo i timestamp ogni 50 interazioni
+                        countSyncTimestamp = 50;
                     }
 
                     //invio messaggio per indicare che può iniziare l'invio dei dati
@@ -251,6 +251,7 @@ namespace SnifferProbeRequestApp {
 
                     //attendo il JSON dal rilevatore con i pacchetti catturati dall'ultima interazione
                     messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+
                     PacketsInfo packetsInfo = null;
 
                     try {
@@ -263,6 +264,8 @@ namespace SnifferProbeRequestApp {
                     if (packetsInfo != null && ConfDevice.lstConfDevices.Count >= 2 && packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device))
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
+
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Numero pacchetti ricevuti: " + packetsInfo.listPacketInfo.Count);
 
                     //decremento il contatore per la sincronizzazione dei timestamp
                     countSyncTimestamp--;

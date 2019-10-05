@@ -42,7 +42,11 @@ int Socket::send(std::string message){
 
 	int ret = lwip_select(FD_SETSIZE, NULL, &writeset, NULL, &tv);
 	if (ret <= 0) return -1; //ret = 0: select in timeout; ret < 0: select in errore
-	return lwip_write(this->socket,message.c_str(),message.size());
+	if (FD_ISSET(this->socket, &writeset) != 0) {
+		int p = lwip_send(this->socket, message.c_str(), message.size(), 0);
+		return p;
+	}
+	else return -1;
 }
 
 std::string Socket::receive(int& result, bool timeoutSet){

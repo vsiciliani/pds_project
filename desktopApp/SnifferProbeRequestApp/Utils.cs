@@ -74,6 +74,7 @@ namespace SnifferProbeRequestApp {
                 try {
                     int numBytes = stream.Read(receivedBytes, 0, receivedBytes.Length);
                     receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
+                    
                     if (receivedMessage.IndexOf("//n") > -1) {
                         break;
                     }
@@ -85,9 +86,9 @@ namespace SnifferProbeRequestApp {
             }
 
             try {
-                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("//n", ""));
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage);
             } catch (SocketException) {
-                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: (errore nella lettura dell'IP del device) Ricevuto: " + receivedMessage.Replace("//n", ""));
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: (errore nella lettura dell'IP del device) Ricevuto: " + receivedMessage);
             }
             return receivedMessage;
         }
