@@ -265,13 +265,13 @@ namespace SnifferProbeRequestApp {
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
 
-                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Numero pacchetti ricevuti: " + packetsInfo.listPacketInfo.Count);
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Device: " + remoteIpEndPoint.Address.ToString() +" -- Numero pacchetti ricevuti: " + packetsInfo.listPacketInfo.Count);
 
                     //decremento il contatore per la sincronizzazione dei timestamp
                     countSyncTimestamp--;
                 }
             } catch (SnifferAppSocketTimeoutException e) {
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Device :" + remoteIpEndPoint.Address.ToString() + " -- " +e.Message);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Device:" + remoteIpEndPoint.Address.ToString() + " -- " +e.Message);
             }
 
             //chiudo il client TCP

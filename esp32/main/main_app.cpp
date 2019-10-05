@@ -180,10 +180,8 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 
 		//lock sulla scrittura della lista che contiene gli oggetti PacketInfo
 		std::lock_guard<std::mutex> l(m);
-		for (int i = 0; i < 11; i++) {
-			listaPackets.push_back(record.JSONSerializer());
-		}
-
+		listaPackets.push_back(record.JSONSerializer());
+		
 		//setto la condition variable
 		ESP_LOGI(tag, "Pacchetto rilevato ed elaborato. Dimensione lista pacchetti: %d", listaPackets.size());
 		cvMinuto.notify_one();
