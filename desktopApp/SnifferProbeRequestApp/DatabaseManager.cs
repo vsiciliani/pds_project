@@ -107,6 +107,7 @@ namespace SnifferProbeRequestApp {
                 whereQuery.Append(" " + deviceName + ".device = '" + device.Value + "' AND");
                 if (deviceName != "d1") {
                     whereQuery.Append(" d1.hashCode = " + deviceName + ".hashCode AND");
+                    whereQuery.Append(" (d1.timestamp_packet > " + deviceName + ".timestamp_packet - 5 OR d1.timestamp_packet < " + deviceName + ".timestamp_packet - 5) AND");
                 }
             }
 
@@ -115,6 +116,8 @@ namespace SnifferProbeRequestApp {
             whereQuery.Remove(whereQuery.Length - 3, 3); //elimino l'ultimo AND
 
             string queryPackets = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
+
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, queryPackets);
 
             DataTable tablePackets = runSelect(queryPackets, null);
 
