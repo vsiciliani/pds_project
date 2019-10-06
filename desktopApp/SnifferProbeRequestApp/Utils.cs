@@ -78,13 +78,14 @@ namespace SnifferProbeRequestApp {
                     if (receivedMessage.IndexOf("//n") > -1) {
                         break;
                     }
+                    
                 } catch (IOException e) {
                     string errorMessage = "Errore nella ricezione dei dati sul socket";
                     Utils.logMessage("Utils.cs -- ReceiveMessage", Utils.LogCategory.Error, errorMessage);
                     throw new SnifferAppSocketTimeoutException(errorMessage, e);
                 }
             }
-
+            receivedMessage = receivedMessage.Remove(receivedMessage.Length - 3); //elimino gli ultimi 3 caratteri
             try {
                 Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage);
             } catch (SocketException) {

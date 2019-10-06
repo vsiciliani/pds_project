@@ -237,7 +237,7 @@ namespace SnifferProbeRequestApp {
                         messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
 
                         //posso ricevere SYNC_CLOCK_START (devo sincronizzare) o SYNC_CLOCK_STOP (sincronizzazione terminata)
-                        while (messageReceived == "SYNC_CLOCK_START//n") {
+                        while (messageReceived == "SYNC_CLOCK_START") {
                             //invio il segnale di sincronizzazione
                             Utils.syncClock(client.Client);
                             messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
