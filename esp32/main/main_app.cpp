@@ -14,6 +14,7 @@
 #include <esp_log.h>
 #include <string>
 #include <list>
+#include <chrono>
 #include <memory>
 #include <thread>
 #include <mutex>
@@ -71,23 +72,27 @@ void app_main() {
 
 		bool interactivePhase = true; //finchè è true non devo applicare il timeout in ricezione perchè è la fase interattiva con il server
 
+		std::chrono::seconds timeoutDuration(INTERVALLO_CONNESSIONE_SERVER);
 		flag = true;
+		
 		do {	
+			
 			std::string message = receiveMessage(socket, !interactivePhase);
-
+			
 			if (message.compare("IDENTIFICA") == 0) {
 				//lancio il thread che si occupa di far lampeggiare il led
 				std::thread threadBlinkLed(blinkLed);
 				//stacco il thread dal flusso principale
 				threadBlinkLed.detach();
-			}
-			else if (message.compare("SYNC_CLOCK") == 0) {
+			} else if (message.compare("SYNC_CLOCK") == 0) {
 				//effetto la sincronizzazione dei timestamp
 				syncClock(socket);
 				interactivePhase = false; //finita la fase di interattività con il server
 			}
 			else if (message.compare("START_SEND") == 0) {
-				
+				//prendo il lock per leggere la lista di PacketInfo
+				std::unique_lock<std::mutex> ul(m);
+
 				if (listaPackets.empty()) {
 					//setto l'handler che gestisce la ricezione del pacchetto
 					ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
@@ -98,24 +103,23 @@ void app_main() {
 					//salvo la memoria a disposizione
 					memorySpace = xPortGetFreeHeapSize();
 
-					//prendo il lock per leggere la lista di PacketInfo
-					std::unique_lock<std::mutex> ul(m);
 					//condition variable sul tempo di attesa per il flush
-					cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
-
-					//disabilito l'handler che gestisce la ricezione del pacchetto
+					cvMinuto.wait_for(ul, timeoutDuration, checkTimeoutThreadConnessionePc);
+					
+					//setto l'handler che gestisce la ricezione del pacchetto
 					ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(nullptr));
 				}
 
 				ESP_LOGI(tag, "Invio dati dei pacchetti al server");
-				
+
 				//invio al server 20 (max) pacchetti alla volta tramite un JSON
 				int numPacket = listaPackets.size();
-				
+
 				if (numPacket > 20)
 					sendMessage(socket, createJSONArray(20));
 				else
-					sendMessage(socket, createJSONArray(numPacket));	
+					sendMessage(socket, createJSONArray(numPacket));
+
 			}
 			else {
 				ESP_LOGI(tag, "Ricevuto messaggio non valido");
