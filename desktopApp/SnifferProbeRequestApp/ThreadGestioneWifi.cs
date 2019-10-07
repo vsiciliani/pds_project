@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using SnifferProbeRequestApp.valueClass;
+using System.IO;
 
 namespace SnifferProbeRequestApp {
     /// <summary>
@@ -12,13 +13,12 @@ namespace SnifferProbeRequestApp {
     class ThreadGestioneWifi {
 
         private NetworkSettings settings;
-        private volatile bool stopThreadElaboration;
+        private volatile bool stopThreadElaboration; //volatile indiica che la variabile viene gestita da più thread
         private ThreadStart delegateThreadElaboration;
         private Thread threadElaboration;
 
         private static ThreadGestioneWifi instance = null;
         private TcpListener listener;
-        //private static ManualResetEvent allDone = new ManualResetEvent(false);
         private DatabaseManager dbManager = null;
 
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
@@ -28,10 +28,10 @@ namespace SnifferProbeRequestApp {
             stopThreadElaboration = false;
             //instanzio il db manager
             dbManager = DatabaseManager.getInstance();
-            start();
         }
 
         ///<summary>Ritorna l'istanza della classe ThreadGestioneWifi se già creata, oppure la istanzia</summary>
+        ///<param name="settings">Impostazione di connessione</param>
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
         ///<exception cref = "SnifferAppThreadException">Eccezione lanciata in caso di errore nell'apertura di un nuovo thread</exception>
         ///<returns>L'istanza della classe ThreadGestioneWifi</returns>
@@ -79,8 +79,7 @@ namespace SnifferProbeRequestApp {
         /// </summary>
         private void elaboration() {
             
-            // setto il listener sulla porta 5010.
-            int port = 5010;
+            //mi metto in ascolto su tutte le perificeriche sulla porto indicata nei NetworkSettings
             IPAddress localAddr = IPAddress.Any;
             listener = new TcpListener(localAddr, settings.servicePort);
             
@@ -96,21 +95,21 @@ namespace SnifferProbeRequestApp {
             
             //ciclo fin quando non viene invocato il metodo stop in attesa di nuovi rilevatori 
             while (!stopThreadElaboration) {
-                //allDone.Reset();
                 TcpClient client = null;
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "In attesa di connessioni...");
                 try {
                     //aspetto una connessione da parte di un rilevatore
                     //con il controllo sul metodo pending evito la chiamata bloccante AcceptTcpClient() che non mi fa chiudere il thread quando chiudo la GUI
-                    while (!listener.Pending()) {
+                    while (!listener.Pending() && !stopThreadElaboration) {
                         Thread.Sleep(2000);
                     }
+                    if (stopThreadElaboration) break;
                     client = listener.AcceptTcpClient();
                 } catch (SocketException) {
                     Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante il binding del socket");
                     break;
                 } catch (InvalidOperationException) {
-                    Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Il listener TCP è stato chiuso");
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante il binding del socket");
                     break;
                 }
 
@@ -135,8 +134,6 @@ namespace SnifferProbeRequestApp {
                     NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
                     break;
                 }
-
-                //allDone.WaitOne();
             }
             //attendo la fine di tutti i thread
             listaThreadSocket.ForEach(thread => thread.Join());
@@ -149,6 +146,9 @@ namespace SnifferProbeRequestApp {
             IPEndPoint remoteIpEndPoint = null;
             Device device;
             NetworkStream stream = client.GetStream();
+            stream.ReadTimeout = 120000; //timeout in lettura in millis
+            stream.WriteTimeout = 15000; //timeout in scrittura in millis
+
             try {
                 remoteIpEndPoint = client.Client.RemoteEndPoint as IPEndPoint;
             } catch (Exception e) {
@@ -157,93 +157,140 @@ namespace SnifferProbeRequestApp {
                 throw new SnifferAppSocketException(message, e);
             }
 
-            //allDone.Set();
+            //verifico che non scattino timeout sulla connessione socket
+            try {
+                //verifico se il dispositivo con quell'IP era già connesso (l'IP del dispositivo era contentuto già nella lstConfDevices)
+                if (ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
+                    //il dispositivo era gia configurato
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
-            //verifico se il dispositivo con quell'IP era già connesso (l'IP del dispositivo era contentuto già nella lstConfDevices)
-            if (ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
-                //il dispositivo era gia configurato
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "RECONNECTED with device: " + remoteIpEndPoint.Address.ToString());
-                    
-            } else {
-                //se non era già configurato aspetto l'evento di Configurazione dall'interfaccia grafica
-                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
+                } else {
+                    //se non era già configurato aspetto l'evento di Configurazione dall'interfaccia grafica
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "CONNECTED with device: " + remoteIpEndPoint.Address.ToString());
 
-                //event per gestire la sincronizzazione con il thread della GUI
-                ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
-                //aggiungo il dispositivo (con il rispettivo Event) nella lista dei dispositivi non configurati
-                NoConfDevice.lstNoConfDevices.TryAdd(remoteIpEndPoint.Address.ToString(), deviceConfEvent);
-                //delegato per gestire la variazione della lista dei device da configurare 
-                NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
+                    //event per gestire la sincronizzazione con il thread della GUI
+                    ManualResetEvent deviceConfEvent = new ManualResetEvent(false);
+                    //aggiungo il dispositivo (con il rispettivo Event) nella lista dei dispositivi non configurati
+                    NoConfDevice.lstNoConfDevices.TryAdd(remoteIpEndPoint.Address.ToString(), deviceConfEvent);
+                    //delegato per gestire la variazione della lista dei device da configurare 
+                    NoConfDevice.OnLstNoConfDevicesChanged(this, EventArgs.Empty);
 
-                //mi risveglio quando dalla GUI è richiesta la configurazione del dispositivo o si vuole inviare al rilevatore il segnale "IDENTIFICA"
-                deviceConfEvent.WaitOne();
-
-                do {
-                    //controllo se il device è stato eliminato dalla lista dei device non configurati
-                    if (!NoConfDevice.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
-                        //il device è stato configurato
-                        break;
-                    } else {
-                        //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
-                        Utils.sendMessage(stream, remoteIpEndPoint, "IDENTIFICA");
-                        
-                        deviceConfEvent.Reset();
-                        deviceConfEvent.WaitOne();
+                    //mi risveglio quando dalla GUI è richiesta la configurazione del dispositivo o si vuole inviare al rilevatore il segnale "IDENTIFICA"
+                    bool isSignalled = false;
+                    while (!isSignalled && !stopThreadElaboration) {
+                        isSignalled = deviceConfEvent.WaitOne(TimeSpan.FromSeconds(20));
                     }
-                } while (true);
-            }
 
-            string messageReceived;
-            //count per triggerare la sincronizzazione dei clock tra il server e il rilevatore
-            int countSyncTimestamp = 0;
+                    //mi sono risvegliato dall'evento ma il thread deve fermarsi
+                    if (stopThreadElaboration) {
+                        //chiudo il client TCP
+                        client.Close();
+                        Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket chiuso");
+                        return;
+                    }
 
-            //ciclo fin quando non viene invocato il metodo stop in attesa di messaggi da parte dei rilevatori
-            while (!stopThreadElaboration) {
-                //se il count è a 0 eseguo la sincronizzazione
-                if (countSyncTimestamp == 0) {
-                    //invio il messaggio per iniziare la sincronizzazione
-                    Utils.sendMessage(stream, remoteIpEndPoint, "SYNC_CLOCK");
+                    do {
+                        //controllo se il device è stato eliminato dalla lista dei device non configurati
+                        if (!NoConfDevice.lstNoConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out deviceConfEvent)) {
+                            //il device è stato configurato
+                            break;
+                        } else {
+                            //il device non è stato configurato e quindi il thread si è risvegliato per richiedere un "IDENTIFICA"
+                            Utils.sendMessage(stream, remoteIpEndPoint, "IDENTIFICA");
+
+                            deviceConfEvent.Reset();
+
+                            //come su, volutare se realizzare un wrapper sull'evento
+                            isSignalled = false;
+                            while (!isSignalled && !stopThreadElaboration) {
+                                isSignalled = deviceConfEvent.WaitOne(TimeSpan.FromSeconds(20));
+                            }
+
+                            //mi sono risvegliato dall'evento ma il thread deve fermarsi
+                            if (stopThreadElaboration) {
+                                //chiudo il client TCP
+                                client.Close();
+                                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket chiuso");
+                                return;
+                            }
+                        }
+                    } while (true);
+                }
+
+                //incremento il numero di socket associati al device
+                //non faccio il check se il device c'è nella lista perchè in questo punto del codice c'è sicuramente
+                ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device);
+                device.openSocket = device.openSocket + 1;
+                ConfDevice.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket aperti con " + remoteIpEndPoint.Address.ToString() + ": " + device.openSocket);
+
+                string messageReceived;
+                //count per triggerare la sincronizzazione dei clock tra il server e il rilevatore
+                int countSyncTimestamp = 0;
+
+                //ciclo fin quando non viene invocato il metodo stop in attesa di messaggi da parte dei rilevatori
+                while (!stopThreadElaboration) {
+                    //se il count è a 0 eseguo la sincronizzazione
+                    if (countSyncTimestamp == 0) {
+                        //invio il messaggio per iniziare la sincronizzazione
+                        Utils.sendMessage(stream, remoteIpEndPoint, "SYNC_CLOCK");
+                        messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+
+                        //posso ricevere SYNC_CLOCK_START (devo sincronizzare) o SYNC_CLOCK_STOP (sincronizzazione terminata)
+                        while (messageReceived == "SYNC_CLOCK_START") {
+                            //invio il segnale di sincronizzazione
+                            Utils.syncClock(client.Client);
+                            messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+                        }
+                        //resetto il count; sincronizzo i timestamp ogni 50 interazioni
+                        countSyncTimestamp = 50;
+                    }
+
+                    //invio messaggio per indicare che può iniziare l'invio dei dati
+                    Utils.sendMessage(stream, remoteIpEndPoint, "START_SEND");
+
+                    //attendo il JSON dal rilevatore con i pacchetti catturati dall'ultima interazione
                     messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
 
-                    //posso ricevere SYNC_CLOCK_START (devo sincronizzare) o SYNC_CLOCK_STOP (sincronizzazione terminata)
-                    while (messageReceived == "SYNC_CLOCK_START//n") {
-                        //invio il segnale di sincronizzazione
-                        Utils.syncClock(client.Client);
-                        messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
+                    PacketsInfo packetsInfo = null;
+
+                    try {
+                        //deserializzazione del JSON ricevuto
+                        packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
+                    } catch (Exception) {
+                        Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Errore nella deserializzazione del messaggio JSON. Il messaggio verrà scartato");
                     }
-                    //resetto il count; sincronizzo i timestamp ogni 5 interazioni
-                    countSyncTimestamp = 5;
-                }
-
-                //invio messaggio per indicare che può iniziare l'invio dei dati
-                Utils.sendMessage(stream, remoteIpEndPoint, "START_SEND");
-
-                //attendo il JSON dal rilevatore con i pacchetti catturati dall'ultima interazione
-                messageReceived = Utils.receiveMessage(stream, remoteIpEndPoint);
-                PacketsInfo packetsInfo = null;
-
-                try {  
-                    //deserializzazione del JSON ricevuto
-                    packetsInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<PacketsInfo>(messageReceived);
-                } catch (Exception) { 
-                    Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Errore nella deserializzazione del messaggio JSON. Il messaggio verrà scartato");           
-                }
-                //controllo che ci siano messaggi, che il device sia tra quelli configurati e che ci siano almeno 2 device configurati
-                if (packetsInfo != null && ConfDevice.lstConfDevices.Count>=2) {
-                    if (packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device)) {
+                    //controllo che ci siano messaggi e che ci siano almeno 2 device configurati
+                    if (packetsInfo != null && ConfDevice.lstConfDevices.Count >= 2 && packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device))
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
-                    }
+
+                    Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Device: " + remoteIpEndPoint.Address.ToString() +" -- Numero pacchetti ricevuti: " + packetsInfo.listPacketInfo.Count);
+
+                    //decremento il contatore per la sincronizzazione dei timestamp
+                    countSyncTimestamp--;
                 }
-                    
-                //decremento il contatore per la sincronizzazione dei timestamp
-                countSyncTimestamp--;
+            } catch (SnifferAppSocketTimeoutException e) {
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Device:" + remoteIpEndPoint.Address.ToString() + " -- " +e.Message);
             }
-            
+
             //chiudo il client TCP
+            stream.Close();
             client.Close();
-            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket chiuso");
-               
-        }         
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket con " + remoteIpEndPoint.Address.ToString() + " chiuso");
+
+            //decremento il numero di socket aperti sul device
+            ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device);
+            device.openSocket = device.openSocket - 1;
+            ConfDevice.lstConfDevices.AddOrUpdate(device.ipAddress, device, (k, v) => v);
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Socket aperti con " + remoteIpEndPoint.Address.ToString() + ": " + device.openSocket);
+
+            //se il numero di socket aperti è zero devo togliere il device dalla lista dei configurati
+            if (device.openSocket <= 0 && !stopThreadElaboration) {
+                ConfDevice.lstConfDevices.TryRemove(remoteIpEndPoint.Address.ToString(), out device);
+                Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Device " + remoteIpEndPoint.Address.ToString() + " eliminato dalla lista dei device configurati");
+                ConfDevice.OnLstConfDevicesChanged(this, EventArgs.Empty);
+            }
+        }
     }
 }

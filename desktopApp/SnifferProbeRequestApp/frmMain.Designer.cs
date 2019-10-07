@@ -572,7 +572,7 @@ namespace SnifferProbeRequestApp   {
             // timerUpdateChartNumberDevice
             // 
             this.timerUpdateChartNumberDevice.Enabled = true;
-            this.timerUpdateChartNumberDevice.Interval = 60000;
+            this.timerUpdateChartNumberDevice.Interval = 30000;
             this.timerUpdateChartNumberDevice.Tick += new System.EventHandler(this.timerUpdateChartNumberDevice_Tick);
             // 
             // lblProgetto

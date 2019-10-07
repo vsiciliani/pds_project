@@ -12,28 +12,6 @@ namespace SnifferProbeRequestApp {
     ///<summary>Classe statica che contiene funzioni di utilità</summary>
     static class Utils {
 
-        static public bool IsAdmin() {
-            WindowsIdentity id = WindowsIdentity.GetCurrent();
-            WindowsPrincipal p = new WindowsPrincipal(id);
-            return p.IsInRole(WindowsBuiltInRole.Administrator);
-        }
-
-        static public void RestartElevated() {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.CreateNoWindow = true;
-            startInfo.WorkingDirectory = Environment.CurrentDirectory;
-            startInfo.FileName = System.Windows.Forms.Application.ExecutablePath;
-            startInfo.Verb = "runas";
-            try {
-                Process p = Process.Start(startInfo);
-            } catch {
-
-            }
-
-            System.Windows.Forms.Application.Exit();
-        }
-
         ///<summary>Classe statica che permette di definire il livello di log</summary>
         public class LogCategory {
             private LogCategory(string value) { Value = value; }
@@ -88,7 +66,7 @@ namespace SnifferProbeRequestApp {
             while (true) {
                 byte[] receivedBytes = new byte[MAXBUFFER];
                 try {
-                    Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Device :" + endPoint.Address.ToString() + " In attesa di dati");
+                    Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Device: " + endPoint.Address.ToString() + " In attesa di dati");
                 } catch(SocketException)  {
                     Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Device : (errore nella lettura dell'IP del device) In attesa di dati");
                 }
@@ -96,20 +74,22 @@ namespace SnifferProbeRequestApp {
                 try {
                     int numBytes = stream.Read(receivedBytes, 0, receivedBytes.Length);
                     receivedMessage += Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
+                    
                     if (receivedMessage.IndexOf("//n") > -1) {
                         break;
                     }
+                    
                 } catch (IOException e) {
                     string errorMessage = "Errore nella ricezione dei dati sul socket";
                     Utils.logMessage("Utils.cs -- ReceiveMessage", Utils.LogCategory.Error, errorMessage);
-                    throw new SnifferAppSocketException(errorMessage, e);
+                    throw new SnifferAppSocketTimeoutException(errorMessage, e);
                 }
             }
-
+            receivedMessage = receivedMessage.Remove(receivedMessage.Length - 3); //elimino gli ultimi 3 caratteri
             try {
-                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage.Replace("//n", ""));
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: " + endPoint.Address.ToString() + " Ricevuto: " + receivedMessage);
             } catch (SocketException) {
-                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: (errore nella lettura dell'IP del device) Ricevuto: " + receivedMessage.Replace("//n", ""));
+                Utils.logMessage("Utils.cs -- ReceviceMessage", Utils.LogCategory.Info, "Sender: (errore nella lettura dell'IP del device) Ricevuto: " + receivedMessage);
             }
             return receivedMessage;
         }

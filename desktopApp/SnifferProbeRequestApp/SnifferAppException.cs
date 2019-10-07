@@ -18,6 +18,14 @@ namespace SnifferProbeRequestApp
         public SnifferAppSocketException(string message, Exception inner) : base(message, inner) { }
     }
 
+    class SnifferAppSocketTimeoutException : SnifferAppException {
+        //costruttore con il solo messaggio di errore
+        public SnifferAppSocketTimeoutException(string message) : base(message) { }
+
+        //costruttore con il messaggio di errore e lo stackTrace
+        public SnifferAppSocketTimeoutException(string message, Exception inner) : base(message, inner) { }
+    }
+
     class SnifferAppDBConnectionException : SnifferAppException
     {
         //costruttore con il solo messaggio di errore

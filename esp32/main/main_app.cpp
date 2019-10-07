@@ -14,6 +14,8 @@
 #include <esp_log.h>
 #include <string>
 #include <list>
+#include <chrono>
+#include <memory>
 #include <thread>
 #include <mutex>
 #include <math.h>
@@ -30,22 +32,25 @@
 
 static char tag[] = "Sniffer-ProbeRequest";
 
+//dichiarazione funzioni
+void init_esp();
 static void wifi_sniffer_packet_handler(void *buff, wifi_promiscuous_pkt_type_t type);
 static esp_err_t event_handler(void* ctx, system_event_t* event);
 bool checkTimeoutThreadConnessionePc();
-void connectSocket();
+void connectSocket(std::shared_ptr<Socket>);
 void blinkLed();
-void syncClock();
-std::string createJSONArray(std::list<std::string>);
-bool sendMessage(std::string message);
-std::string receiveMessage();
+void syncClock(std::shared_ptr<Socket>);
+std::string createJSONArray(int size);
+void sendMessage(std::shared_ptr<Socket>, std::string message);
+std::string receiveMessage(std::shared_ptr<Socket>, bool timeoutSet);
 
-std::list<std::string> listaRecord;
+//dichiarazioni variabili globali
+std::list<std::string> listaPackets;
 std::mutex m;
 std::condition_variable cvMinuto;
 time_t startWaitTime;
-Socket *s;
 float memorySpace; //memoria inizialmente disponibile
+bool flag = true; //flag per gestire il loop del codice in caso di errori sul socket
 
 static EventGroupHandle_t wifi_event_group;
 
@@ -55,6 +60,79 @@ extern "C" {
 
 void app_main() {
 
+	//eseguo l'inizializzazione del sensore e del WiFi
+	init_esp();
+
+	//ciclo per gestire i messaggi in entrata
+	do {
+		ESP_LOGI(tag, "Apertura socket con il server...");
+		//creo il socket
+		std::shared_ptr<Socket> socket = std::make_shared<Socket>(SERVER_HOST, SERVER_PORT);
+		connectSocket(socket);
+
+		bool interactivePhase = true; //finchè è true non devo applicare il timeout in ricezione perchè è la fase interattiva con il server
+
+		std::chrono::seconds timeoutDuration(INTERVALLO_CONNESSIONE_SERVER);
+		flag = true;
+		
+		do {	
+			
+			std::string message = receiveMessage(socket, !interactivePhase);
+			
+			if (message.compare("IDENTIFICA") == 0) {
+				//lancio il thread che si occupa di far lampeggiare il led
+				std::thread threadBlinkLed(blinkLed);
+				//stacco il thread dal flusso principale
+				threadBlinkLed.detach();
+			} else if (message.compare("SYNC_CLOCK") == 0) {
+				//effetto la sincronizzazione dei timestamp
+				syncClock(socket);
+				interactivePhase = false; //finita la fase di interattività con il server
+			}
+			else if (message.compare("START_SEND") == 0) {
+				//prendo il lock per leggere la lista di PacketInfo
+				std::unique_lock<std::mutex> ul(m);
+
+				if (listaPackets.empty()) {
+					//setto l'handler che gestisce la ricezione del pacchetto
+					ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
+
+					//salvo il timestamp per calcolare il tempo di flush verso il server
+					time(&startWaitTime);
+
+					//salvo la memoria a disposizione
+					memorySpace = xPortGetFreeHeapSize();
+
+					//condition variable sul tempo di attesa per il flush
+					cvMinuto.wait_for(ul, timeoutDuration, checkTimeoutThreadConnessionePc);
+					
+					//setto l'handler che gestisce la ricezione del pacchetto
+					ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(nullptr));
+				}
+
+				ESP_LOGI(tag, "Invio dati dei pacchetti al server");
+
+				//invio al server 20 (max) pacchetti alla volta tramite un JSON
+				int numPacket = listaPackets.size();
+
+				if (numPacket > 20)
+					sendMessage(socket, createJSONArray(20));
+				else
+					sendMessage(socket, createJSONArray(numPacket));
+
+			}
+			else {
+				ESP_LOGI(tag, "Ricevuto messaggio non valido");
+				flag = false;
+			}
+		} while (flag);
+		listaPackets.clear();
+		
+	} while (true);
+}
+
+//funzione per inizializzare il sensore per lo sniffing
+void init_esp() {
 	nvs_flash_init();
 
 	//setto il led come output
@@ -80,74 +158,12 @@ void app_main() {
 
 	ESP_LOGI(tag, "Inizializzazione completata");
 	esp_wifi_connect();
-	
-	ESP_LOGI(tag, "connect to ap SSID: %s",	WIFI_SSID);
 
-	/* FINE GESTIONE CONNESSIONE WIFI */
+	ESP_LOGI(tag, "connect to ap SSID: %s", WIFI_SSID);
 
-	bool flag = true;
-
-	//ciclo per gestire i messaggi in entrata
-	do {
-		ESP_LOGI(tag, "Apertura socket con il server...");
-		//creo il socket
-		s = new Socket(SERVER_HOST, SERVER_PORT);
-		connectSocket();
-
-		//abilito la modalità di attività promiscua
-		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
-		ESP_LOGI(tag, "Modalita schema promiscua abilitata");
-
-		flag = true;
-		do {	
-			std::string message = receiveMessage();
-
-			if (message.compare("IDENTIFICA") == 0) {
-				//lancio il thread che si occupa di far lampeggiare il led
-				std::thread threadBlinkLed(blinkLed);
-				//stacco il thread dal flusso principale
-				threadBlinkLed.detach();
-			}
-			else if (message.compare("SYNC_CLOCK") == 0) {
-				//effetto la sincronizzazione dei timestamp
-				syncClock();
-			}
-			else if (message.compare("START_SEND") == 0) {
-				
-				//setto l'handler che gestisce la ricezione del pacchetto
-				ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(&wifi_sniffer_packet_handler));
-
-				//salvo il timestamp per calcolare il tempo di flush verso il server
-				time(&startWaitTime);
-
-				//salvo la memoria a disposizione
-				memorySpace = xPortGetFreeHeapSize();
-
-				//prendo il lock per leggere la lista di PacketInfo
-				std::unique_lock<std::mutex> ul(m);
-				//condition variable sul tempo di attesa per il flush
-				cvMinuto.wait(ul, checkTimeoutThreadConnessionePc);
-
-				ESP_LOGI(tag, "Invio dati dei pacchetti al server");
-
-				//send dei dati verso il server
-				sendMessage(createJSONArray(listaRecord));
-
-				//pulisco la lista di PacketInfo
-				listaRecord.clear();
-
-			}
-			else {
-				ESP_LOGI(tag, "Ricevuto messaggio non valido");
-				flag = false;
-			}
-		} while (flag);
-		//abilito la modalità di attività promiscua
-		ESP_ERROR_CHECK(esp_wifi_set_promiscuous(false));
-		ESP_LOGI(tag, "Modalita schema promiscua disattivata");
-		delete s;
-		ESP_LOGI(tag, "Socket con il server chiuso");
-	} while (true);
+	//abilito la modalità di attività promiscua
+	ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
+	ESP_LOGI(tag, "Modalita schema promiscua abilitata");
 }
 
 //processo di gestione del pacchetto Wifi sniffato
@@ -168,11 +184,11 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 
 		//lock sulla scrittura della lista che contiene gli oggetti PacketInfo
 		std::lock_guard<std::mutex> l(m);
-		listaRecord.push_back(record.JSONSerializer());
-
+		listaPackets.push_back(record.JSONSerializer());
+		
 		//setto la condition variable
+		ESP_LOGI(tag, "Pacchetto rilevato ed elaborato. Dimensione lista pacchetti: %d", listaPackets.size());
 		cvMinuto.notify_one();
-		ESP_LOGI(tag, "Pacchetto rilevato ed elaborato");
 	}
 }
 
@@ -191,15 +207,17 @@ bool checkTimeoutThreadConnessionePc() {
 }
 
 //preparo il messaggio JSON da inviare al server
-std::string createJSONArray(std::list<std::string>){
-	std::list<std::string>::iterator it;
+std::string createJSONArray(int size){
 	std::string buf;
+
 	buf="{ \"listPacketInfo\" : [ ";
-	for (it= listaRecord.begin(); it != listaRecord.end(); it++){
-		if (it!= listaRecord.begin()){
-			buf+=", ";
-		}
-		buf+=it->c_str();
+
+	for (int i = 0; i < size; i++) {
+		if (i != 0)
+			buf += ", ";
+
+		buf += listaPackets.front().c_str();
+		listaPackets.pop_front();
 	}
 
 	buf+="]}//n";
@@ -207,51 +225,78 @@ std::string createJSONArray(std::list<std::string>){
 }
 
 //funzione che esegue la connessione al socket se non e' già connesso
-void connectSocket(){
-	int res = s->connect();
+void connectSocket(std::shared_ptr<Socket> socket){
+	int res = socket->connect();
 
 	while (res < 0) {
-		ESP_LOGE(tag, "Connessione con il server fallita. Nuovo tentativo tra 5 secondi...");
+		ESP_LOGE(tag, "Connessione con il server fallita. Nuovo tentativo tra %d secondi...", TIMEOUT_RICONNESSIONE_SERVER);
 		//attende 10 secondi tra un tentativo di connessione e il successivo
-		sleep(5);
-		res = s->connect();
+		sleep(TIMEOUT_RICONNESSIONE_SERVER);
+		res = socket->connect();
 	}
 	ESP_LOGI(tag, "Socket connesso");
 }
 
 //procedura per inviare un messaggio (stringa) al server
-bool sendMessage(std::string message){
+void sendMessage(std::shared_ptr<Socket> socket, std::string message){
 	int numByteSent;
+	int length = message.length();
+	int retry = 5;
 	do {
-		numByteSent = s->send(message);
-	} while (numByteSent != message.length());
-	ESP_LOGI(tag, "Messaggio inviato al server con successo");
-	return true;
+		numByteSent = socket->send(message);
+		if (numByteSent != length) {
+			ESP_LOGE(tag, "Invio del messaggio al server fallito. Ci sono ancora %d retry", retry-1 );
+			retry--;
+		} else {
+			ESP_LOGI(tag, "Messaggio inviato al server con successo");
+			return;
+		}
+	} while (retry > 0);
+	flag = false;
+	return;
 }
 
 //procedura per ricevere un messaggio (stringa) dal socket
-std::string receiveMessage(){
-	//ripulisco il buffer di ricezione
-	std::string messaggio = s->receive();
-	ESP_LOGI(tag, "Messaggio ricevuto: %s", messaggio.c_str());
-	return messaggio;
+std::string receiveMessage(std::shared_ptr<Socket> socket, bool timeoutSet){
+	int result = 0;
+	int retry = 5;
+	do {
+		std::string messaggio = socket->receive(result, timeoutSet);
+		if (result <= 0) {
+			ESP_LOGE(tag, "Ricezione del messaggio dal server fallito. Ci sono ancora %d retry", retry - 1);
+			retry--;
+		}
+		else {
+			ESP_LOGI(tag, "Messaggio ricevuto: %s", messaggio.c_str());
+			return messaggio;
+		}
+	} while (retry > 0);
+	flag = false;
+	return "";
 }
 
 //procedura per sincronizzare il clock con il server
-void syncClock(){
+void syncClock(std::shared_ptr<Socket> socket){
 	long delay = 0;
 	long request_timestamp;
 	long reply_timestamp;
 	long received_timestamp;
+	int result = 0;
 
 	for (int i=0; i<4; i++){
 		time(&request_timestamp);
-		sendMessage("SYNC_CLOCK_START//n");
-		s->receiveRaw();
+		sendMessage(socket, "SYNC_CLOCK_START//n");
+		socket->receiveRaw(result);
+
+		if (result <= 0) {
+			ESP_LOGE(tag, "Sincronizzazione con il server fallita.");
+			flag = false;
+			return;
+		}
 
 		received_timestamp = 0;
 		for (int j=0; j<8; j++){
-			received_timestamp += (s->buffer_ric[j] * pow(2, j*8));
+			received_timestamp += (socket->buffer_ric[j] * pow(2, j*8));
 		}
 		time(&reply_timestamp);
 
@@ -264,7 +309,7 @@ void syncClock(){
 	tv.tv_sec = received_timestamp + (delay/2);
 	tv.tv_usec = 0;
 	settimeofday(&tv, NULL);
-	sendMessage("SYNC_CLOCK_STOP//n");
+	sendMessage(socket, "SYNC_CLOCK_STOP//n");
 }
 
 //procedura che gestire il lampeggio del led quando viene richiesta dal server l'IDENTIFICAZIONE

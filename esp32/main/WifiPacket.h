@@ -19,7 +19,7 @@ struct wifiHeader{
 	unsigned short int type:2;
 	unsigned short int subtype:4;
 	unsigned short int flags:8;
-	uint16_t duration_id; //dovrebbe esserci ma se lo metto mi slitta tutto di 2 byte
+	uint16_t duration_id;
     uint8_t addr1[6]; /* receiver address */
     uint8_t addr2[6]; /* sender address */
     uint8_t addr3[6]; /* filtering address */
@@ -31,12 +31,12 @@ struct wifiPayload{
 	unsigned short int element_id:8;
 	unsigned short int SSIDlength:8;
 	uint8_t ssid[32];
-    uint8_t payload[0]; /* network data ended with 4 bytes csum (CRC32) */
+    uint8_t payload[0]; /* network data ended with 4 bytes csum (CRC32) DROPPATO */
 };
 
 struct wifi_packet{
 	wifiHeader header;
-    wifiPayload payload; /* network data ended with 4 bytes csum (CRC32) */
+    wifiPayload payload;
 };
 
 class WifiPacket {

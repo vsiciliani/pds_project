@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Net;
 using System.Text;
+using System.Configuration;
 
 namespace SnifferProbeRequestApp {
     /// <summary>
@@ -12,7 +13,7 @@ namespace SnifferProbeRequestApp {
     /// </summary>
     class DatabaseManager {
         private static DatabaseManager instance = null;
-        private string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename="+ Environment.CurrentDirectory + "\\DBApp.mdf;Integrated Security=True;MultipleActiveResultSets=True;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DatabaseConnectionString"].ConnectionString;
         private SqlConnection connection;
 
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
@@ -20,13 +21,13 @@ namespace SnifferProbeRequestApp {
             
             Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "Connection String: " + connectionString);
             connection = new SqlConnection(connectionString);
-            //try {
+            try {
                 connection.Open();
-            /*} catch (SqlException e) {
+            } catch (SqlException e) {
                 string message = "Errore durante l'apertura della connessione con il database";
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, message);
                 throw new SnifferAppDBConnectionException(message, e);
-            }*/
+            }
         }
         ///<summary>Ritorna l'istanza della classe DatabaseManager se già creata, oppure la istanzia</summary>
         ///<exception cref = "SnifferAppDBConnectionException">Eccezione lanciata in caso di errore nell'apertura della connessione al DB</exception>
@@ -105,6 +106,7 @@ namespace SnifferProbeRequestApp {
                 whereQuery.Append(" " + deviceName + ".device = '" + device.Value + "' AND");
                 if (deviceName != "d1") {
                     whereQuery.Append(" d1.hashCode = " + deviceName + ".hashCode AND");
+                    whereQuery.Append(" (d1.timestamp_packet > " + deviceName + ".timestamp_packet - 5 OR d1.timestamp_packet < " + deviceName + ".timestamp_packet - 5) AND");
                 }
             }
 
@@ -113,6 +115,8 @@ namespace SnifferProbeRequestApp {
             whereQuery.Remove(whereQuery.Length - 3, 3); //elimino l'ultimo AND
 
             string queryPackets = selectQuery.ToString() + fromQuery.ToString() + whereQuery.ToString();
+
+            Utils.logMessage(this.ToString(), Utils.LogCategory.Info, queryPackets);
 
             DataTable tablePackets = runSelect(queryPackets, null);
 

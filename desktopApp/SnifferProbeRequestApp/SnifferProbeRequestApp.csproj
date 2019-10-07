@@ -75,7 +75,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfDevice.cs" />
-    <Compile Include="Settings.cs" />
     <Compile Include="valueClass\AssembledPacketInfo.cs" />
     <Compile Include="DatabaseManager.cs" />
     <Compile Include="CachedDevicePosition.cs" />
