@@ -261,7 +261,7 @@ namespace SnifferProbeRequestApp {
                         Utils.logMessage(this.ToString(), Utils.LogCategory.Warning, "Errore nella deserializzazione del messaggio JSON. Il messaggio verrà scartato");
                     }
                     //controllo che ci siano messaggi e che ci siano almeno 2 device configurati
-                    if (packetsInfo != null && ConfDevice.lstConfDevices.Count >= 2 && packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.TryGetValue(remoteIpEndPoint.Address.ToString(), out device))
+                    if (packetsInfo != null && packetsInfo.listPacketInfo.Count > 0 && ConfDevice.lstConfDevices.Count >= 2)
                         //salvo i dati nella tabella raw del DB
                         dbManager.saveReceivedData(packetsInfo, remoteIpEndPoint.Address);
 

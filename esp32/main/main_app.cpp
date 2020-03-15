@@ -45,9 +45,9 @@ void sendMessage(std::shared_ptr<Socket>, std::string message);
 std::string receiveMessage(std::shared_ptr<Socket>, bool timeoutSet);
 
 //dichiarazioni variabili globali
-std::list<std::string> listaPackets;
+std::list<PacketInfo> listaPackets;
 std::mutex m;
-std::condition_variable cvMinuto;
+std::condition_variable cvSync;
 time_t startWaitTime;
 float memorySpace; //memoria inizialmente disponibile
 bool flag = true; //flag per gestire il loop del codice in caso di errori sul socket
@@ -104,7 +104,7 @@ void app_main() {
 					memorySpace = xPortGetFreeHeapSize();
 
 					//condition variable sul tempo di attesa per il flush
-					cvMinuto.wait_for(ul, timeoutDuration, checkTimeoutThreadConnessionePc);
+					cvSync.wait_for(ul, timeoutDuration, checkTimeoutThreadConnessionePc);
 					
 					//setto l'handler che gestisce la ricezione del pacchetto
 					ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(nullptr));
@@ -184,11 +184,11 @@ void wifi_sniffer_packet_handler(void* buff, wifi_promiscuous_pkt_type_t type){
 
 		//lock sulla scrittura della lista che contiene gli oggetti PacketInfo
 		std::lock_guard<std::mutex> l(m);
-		listaPackets.push_back(record.JSONSerializer());
+		listaPackets.push_back(record);
 		
 		//setto la condition variable
 		ESP_LOGI(tag, "Pacchetto rilevato ed elaborato. Dimensione lista pacchetti: %d", listaPackets.size());
-		cvMinuto.notify_one();
+		cvSync.notify_one();
 	}
 }
 
@@ -216,7 +216,7 @@ std::string createJSONArray(int size){
 		if (i != 0)
 			buf += ", ";
 
-		buf += listaPackets.front().c_str();
+		buf += listaPackets.front().JSONSerializer().c_str();
 		listaPackets.pop_front();
 	}
 
