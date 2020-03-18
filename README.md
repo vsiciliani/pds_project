@@ -1,8 +1,8 @@
 # Progetto di programmazione di sistema
 
-![Banner](banner.png)
+![Banner](resources/banner.png)
 
-Rilevatore di persone in un'area utilizzando il wifi delle schede ESP32 ([Traccia del progetto](Traccia.pdf))
+Rilevatore di persone in un'area utilizzando il wifi delle schede ESP32 ([Traccia del progetto](resources/Traccia.pdf))
 
 ## Struttura progetto
 
@@ -21,6 +21,12 @@ Il progetto è composto da due moduli:
     *  salvare le informazioni ricevute in un DB;
     *  elaborare le informazioni ricevute per generare l'output desiderato (numero di device connessi nel tempo e posizione dei device);
     *  gestire una interfaccia grafica per la gestione dell'applicativo.
+
+## Protocollo di comunicazione
+Il protocollo di comunicazione tra il server e i rilevatori ESP32 è il seguente:
+<p align="center">
+	<img src="resources/protocol_sequence.png">
+</p>
 
 ## Modalità di esecuzione moduli
 

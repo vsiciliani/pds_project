@@ -63,8 +63,11 @@ namespace SnifferProbeRequestApp {
             int queryResult = runInsertDelete(query.ToString(), null);
             if (queryResult == packets.listPacketInfo.Count)
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in Packets effettuata con successo");
-            else
+            else {
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in Packets fallita");
+                return;
+            }
+               
 
             updateAssembled();
         }
@@ -176,8 +179,11 @@ namespace SnifferProbeRequestApp {
             int queryResult = runInsertDelete(insertQuery.ToString(), null);
             if (queryResult == lstAssembledInfo.Count)
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in AssembledPacketInfo effettuata con successo");
-            else
+            else {
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "INSERT in AssembledPacketInfo fallita");
+                return;
+            }
+               
 
             //elimino gli id dalla tabella "raw"
             deleteQuery.Remove(deleteQuery.Length - 1, 1); //elimino l'ultima virgola nalla IN
@@ -186,8 +192,10 @@ namespace SnifferProbeRequestApp {
             queryResult = runInsertDelete(deleteQuery.ToString(), null);
             if (queryResult > 0)
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "DELETE da Packets effettuata con successo");
-            else
+            else {
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Info, "DELETE da Packets fallita");
+                return;
+            }
         }
 
         ///<summary>Conta il numero di Device Univoci presenti continuativamente nel periodo interessato (es. 5 min)</summary>
