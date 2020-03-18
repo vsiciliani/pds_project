@@ -88,6 +88,7 @@ namespace SnifferProbeRequestApp {
                 listener.Start();
             } catch (SocketException) {
                 Utils.logMessage(this.ToString(), Utils.LogCategory.Error, "Errore durante l'apertura del socket");
+                return;
             } 
             
             //lista che contiene i puntamenti ai threads per la gestione dei singoli rilevatori
